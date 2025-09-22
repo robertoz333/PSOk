@@ -329,7 +329,7 @@
 
             const nameSpan = document.createElement("span");
             nameSpan.className = "item-name";
-            nameSpan.innerHTML = `<span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span>`;
+            nameSpan.innerHTML = `<span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span><span class="search-result-title">${item.prompt.title}</span>`;
             nameSpan.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, { origin: 'favorites' });
 
             const unfavoriteIcon = document.createElement("i");
@@ -859,4 +859,4 @@
 })();
 </script>
 </body>
-</html>```
+</html>

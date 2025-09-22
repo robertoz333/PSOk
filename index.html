@@ -51,8 +51,10 @@
         .item-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: var(--element-bg); border-radius: 6px; margin-bottom: 8px; transition: background-color .2s, transform .2s; color: var(--text-secondary); }
         .item-container:hover { background-color: var(--element-bg-hover); transform: translateX(5px); }
         .item-name { flex-grow: 1; cursor: pointer; }
-        .delete-icon { color: var(--text-muted); cursor: pointer; padding: 5px; transition: color .2s; }
+        .delete-icon, .unfavorite-icon { color: var(--text-muted); cursor: pointer; padding: 5px; transition: color .2s, transform .2s; }
         .delete-icon:hover { color: var(--btn-red); }
+        .unfavorite-icon { color: var(--star-yellow); font-size: 18px; padding: 8px; }
+        .unfavorite-icon:hover { transform: scale(1.2); }
         .initial-message { text-align: center; color: var(--text-muted); font-size: 18px; padding: 40px; }
         .prompt-detail-view { color: var(--text-secondary); }
         .prompt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -320,11 +322,35 @@
             listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt aggiunto ai preferiti.</p></div>';
             return;
         }
+
         favoritePrompts.forEach(item => {
             const el = document.createElement("div");
             el.className = "item-container";
-            el.innerHTML = `<span class="item-name"><span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span></span>`;
-            el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category);
+
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "item-name";
+            nameSpan.innerHTML = `<span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span>`;
+            nameSpan.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, { origin: 'favorites' });
+
+            const unfavoriteIcon = document.createElement("i");
+            unfavoriteIcon.className = "fa-solid fa-star unfavorite-icon";
+            unfavoriteIcon.title = "Rimuovi dai preferiti";
+            unfavoriteIcon.onclick = async (e) => {
+                e.stopPropagation();
+                
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const promptToUpdate = newData
+                    .find(c => c.id === item.category.id)?.subcategories
+                    .find(s => s.id === item.subcategory.id)?.prompts
+                    .find(p => p.id === item.prompt.id);
+
+                if (promptToUpdate) {
+                    promptToUpdate.favorite = false;
+                    await updateStateAndSave(newData);
+                }
+            };
+            
+            el.append(nameSpan, unfavoriteIcon);
             listContainer.appendChild(el);
         });
     }
@@ -352,7 +378,7 @@
             const el = document.createElement("div");
             el.className = "item-container";
             el.innerHTML = `<span class="item-name"><span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span></span>`;
-            el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category);
+            el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, { origin: 'recents' });
             listContainer.appendChild(el);
         });
     }
@@ -418,22 +444,33 @@
         });
     }
 
-    function displayPromptDetail(prompt, parentSub, parentCat, isFromSearch = false) {
-        const recentEntry = { promptId: prompt.id, subId: parentSub.id, catId: parentCat.id };
-        state.recents = state.recents.filter(r => r.promptId !== prompt.id);
-        state.recents.unshift(recentEntry);
-        if (state.recents.length > 20) state.recents.pop();
+    function displayPromptDetail(prompt, parentSub, parentCat, options = {}) {
+        const { origin = 'category' } = options; 
+
+        if (origin !== 'search') { 
+            const recentEntry = { promptId: prompt.id, subId: parentSub.id, catId: parentCat.id };
+            state.recents = state.recents.filter(r => r.promptId !== prompt.id);
+            state.recents.unshift(recentEntry);
+            if (state.recents.length > 20) state.recents.pop();
+        }
         
+        let backText = "Torna alla categoria";
+        if (origin === 'search') backText = "Torna ai risultati";
+        if (origin === 'favorites') backText = "Torna ai preferiti";
+        if (origin === 'recents') backText = "Torna ai recenti";
+
+        const showDeleteIcon = origin !== 'favorites' && origin !== 'recents';
+
         selectionPanel.style.display = "none";
         displayArea.innerHTML = `
             <div class="prompt-detail-view">
                 <div class="prompt-header">
-                    <a href="#" class="back-button" id="back-to-list"><i class="fa-solid fa-arrow-left"></i> ${isFromSearch ? "Torna ai risultati" : "Torna alla categoria"}</a>
+                    <a href="#" class="back-button" id="back-to-list"><i class="fa-solid fa-arrow-left"></i> ${backText}</a>
                     <div class="prompt-actions-toolbar" id="prompt-actions">
                         <i class="fa-solid fa-pencil" id="edit-prompt-btn" title="Modifica"></i>
                         <i class="fa-solid fa-copy" title="Copia Descrizione"></i>
                         <i class="${prompt.favorite ? "fa-solid" : "fa-regular"} fa-star" title="Preferito"></i>
-                        <i class="fa-solid fa-trash-can" id="delete-prompt-detail-btn" title="Elimina"></i>
+                        ${showDeleteIcon ? `<i class="fa-solid fa-trash-can" id="delete-prompt-detail-btn" title="Elimina"></i>` : ''}
                     </div>
                 </div>
                 <div class="prompt-title-section"><h1>${prompt.title}</h1></div>
@@ -456,7 +493,6 @@
             </div>`;
 
         const backBtn = document.getElementById("back-to-list");
-        const deleteBtn = document.getElementById("delete-prompt-detail-btn");
         const editBtn = document.getElementById("edit-prompt-btn");
         const descriptionContainer = document.getElementById("detail-description");
         const formattingToolbar = document.getElementById("formatting-toolbar");
@@ -562,12 +598,28 @@
                 .then(() => alert("Descrizione copiata!"))
                 .catch(err => console.error("Errore copia:", err));
         };
+        
         backBtn.onclick = (e) => {
             e.preventDefault();
-            if (isFromSearch) performSearch(normalizeStr(searchInput.value));
-            else { selectionPanel.style.display = "block"; state.activeCategoryId = parentCat.id; renderUI(); }
+            if (origin === 'search') {
+                performSearch(normalizeStr(searchInput.value));
+            } else if (origin === 'favorites') {
+                state.activeCategoryId = 'favorites';
+                renderUI();
+            } else if (origin === 'recents') {
+                state.activeCategoryId = 'recents';
+                renderUI();
+            } else {
+                selectionPanel.style.display = "block";
+                state.activeCategoryId = parentCat.id;
+                renderUI();
+            }
         };
-        deleteBtn.onclick = () => deletePrompt(prompt.id, parentSub.id, parentCat.id);
+
+        if (showDeleteIcon) {
+            document.getElementById("delete-prompt-detail-btn").onclick = () => deletePrompt(prompt.id, parentSub.id, parentCat.id);
+        }
+
         editBtn.onclick = () => { descriptionContainer.contentEditable = true; formattingToolbar.classList.add("show"); saveChangesBtn.classList.add("show"); descriptionContainer.focus(); };
         formattingToolbar.querySelectorAll("button[data-command]").forEach(btn => {
             btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };
@@ -580,7 +632,7 @@
             if (promptToUpdate) {
                 promptToUpdate.description = descriptionContainer.innerHTML;
                 await updateStateAndSave(newData);
-                displayPromptDetail(promptToUpdate, parentSub, parentCat, isFromSearch);
+                displayPromptDetail(promptToUpdate, parentSub, parentCat, { origin });
             }
         };
         starBtn.onclick = async () => {
@@ -663,7 +715,7 @@
         document.querySelectorAll(".search-result-item").forEach(el => {
             el.onclick = () => {
                 const r = results[parseInt(el.dataset.idx, 10)];
-                displayPromptDetail(r.prompt, r.subcategory, r.category, true);
+                displayPromptDetail(r.prompt, r.subcategory, r.category, { origin: 'search' });
             };
         });
     }
@@ -732,6 +784,9 @@
                 if (index > -1) {
                     subcat.prompts.splice(index, 1);
                     await updateStateAndSave(newData);
+                    // After deleting, go back to the category view
+                    state.activeCategoryId = categoryId;
+                    renderUI();
                 }
             }
         }
@@ -783,9 +838,20 @@
     try {
         await Database.init();
         state.allData = await Database.load();
+        // Load recents from localStorage if available
+        const savedRecents = localStorage.getItem("promptManagerRecents");
+        if (savedRecents) {
+            state.recents = JSON.parse(savedRecents);
+        }
         state.activeCategoryId = 'favorites';
         setupEventListeners();
         renderUI();
+
+        // Save recents to localStorage on page close
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem("promptManagerRecents", JSON.stringify(state.recents));
+        });
+
     } catch (error) {
         console.error("Inizializzazione fallita:", error);
         displayArea.innerHTML = '<div class="initial-message"><p>Errore critico: impossibile avviare l\'app.</p></div>';
@@ -793,4 +859,4 @@
 })();
 </script>
 </body>
-</html>
+</html>```

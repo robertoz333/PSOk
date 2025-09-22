@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Manager Stabile v12.0</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        :root {
+            --background-dark: #121417; --container-bg: #22252A; --header-bg: #2D2F3E;
+            --element-bg: #3A3D4D; --element-bg-hover: #4a4e5a; --primary-accent: #007BFF;
+            --primary-accent-dark: #0056b3; --text-primary: #FFFFFF; --text-secondary: #E0E0E0;
+            --text-muted: #9E9E9E; --border-color: #3A3D4D; --star-yellow: #FFC107;
+            --btn-green: #28a745; --btn-green-hover: #218838; --btn-red: #dc3545; --btn-red-hover: #c82333;
+        }
+        body { background-color: var(--background-dark); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        .app-header { background-color: var(--header-bg); border-radius: 16px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
+        .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 16px; }
+        .logo { color: var(--text-primary); font-size: 28px; font-weight: bold; }
+        .search-bar { display: flex; align-items: center; background-color: var(--element-bg); border-radius: 12px; padding: 0 15px; }
+        .search-bar i { color: var(--text-muted); cursor: pointer; }
+        .search-bar input { background: transparent; border: none; outline: none; color: var(--text-primary); padding: 12px 10px; font-size: 16px; width: 280px; }
+        .tool-button { background-color: #7A69E9; color: var(--text-primary); border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color .3s; }
+        .tool-button:hover { background-color: #6957d1; }
+        .header-right { position: relative; }
+        .toolbar-dropdown-menu { display: none; position: absolute; top: 110%; right: 0; background-color: #1c1c1c; border-radius: 12px; padding: 10px; z-index: 1000; width: 360px; box-shadow: 0 8px 16px rgba(0,0,0,.4); grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .toolbar-dropdown-menu.show { display: grid; }
+        .toolbar-btn { color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: all .2s; min-height: 70px; }
+        .toolbar-btn:hover { opacity: .9; transform: translateY(-2px); }
+        .toolbar-btn:disabled { background-color: #555 !important; cursor: not-allowed; opacity: .5; transform: none; }
+        .btn-green { background-color: var(--btn-green); } .btn-yellow { background-color: #f7b731; color: #333; } .btn-blue { background-color: #007bff; } .btn-dark-blue { background-color: #0d47a1; } .btn-red { background-color: var(--btn-red); }
+        .content-container { max-width: 1200px; margin: 0 auto; }
+        .selection-container { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .panel-header h2 { color: var(--text-primary); margin: 0; }
+        .add-button-inline { background-color: var(--btn-green); border: none; color: var(--text-primary); border-radius: 5px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all .2s; }
+        .add-button-inline:hover { background-color: var(--btn-green-hover); }
+        #category-buttons-container { display: flex; flex-wrap: wrap; gap: 12px; }
+        .category-pill { background-color: var(--element-bg); color: var(--text-secondary); border: 2px solid transparent; border-radius: 20px; padding: 8px 20px; font-size: 16px; cursor: pointer; transition: all .3s; }
+        .category-pill:hover { background-color: var(--element-bg-hover); }
+        .category-pill.active { background-color: var(--primary-accent); color: var(--text-primary); font-weight: 500; }
+        #display-area { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; min-height: 200px; }
+        .display-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--element-bg); padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+        .display-header h3 { margin: 0; font-size: 18px; color: var(--text-secondary); border: none; padding: 0; flex-grow: 1; }
+        .header-buttons { display: flex; gap: 10px; }
+        .add-button { background-color: var(--btn-green); color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background-color .2s; }
+        .add-button:hover { background-color: var(--btn-green-hover); }
+        .delete-button { background-color: var(--btn-red); } .delete-button:hover { background-color: var(--btn-red-hover); }
+        .item-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: var(--element-bg); border-radius: 6px; margin-bottom: 8px; transition: background-color .2s, transform .2s; color: var(--text-secondary); }
+        .item-container:hover { background-color: var(--element-bg-hover); transform: translateX(5px); }
+        .item-name { flex-grow: 1; cursor: pointer; }
+        .delete-icon { color: var(--text-muted); cursor: pointer; padding: 5px; transition: color .2s; }
+        .delete-icon:hover { color: var(--btn-red); }
+        .initial-message { text-align: center; color: var(--text-muted); font-size: 18px; padding: 40px; }
+        .prompt-detail-view { color: var(--text-secondary); }
+        .prompt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-button { color: var(--text-secondary); cursor: pointer; font-size: 16px; text-decoration: none; }
+        .back-button:hover { color: var(--text-primary); }
+        .prompt-actions-toolbar { display: flex; gap: 15px; }
+        .prompt-actions-toolbar i { cursor: pointer; font-size: 18px; transition: color .2s; }
+        .prompt-actions-toolbar i:hover { color: var(--text-primary); }
+        .prompt-actions-toolbar i.is-favorite { color: var(--star-yellow); }
+        .prompt-title-section { text-align: center; margin-bottom: 20px; }
+        .prompt-title-section h1 { margin: 0; font-size: 32px; color: var(--text-primary); }
+        .prompt-description-container { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 200px; line-height: 1.7; }
+        .prompt-description-container a { color: var(--star-yellow); }
+        .prompt-description-container img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; display: block; cursor: pointer; }
+        .prompt-description-container[contenteditable="true"] { outline: 2px dashed var(--primary-accent); background-color: #1c1c1c; }
+        #formatting-toolbar { margin-bottom: 10px; display: none; gap: 10px; align-items: center; flex-wrap: wrap; }
+        #formatting-toolbar.show { display: flex; }
+        #formatting-toolbar button { background: var(--element-bg); border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        #formatting-toolbar button:hover { background: var(--element-bg-hover); }
+        #formatting-toolbar button i { font-size: 16px; }
+        #btnSaveChanges { background-color: var(--primary-accent); display: none; margin-left: auto; }
+        #btnSaveChanges.show { display: inline-block; }
+        .color-picker-wrapper { position: relative; display: flex; align-items: center; justify-content: center; background: var(--element-bg); padding: 8px 12px; border-radius: 5px; }
+        .color-picker-wrapper:hover { background-color: var(--element-bg-hover); }
+        .color-picker-wrapper i { font-size: 16px; pointer-events: none; }
+        #fontColorPicker { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .search-result-path { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .search-result-title { font-weight: 500; }
+        mark { background-color: var(--star-yellow); color: var(--background-dark); padding: 1px 3px; border-radius: 3px; }
+        #link-modal-overlay, #image-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        #link-modal-overlay.show, #image-modal-overlay.show { display: flex; }
+        #link-modal-content, #image-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 450px; }
+        #link-modal-content h3, #image-modal-content h3 { margin-top: 0; color: var(--text-primary); }
+        #link-url-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
+        #image-preview-container { margin: 15px 0; min-height: 100px; border: 2px dashed var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 10px; }
+        #image-preview { max-width: 100%; max-height: 200px; display: none; }
+        #image-preview.show { display: block; }
+        #link-modal-actions, #image-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        #link-modal-actions button, #image-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+        #link-modal-cancel, #image-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
+        #link-modal-confirm, #image-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
+    </style>
+</head>
+<body>
+<header class="app-header">
+    <div class="header-left"><div class="logo">PS</div></div>
+    <div class="header-center">
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass" id="search-icon"></i>
+            <input type="text" id="search-input" placeholder="Cerca per titolo, categoria o sottocategoria…">
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="tool-button" id="toolBtn"><i class="fa-solid fa-screwdriver-wrench"></i><span>Tool</span></button>
+        <div class="toolbar-dropdown-menu" id="toolMenu">
+            <button class="toolbar-btn btn-yellow" id="btnAnnulla"><i class="fa-solid fa-arrow-rotate-left"></i><span>Annulla</span></button>
+            <button class="toolbar-btn btn-yellow" id="btnRipristina"><i class="fa-solid fa-arrow-rotate-right"></i><span>Ripristina</span></button>
+            <button class="toolbar-btn btn-blue" id="btnBackup"><i class="fa-solid fa-download"></i><span>Backup</span></button>
+            <button class="toolbar-btn btn-dark-blue" id="btnImporta"><i class="fa-solid fa-upload"></i><span>Importa</span></button>
+        </div>
+    </div>
+</header>
+
+<input type="file" id="backupInput" style="display:none" accept=".json,.txt" />
+
+<main class="content-container">
+    <div class="selection-container" id="selection-panel" style="display:none">
+        <div class="panel-header">
+            <h2>Categorie</h2>
+            <button class="add-button-inline" id="add-category-inline-btn"><i class="fa-solid fa-plus"></i> Aggiungi categoria</button>
+        </div>
+        <div id="category-buttons-container"></div>
+    </div>
+    <div id="display-area"><div class="initial-message"><p>Caricamento dati...</p></div></div>
+</main>
+
+<!-- Modali -->
+<div id="link-modal-overlay">
+    <div id="link-modal-content">
+        <h3>Inserisci URL</h3>
+        <input type="url" id="link-url-input" placeholder="https://esempio.com" />
+        <div id="link-modal-actions">
+            <button id="link-modal-cancel">Annulla</button>
+            <button id="link-modal-confirm">Conferma</button>
+        </div>
+    </div>
+</div>
+
+<div id="image-modal-overlay">
+    <div id="image-modal-content">
+        <h3>Carica Immagine</h3>
+        <input type="file" id="image-upload-input" accept="image/*" />
+        <div id="image-preview-container">
+            <img id="image-preview" alt="Anteprima immagine" />
+        </div>
+        <div id="image-modal-actions">
+            <button id="image-modal-cancel">Annulla</button>
+            <button id="image-modal-confirm">Conferma</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(async () => {
+    /*** Helpers ***/
+    const normalizeStr = (s = "") =>
+        s.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const escapeRegExp = (s = "") => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    /*** DB ***/
+    const Database = {
+        DB_NAME: "PromptManagerDB_v10",
+        STORE_NAME: "promptsData",
+        DB_VERSION: 1,
+        db: null,
+        async init() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                request.onerror = e => reject("Errore IndexedDB: " + e.target.errorCode);
+                request.onsuccess = e => { this.db = e.target.result; resolve(this.db); };
+                request.onupgradeneeded = e => {
+                    if (!e.target.result.objectStoreNames.contains(this.STORE_NAME)) {
+                        e.target.result.createObjectStore(this.STORE_NAME, { keyPath: "id" });
+                    }
+                };
+            });
+        },
+        async save(data) {
+            return new Promise((resolve, reject) => {
+                if (!this.db) return reject("DB non inizializzato.");
+                const tx = this.db.transaction([this.STORE_NAME], "readwrite");
+                tx.objectStore(this.STORE_NAME).put({ id: "main", data });
+                tx.oncomplete = () => resolve();
+                tx.onerror = e => reject("Errore salvataggio: " + e.target.error);
+            });
+        },
+        async load() {
+            return new Promise((resolve, reject) => {
+                if (!this.db) return reject("DB non inizializzato.");
+                const req = this.db.transaction([this.STORE_NAME], "readonly").objectStore(this.STORE_NAME).get("main");
+                req.onsuccess = e => resolve(e.target.result ? e.target.result.data : []);
+                req.onerror = e => reject("Errore caricamento: " + e.target.error);
+            });
+        }
+    };
+
+    /*** Stato ***/
+    let state = { allData: [], history: [], redoStack: [], activeCategoryId: null };
+    let savedSelectionRange = null;
+
+    /*** Elementi ***/
+    const toolBtn = document.getElementById("toolBtn");
+    const toolMenu = document.getElementById("toolMenu");
+    const importBtn = document.getElementById("btnImporta");
+    const backupInput = document.getElementById("backupInput");
+    const selectionPanel = document.getElementById("selection-panel");
+    const categoryButtonsContainer = document.getElementById("category-buttons-container");
+    const displayArea = document.getElementById("display-area");
+    const btnAnnulla = document.getElementById("btnAnnulla");
+    const btnRipristina = document.getElementById("btnRipristina");
+    const btnBackup = document.getElementById("btnBackup");
+    const searchInput = document.getElementById("search-input");
+    const searchIcon = document.getElementById("search-icon");
+
+    /*** Undo/Redo ***/
+    function updateUndoRedoButtons() {
+        if (btnAnnulla) btnAnnulla.disabled = state.history.length === 0;
+        if (btnRipristina) btnRipristina.disabled = state.redoStack.length === 0;
+    }
+    async function updateStateAndSave(newData, options = { saveHistory: true }) {
+        if (options.saveHistory) {
+            state.redoStack = [];
+            state.history.push(JSON.parse(JSON.stringify(state.allData)));
+            if (state.history.length > 30) state.history.shift();
+        }
+        state.allData = newData;
+        await Database.save(state.allData);
+        updateUndoRedoButtons();
+        const term = normalizeStr(searchInput?.value || "");
+        if (term) performSearch(term);
+        else renderUI();
+    }
+    async function performUndo() {
+        if (state.history.length > 0) {
+            state.redoStack.push(JSON.parse(JSON.stringify(state.allData)));
+            await updateStateAndSave(state.history.pop(), { saveHistory: false });
+        }
+    }
+    async function performRedo() {
+        if (state.redoStack.length > 0) {
+            state.history.push(JSON.parse(JSON.stringify(state.allData)));
+            await updateStateAndSave(state.redoStack.pop(), { saveHistory: false });
+        }
+    }
+
+    /*** Render ***/
+    function renderUI() {
+        if (!state.allData || state.allData.length === 0) {
+            selectionPanel.style.display = "none";
+            displayArea.innerHTML = '<div class="initial-message"><p>Nessun dato. Importa un backup o aggiungi una categoria.</p></div>';
+        } else {
+            selectionPanel.style.display = "block";
+            renderCategories();
+            const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
+            if (activeCategory) displaySubcategoryList(activeCategory);
+            else displayArea.innerHTML = '<div class="initial-message"><p>Seleziona una categoria.</p></div>';
+        }
+        updateUndoRedoButtons();
+    }
+    function renderCategories() {
+        categoryButtonsContainer.innerHTML = "";
+        state.allData.forEach(category => {
+            const button = document.createElement("button");
+            button.className = "category-pill";
+            if (category.id === state.activeCategoryId) button.classList.add("active");
+            button.textContent = category.name;
+            button.onclick = () => { state.activeCategoryId = category.id; renderUI(); };
+            categoryButtonsContainer.appendChild(button);
+        });
+    }
+    function displaySubcategoryList(category) {
+        displayArea.innerHTML = `
+            <div class="display-header">
+                <h3>Sottocategorie in: ${category.name}</h3>
+                <div class="header-buttons">
+                    <button class="add-button" id="add-subcat-btn"><i class="fa-solid fa-plus"></i> Aggiungi Sottocategoria</button>
+                    <button class="add-button delete-button" id="delete-cat-btn"><i class="fa-solid fa-trash-can"></i> Elimina Categoria</button>
+                </div>
+            </div>
+            <div id="subcat-list"></div>`;
+        document.getElementById("add-subcat-btn").onclick = () => addSubcategory(category.id);
+        document.getElementById("delete-cat-btn").onclick = () => deleteCategory(category.id);
+        const listContainer = document.getElementById("subcat-list");
+        if (!category.subcategories || category.subcategories.length === 0) {
+            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Questa categoria non ha sottocategorie.</p></div>';
+            return;
+        }
+        category.subcategories.forEach(subcat => {
+            const item = document.createElement("div");
+            item.className = "item-container";
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "item-name";
+            nameSpan.textContent = subcat.name;
+            nameSpan.onclick = () => displayPromptTitles(subcat, category);
+            const deleteIcon = document.createElement("i");
+            deleteIcon.className = "fa-solid fa-trash-can delete-icon";
+            deleteIcon.onclick = e => { e.stopPropagation(); deleteSubcategory(subcat.id, category.id); };
+            item.append(nameSpan, deleteIcon);
+            listContainer.appendChild(item);
+        });
+    }
+    function displayPromptTitles(subcategory, parentCategory) {
+        displayArea.innerHTML = `
+            <div class="display-header">
+                <h3>Prompt in: ${subcategory.name}</h3>
+                <div class="header-buttons">
+                    <button class="add-button" id="add-prompt-btn"><i class="fa-solid fa-plus"></i> Aggiungi Prompt</button>
+                </div>
+            </div>
+            <div id="prompt-list"></div>`;
+        document.getElementById("add-prompt-btn").onclick = () => addPrompt(subcategory.id, parentCategory.id);
+        const listContainer = document.getElementById("prompt-list");
+        if (!subcategory.prompts || subcategory.prompts.length === 0) {
+            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt in questa sottocategoria.</p></div>';
+            return;
+        }
+        subcategory.prompts.forEach(prompt => {
+            const item = document.createElement("div");
+            item.className = "item-container";
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "item-name";
+            nameSpan.textContent = prompt.title;
+            nameSpan.onclick = () => displayPromptDetail(prompt, subcategory, parentCategory);
+            const deleteIcon = document.createElement("i");
+            deleteIcon.className = "fa-solid fa-trash-can delete-icon";
+            deleteIcon.onclick = e => { e.stopPropagation(); deletePrompt(prompt.id, subcategory.id, parentCategory.id); };
+            item.append(nameSpan, deleteIcon);
+            listContainer.appendChild(item);
+        });
+    }
+
+    function displayPromptDetail(prompt, parentSub, parentCat, isFromSearch = false) {
+        selectionPanel.style.display = "none";
+        displayArea.innerHTML = `
+            <div class="prompt-detail-view">
+                <div class="prompt-header">
+                    <a href="#" class="back-button" id="back-to-list"><i class="fa-solid fa-arrow-left"></i> ${isFromSearch ? "Torna ai risultati" : "Torna alla categoria"}</a>
+                    <div class="prompt-actions-toolbar" id="prompt-actions">
+                        <i class="fa-solid fa-pencil" id="edit-prompt-btn" title="Modifica"></i>
+                        <i class="fa-solid fa-copy" title="Copia Descrizione"></i>
+                        <i class="${prompt.favorite ? "fa-solid" : "fa-regular"} fa-star" title="Preferito"></i>
+                        <i class="fa-solid fa-trash-can" id="delete-prompt-detail-btn" title="Elimina"></i>
+                    </div>
+                </div>
+                <div class="prompt-title-section"><h1>${prompt.title}</h1></div>
+                <div id="formatting-toolbar">
+                    <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+                    <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+                    <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
+                    <button data-command="insertUnorderedList" title="Elenco puntato"><i class="fa-solid fa-list-ul"></i></button>
+                    <button id="create-link-btn" title="Crea Link"><i class="fa-solid fa-link"></i></button>
+                    <button id="unlink-btn" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
+                    <button id="insert-image-btn" title="Inserisci Immagine"><i class="fa-solid fa-image"></i></button>
+                    <button id="increase-font-btn" title="Aumenta testo"><i class="fa-solid fa-plus"></i></button>
+                    <button id="decrease-font-btn" title="Riduci testo"><i class="fa-solid fa-minus"></i></button>
+                    <div class="color-picker-wrapper" title="Colore testo">
+                        <i class="fa-solid fa-palette"></i><input type="color" id="fontColorPicker">
+                    </div>
+                    <button id="btnSaveChanges" class="add-button">Salva Modifiche</button>
+                </div>
+                <div class="prompt-description-container" id="detail-description">${prompt.description || ""}</div>
+            </div>`;
+
+        const backBtn = document.getElementById("back-to-list");
+        const deleteBtn = document.getElementById("delete-prompt-detail-btn");
+        const editBtn = document.getElementById("edit-prompt-btn");
+        const descriptionContainer = document.getElementById("detail-description");
+        const formattingToolbar = document.getElementById("formatting-toolbar");
+        const saveChangesBtn = document.getElementById("btnSaveChanges");
+        const copyBtn = document.querySelector("#prompt-actions .fa-copy");
+        const colorPicker = document.getElementById("fontColorPicker");
+        const increaseFontBtn = document.getElementById("increase-font-btn");
+        const decreaseFontBtn = document.getElementById("decrease-font-btn");
+
+        // Link modal
+        const createLinkBtn = document.getElementById("create-link-btn");
+        const unlinkBtn = document.getElementById("unlink-btn");
+        const linkModalOverlay = document.getElementById("link-modal-overlay");
+        const linkUrlInput = document.getElementById("link-url-input");
+        const linkConfirmBtn = document.getElementById("link-modal-confirm");
+        const linkCancelBtn = document.getElementById("link-modal-cancel");
+
+        // Image modal
+        const insertImageBtn = document.getElementById("insert-image-btn");
+        const imageModalOverlay = document.getElementById("image-modal-overlay");
+        const imageUploadInput = document.getElementById("image-upload-input");
+        const imagePreview = document.getElementById("image-preview");
+        const imageConfirmBtn = document.getElementById("image-modal-confirm");
+        const imageCancelBtn = document.getElementById("image-modal-cancel");
+
+        createLinkBtn.onclick = (e) => {
+            e.preventDefault();
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0 || selection.toString().trim() === "") { alert("Prima seleziona il testo da trasformare in link."); return; }
+            savedSelectionRange = selection.getRangeAt(0).cloneRange();
+            linkModalOverlay.classList.add("show");
+            linkUrlInput.value = "https://";
+            linkUrlInput.focus();
+        };
+        unlinkBtn.onclick = (e) => { e.preventDefault(); document.execCommand("unlink", false, null); descriptionContainer.focus(); };
+        const closeLinkModal = () => { linkModalOverlay.classList.remove("show"); savedSelectionRange = null; };
+        linkConfirmBtn.onclick = () => {
+            const url = linkUrlInput.value.trim();
+            if (url && savedSelectionRange) {
+                descriptionContainer.focus();
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelectionRange);
+                document.execCommand("createLink", false, url);
+            }
+            closeLinkModal();
+        };
+        linkCancelBtn.onclick = closeLinkModal;
+        linkModalOverlay.onclick = (e) => { if (e.target === linkModalOverlay) closeLinkModal(); };
+
+        const resetImageModal = () => { imageUploadInput.value = null; imagePreview.src = ""; imagePreview.classList.remove("show"); };
+        insertImageBtn.onclick = (e) => {
+            e.preventDefault();
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) savedSelectionRange = selection.getRangeAt(0).cloneRange();
+            imageModalOverlay.classList.add("show");
+        };
+        imageUploadInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => { imagePreview.src = event.target.result; imagePreview.classList.add("show"); };
+                reader.readAsDataURL(file);
+            }
+        };
+        const closeImageModal = () => { imageModalOverlay.classList.remove("show"); resetImageModal(); savedSelectionRange = null; };
+        imageConfirmBtn.onclick = () => {
+            const imgSrc = imagePreview.src;
+            if (imgSrc && savedSelectionRange) {
+                descriptionContainer.focus();
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelectionRange);
+                const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
+                document.execCommand("insertHTML", false, imgTag);
+            }
+            closeImageModal();
+        };
+        imageCancelBtn.onclick = closeImageModal;
+        imageModalOverlay.onclick = (e) => { if (e.target === imageModalOverlay) closeImageModal(); };
+
+        const getCurrentFontSize = () => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return 3;
+            let p = sel.getRangeAt(0).commonAncestorContainer;
+            if (p.nodeType === 3) p = p.parentNode;
+            while (p && p.tagName !== "FONT" && p !== descriptionContainer) p = p.parentNode;
+            return (p && p.tagName === "FONT" && p.size) ? parseInt(p.size, 10) : 3;
+        };
+        const changeFontSize = (dir) => {
+            let s = getCurrentFontSize();
+            let newS = (dir === "increase") ? Math.min(7, s + 1) : Math.max(1, s - 1);
+            document.execCommand("fontSize", false, newS);
+            descriptionContainer.focus();
+        };
+        increaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("increase"); };
+        decreaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("decrease"); };
+        colorPicker.addEventListener("input", (e) => document.execCommand("foreColor", false, e.target.value));
+        copyBtn.onclick = () => {
+            if (!descriptionContainer.innerText) return alert("Nessuna descrizione da copiare.");
+            navigator.clipboard.writeText(descriptionContainer.innerText)
+                .then(() => alert("Descrizione copiata!"))
+                .catch(err => console.error("Errore copia:", err));
+        };
+        backBtn.onclick = (e) => {
+            e.preventDefault();
+            if (isFromSearch) performSearch(normalizeStr(searchInput.value));
+            else { selectionPanel.style.display = "block"; state.activeCategoryId = parentCat.id; renderUI(); }
+        };
+        deleteBtn.onclick = () => deletePrompt(prompt.id, parentSub.id, parentCat.id);
+        editBtn.onclick = () => { descriptionContainer.contentEditable = true; formattingToolbar.classList.add("show"); saveChangesBtn.classList.add("show"); descriptionContainer.focus(); };
+        formattingToolbar.querySelectorAll("button[data-command]").forEach(btn => {
+            btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };
+        });
+        saveChangesBtn.onclick = async () => {
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const promptToUpdate = newData.find(c => c.id === parentCat.id)
+                ?.subcategories.find(s => s.id === parentSub.id)
+                ?.prompts.find(p => p.id === prompt.id);
+            if (promptToUpdate) {
+                promptToUpdate.description = descriptionContainer.innerHTML;
+                await updateStateAndSave(newData);
+                displayPromptDetail(promptToUpdate, parentSub, parentCat, isFromSearch);
+            }
+        };
+    }
+
+    /*** Ricerca ***/
+    function performSearch(rawTerm) {
+        const term = normalizeStr(rawTerm);
+        const results = [];
+        const seen = new Set();
+        const tempDiv = document.createElement("div");
+
+        if (!term) { renderUI(); return; }
+
+        // Scansione
+        state.allData.forEach(cat => {
+            const catMatch = normalizeStr(cat.name).includes(term);
+
+            cat.subcategories?.forEach(sub => {
+                const subMatch = normalizeStr(sub.name).includes(term);
+
+                sub.prompts?.forEach(p => {
+                    if (seen.has(p.id)) return;
+
+                    // Testo descrizione sicuro
+                    tempDiv.innerHTML = p.description || "";
+                    const descText = normalizeStr(tempDiv.textContent || "");
+                    const titleMatch = normalizeStr(p.title).includes(term);
+                    const descMatch  = descText.includes(term);
+
+                    // Se il termine matcha categoria o sottocategoria → includi tutti i prompt del ramo
+                    if (catMatch || subMatch || titleMatch || descMatch) {
+                        results.push({
+                            prompt: p,
+                            subcategory: sub,
+                            category: cat,
+                            score: (titleMatch ? 3 : 0) + (subMatch ? 2 : 0) + (catMatch ? 1 : 0) + (descMatch ? 0.5 : 0)
+                        });
+                        seen.add(p.id);
+                    }
+                });
+            });
+        });
+
+        // Ordina risultati: titolo > sottocategoria > categoria > descrizione
+        results.sort((a, b) => b.score - a.score);
+
+        displaySearchResults(results, rawTerm);
+    }
+
+    function displaySearchResults(results, rawTerm) {
+        selectionPanel.style.display = "none";
+        if (!results.length) {
+            displayArea.innerHTML = `<div class="initial-message"><p>Nessun risultato per "<strong>${rawTerm}</strong>"</p></div>`;
+            return;
+        }
+        const safe = escapeRegExp(rawTerm);
+        const hi = (text) => text.replace(new RegExp(safe, "gi"), m => `<mark>${m}</mark>`);
+
+        let html = `<div class="display-header"><h3>${results.length} risultati trovati</h3></div><div id="search-results-list">`;
+        results.forEach((res, idx) => {
+            html += `
+                <div class="item-container search-result-item" data-idx="${idx}">
+                    <div class="item-name">
+                        <span class="search-result-title">${hi(res.prompt.title)}</span>
+                        <span class="search-result-path">In: ${hi(res.category.name)} > ${hi(res.subcategory.name)}</span>
+                    </div>
+                </div>`;
+        });
+        html += `</div>`;
+        displayArea.innerHTML = html;
+
+        document.querySelectorAll(".search-result-item").forEach(el => {
+            el.onclick = () => {
+                const r = results[parseInt(el.dataset.idx, 10)];
+                displayPromptDetail(r.prompt, r.subcategory, r.category, true);
+            };
+        });
+    }
+
+    function handleSearchInput() {
+        const term = searchInput.value;
+        if (normalizeStr(term)) performSearch(term);
+        else renderUI();
+    }
+
+    /*** CRUD ***/
+    async function addCategory() {
+        const name = prompt("Nome nuova categoria:");
+        if (name && name.trim()) {
+            const newData = [...state.allData, { id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), subcategories: [] }];
+            newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+            await updateStateAndSave(newData);
+        }
+    }
+    async function addSubcategory(categoryId) {
+        const name = prompt("Nome della nuova sottocategoria:");
+        if (name && name.trim()) {
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const cat = newData.find(c => c.id === categoryId);
+            if (cat) {
+                cat.subcategories.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), prompts: [] });
+                cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                await updateStateAndSave(newData);
+            }
+        }
+    }
+    async function addPrompt(subcategoryId, categoryId) {
+        const title = prompt("Titolo del nuovo prompt:");
+        if (!title || !title.trim()) return;
+        const description = prompt("Descrizione del prompt:", "") || "";
+        const newData = JSON.parse(JSON.stringify(state.allData));
+        const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
+        if (subcat) {
+            subcat.prompts.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, title: title.trim(), description: description.trim(), favorite: false });
+            await updateStateAndSave(newData);
+        }
+    }
+    async function deleteCategory(categoryId) {
+        if (confirm("Sei sicuro di voler eliminare questa categoria e TUTTO il suo contenuto?")) {
+            const newData = state.allData.filter(c => c.id !== categoryId);
+            if (state.activeCategoryId === categoryId) state.activeCategoryId = null;
+            await updateStateAndSave(newData);
+        }
+    }
+    async function deleteSubcategory(subcategoryId, parentCategoryId) {
+        if (confirm("Sei sicuro di voler eliminare questa sottocategoria?")) {
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const cat = newData.find(c => c.id === parentCategoryId);
+            if (cat) {
+                cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcategoryId);
+                await updateStateAndSave(newData);
+            }
+        }
+    }
+    async function deletePrompt(promptId, subcategoryId, categoryId) {
+        if (confirm("Sei sicuro di voler eliminare questo prompt?")) {
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
+            if (subcat) {
+                const index = subcat.prompts.findIndex(p => p.id === promptId);
+                if (index > -1) {
+                    subcat.prompts.splice(index, 1);
+                    await updateStateAndSave(newData);
+                }
+            }
+        }
+    }
+
+    /*** Eventi UI ***/
+    const setupEventListeners = () => {
+        toolBtn?.addEventListener("click", (e) => { e.stopPropagation(); toolMenu.classList.toggle("show"); });
+        window.addEventListener("click", () => toolMenu.classList.remove("show"));
+
+        importBtn?.addEventListener("click", () => backupInput.click());
+        backupInput?.addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    await updateStateAndSave(Array.isArray(data) ? data : []);
+                    alert("Backup importato!");
+                } catch {
+                    alert("File di backup non valido.");
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        btnBackup?.addEventListener("click", () => {
+            if (state.allData.length === 0) { alert("Nessun dato da esportare."); return; }
+            const dataStr = JSON.stringify(state.allData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "prompts_backup.json";
+            a.click();
+            URL.revokeObjectURL(a.href);
+        });
+
+        document.getElementById("add-category-inline-btn")?.addEventListener("click", addCategory);
+        btnAnnulla?.addEventListener("click", performUndo);
+        btnRipristina?.addEventListener("click", performRedo);
+
+        // Ricerca: input live + Enter + click lente
+        searchInput?.addEventListener("input", handleSearchInput);
+        searchInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); handleSearchInput(); } });
+        searchIcon?.addEventListener("click", () => { searchInput.focus(); handleSearchInput(); });
+    };
+
+    /*** Bootstrap ***/
+    try {
+        await Database.init();
+        state.allData = await Database.load();
+        setupEventListeners();
+        renderUI();
+    } catch (error) {
+        console.error("Inizializzazione fallita:", error);
+        displayArea.innerHTML = '<div class="initial-message"><p>Errore critico: impossibile avviare l\'app.</p></div>';
+    }
+})();
+</script>
+</body>
+</html>

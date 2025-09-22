@@ -200,7 +200,7 @@
     };
 
     /*** Stato ***/
-    let state = { allData: [], history: [], redoStack: [], activeCategoryId: null };
+    let state = { allData: [], history: [], redoStack: [], activeCategoryId: null, recents: [] };
     let savedSelectionRange = null;
 
     /*** Elementi ***/
@@ -250,20 +250,46 @@
 
     /*** Render ***/
     function renderUI() {
-        if (!state.allData || state.allData.length === 0) {
-            selectionPanel.style.display = "none";
-            displayArea.innerHTML = '<div class="initial-message"><p>Nessun dato. Importa un backup o aggiungi una categoria.</p></div>';
+        selectionPanel.style.display = "block";
+        renderCategories();
+
+        if (state.activeCategoryId === 'favorites') {
+            displayFavorites();
+        } else if (state.activeCategoryId === 'recents') {
+            displayRecents();
         } else {
-            selectionPanel.style.display = "block";
-            renderCategories();
             const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
-            if (activeCategory) displaySubcategoryList(activeCategory);
-            else displayArea.innerHTML = '<div class="initial-message"><p>Seleziona una categoria.</p></div>';
+            if (activeCategory) {
+                displaySubcategoryList(activeCategory);
+            } else {
+                if (state.allData && state.allData.length > 0) {
+                    displayArea.innerHTML = '<div class="initial-message"><p>Seleziona una categoria.</p></div>';
+                } else {
+                    displayArea.innerHTML = '<div class="initial-message"><p>Nessuna categoria definita. Aggiungi una categoria o importa un file di backup.</p></div>';
+                }
+            }
         }
         updateUndoRedoButtons();
     }
+
     function renderCategories() {
         categoryButtonsContainer.innerHTML = "";
+
+        const createPill = (text, id) => {
+            const button = document.createElement("button");
+            button.className = "category-pill";
+            if (id === state.activeCategoryId) button.classList.add("active");
+            button.textContent = text;
+            button.onclick = () => {
+                state.activeCategoryId = id;
+                renderUI();
+            };
+            return button;
+        };
+
+        categoryButtonsContainer.appendChild(createPill("Preferiti", "favorites"));
+        categoryButtonsContainer.appendChild(createPill("Recenti", "recents"));
+
         state.allData.forEach(category => {
             const button = document.createElement("button");
             button.className = "category-pill";
@@ -273,6 +299,64 @@
             categoryButtonsContainer.appendChild(button);
         });
     }
+
+    function displayFavorites() {
+        const favoritePrompts = [];
+        state.allData.forEach(cat => {
+            cat.subcategories?.forEach(sub => {
+                sub.prompts?.forEach(p => {
+                    if (p.favorite) {
+                        favoritePrompts.push({ prompt: p, subcategory: sub, category: cat });
+                    }
+                });
+            });
+        });
+
+        displayArea.innerHTML = `
+            <div class="display-header"><h3>Preferiti</h3></div>
+            <div id="prompt-list"></div>`;
+        const listContainer = document.getElementById("prompt-list");
+        if (favoritePrompts.length === 0) {
+            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt aggiunto ai preferiti.</p></div>';
+            return;
+        }
+        favoritePrompts.forEach(item => {
+            const el = document.createElement("div");
+            el.className = "item-container";
+            el.innerHTML = `<span class="item-name"><span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span></span>`;
+            el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category);
+            listContainer.appendChild(el);
+        });
+    }
+
+    function displayRecents() {
+        const recentPrompts = [];
+        const catMap = new Map(state.allData.map(c => [c.id, c]));
+
+        state.recents.forEach(r => {
+            const category = catMap.get(r.catId);
+            const subcategory = category?.subcategories.find(s => s.id === r.subId);
+            const prompt = subcategory?.prompts.find(p => p.id === r.promptId);
+            if (prompt) recentPrompts.push({ prompt, subcategory, category });
+        });
+
+        displayArea.innerHTML = `
+            <div class="display-header"><h3>Recenti</h3></div>
+            <div id="prompt-list"></div>`;
+        const listContainer = document.getElementById("prompt-list");
+        if (recentPrompts.length === 0) {
+            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt visualizzato di recente.</p></div>';
+            return;
+        }
+        recentPrompts.forEach(item => {
+            const el = document.createElement("div");
+            el.className = "item-container";
+            el.innerHTML = `<span class="item-name"><span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span></span>`;
+            el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category);
+            listContainer.appendChild(el);
+        });
+    }
+
     function displaySubcategoryList(category) {
         displayArea.innerHTML = `
             <div class="display-header">
@@ -335,6 +419,11 @@
     }
 
     function displayPromptDetail(prompt, parentSub, parentCat, isFromSearch = false) {
+        const recentEntry = { promptId: prompt.id, subId: parentSub.id, catId: parentCat.id };
+        state.recents = state.recents.filter(r => r.promptId !== prompt.id);
+        state.recents.unshift(recentEntry);
+        if (state.recents.length > 20) state.recents.pop();
+        
         selectionPanel.style.display = "none";
         displayArea.innerHTML = `
             <div class="prompt-detail-view">
@@ -373,6 +462,7 @@
         const formattingToolbar = document.getElementById("formatting-toolbar");
         const saveChangesBtn = document.getElementById("btnSaveChanges");
         const copyBtn = document.querySelector("#prompt-actions .fa-copy");
+        const starBtn = document.querySelector("#prompt-actions .fa-star");
         const colorPicker = document.getElementById("fontColorPicker");
         const increaseFontBtn = document.getElementById("increase-font-btn");
         const decreaseFontBtn = document.getElementById("decrease-font-btn");
@@ -493,6 +583,19 @@
                 displayPromptDetail(promptToUpdate, parentSub, parentCat, isFromSearch);
             }
         };
+        starBtn.onclick = async () => {
+            const isFavorite = starBtn.classList.contains("fa-solid");
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const promptToUpdate = newData.find(c => c.id === parentCat.id)
+                ?.subcategories.find(s => s.id === parentSub.id)
+                ?.prompts.find(p => p.id === prompt.id);
+            if (promptToUpdate) {
+                promptToUpdate.favorite = !isFavorite;
+                await updateStateAndSave(newData);
+                starBtn.classList.toggle("fa-solid", !isFavorite);
+                starBtn.classList.toggle("fa-regular", isFavorite);
+            }
+        };
     }
 
     /*** Ricerca ***/
@@ -504,7 +607,6 @@
 
         if (!term) { renderUI(); return; }
 
-        // Scansione
         state.allData.forEach(cat => {
             const catMatch = normalizeStr(cat.name).includes(term);
 
@@ -514,13 +616,11 @@
                 sub.prompts?.forEach(p => {
                     if (seen.has(p.id)) return;
 
-                    // Testo descrizione sicuro
                     tempDiv.innerHTML = p.description || "";
                     const descText = normalizeStr(tempDiv.textContent || "");
                     const titleMatch = normalizeStr(p.title).includes(term);
                     const descMatch  = descText.includes(term);
 
-                    // Se il termine matcha categoria o sottocategoria → includi tutti i prompt del ramo
                     if (catMatch || subMatch || titleMatch || descMatch) {
                         results.push({
                             prompt: p,
@@ -534,9 +634,7 @@
             });
         });
 
-        // Ordina risultati: titolo > sottocategoria > categoria > descrizione
         results.sort((a, b) => b.score - a.score);
-
         displaySearchResults(results, rawTerm);
     }
 
@@ -611,7 +709,7 @@
     async function deleteCategory(categoryId) {
         if (confirm("Sei sicuro di voler eliminare questa categoria e TUTTO il suo contenuto?")) {
             const newData = state.allData.filter(c => c.id !== categoryId);
-            if (state.activeCategoryId === categoryId) state.activeCategoryId = null;
+            if (state.activeCategoryId === categoryId) state.activeCategoryId = 'favorites';
             await updateStateAndSave(newData);
         }
     }
@@ -676,7 +774,6 @@
         btnAnnulla?.addEventListener("click", performUndo);
         btnRipristina?.addEventListener("click", performRedo);
 
-        // Ricerca: input live + Enter + click lente
         searchInput?.addEventListener("input", handleSearchInput);
         searchInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); handleSearchInput(); } });
         searchIcon?.addEventListener("click", () => { searchInput.focus(); handleSearchInput(); });
@@ -686,6 +783,7 @@
     try {
         await Database.init();
         state.allData = await Database.load();
+        state.activeCategoryId = 'favorites';
         setupEventListeners();
         renderUI();
     } catch (error) {

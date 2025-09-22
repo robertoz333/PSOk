@@ -429,6 +429,8 @@
             listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt in questa sottocategoria.</p></div>';
             return;
         }
+        // MODIFICA: Ordina i prompt per titolo
+        subcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
         subcategory.prompts.forEach(prompt => {
             const item = document.createElement("div");
             item.className = "item-container";
@@ -755,6 +757,8 @@
         const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
         if (subcat) {
             subcat.prompts.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, title: title.trim(), description: description.trim(), favorite: false });
+            // MODIFICA: Ordina i prompt dopo l'aggiunta
+            subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
             await updateStateAndSave(newData);
         }
     }

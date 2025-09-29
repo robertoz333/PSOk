@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="it">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,632 +11,1372 @@
     <style>
         /* TEMA DARK (PREDEFINITO) */
         :root {
-            --background-dark: #121417; --container-bg: #22252A; --header-bg: #2D2F3E;
-            --element-bg: #3A3D4D; --element-bg-hover: #4a4e5a; --primary-accent: #007BFF;
-            --primary-accent-dark: #0056b3; --text-primary: #FFFFFF; --text-secondary: #E0E0E0;
-            --text-muted: #9E9E9E; --border-color: #3A3D4D; --star-yellow: #FFC107;
-            --btn-green: #28a745; --btn-green-hover: #218838; --btn-red: #dc3545; --btn-red-hover: #c82333;
+            --background-dark: #121417;
+            --container-bg: #22252A;
+            --header-bg: #2D2F3E;
+            --element-bg: #3A3D4D;
+            --element-bg-hover: #4a4e5a;
+            --primary-accent: #007BFF;
+            --primary-accent-dark: #0056b3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #E0E0E0;
+            --text-muted: #9E9E9E;
+            --border-color: #3A3D4D;
+            --star-yellow: #FFC107;
+            --btn-green: #28a745;
+            --btn-green-hover: #218838;
+            --btn-red: #dc3545;
+            --btn-red-hover: #c82333;
         }
+
         /* TEMA LIGHT */
         html[data-theme="light"] {
-            --background-dark: #F0F2F5; --container-bg: #FFFFFF; --header-bg: #FFFFFF;
-            --element-bg: #E4E6EB; --element-bg-hover: #D8DBE0; --primary-accent: #007BFF;
-            --primary-accent-dark: #0056b3; --text-primary: #121417; --text-secondary: #4A4E5A;
-            --text-muted: #65676B; --border-color: #CED0D4; --star-yellow: #FFC107;
+            --background-dark: #F0F2F5;
+            --container-bg: #FFFFFF;
+            --header-bg: #FFFFFF;
+            --element-bg: #E4E6EB;
+            --element-bg-hover: #D8DBE0;
+            --primary-accent: #007BFF;
+            --primary-accent-dark: #0056b3;
+            --text-primary: #121417;
+            --text-secondary: #4A4E5A;
+            --text-muted: #65676B;
+            --border-color: #CED0D4;
+            --star-yellow: #FFC107;
         }
+
         /* TEMA BLUE */
         html[data-theme="blue"] {
-            --background-dark: #0d1117; --container-bg: #161b22; --header-bg: #161b22;
-            --element-bg: #21262d; --element-bg-hover: #30363d; --primary-accent: #58a6ff;
-            --primary-accent-dark: #1f6feb; --text-primary: #c9d1d9; --text-secondary: #8b949e;
-            --text-muted: #8b949e; --border-color: #30363d; --star-yellow: #FFC107;
+            --background-dark: #0d1117;
+            --container-bg: #161b22;
+            --header-bg: #161b22;
+            --element-bg: #21262d;
+            --element-bg-hover: #30363d;
+            --primary-accent: #58a6ff;
+            --primary-accent-dark: #1f6feb;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --star-yellow: #FFC107;
         }
 
-        body { background-color: var(--background-dark); color: var(--text-secondary); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; transition: background-color .3s, color .3s; }
-        .app-header { background-color: var(--header-bg); border-radius: 16px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
-        .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 16px; }
-        .logo { color: var(--text-primary); font-size: 28px; font-weight: bold; }
-        .search-bar { display: flex; align-items: center; background-color: var(--element-bg); border-radius: 12px; padding: 0 15px; }
-        .search-bar i { color: var(--text-muted); cursor: pointer; }
-        .search-bar input { background: transparent; border: none; outline: none; color: var(--text-primary); padding: 12px 10px; font-size: 16px; width: 280px; }
-        .tool-button { background-color: var(--element-bg-hover); color: var(--text-primary); border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color .3s; }
-        .tool-button:hover { background-color: #6957d1; }
-        #themeBtn { background-color: var(--element-bg-hover); }
-        #themeBtn:hover { background-color: var(--primary-accent); }
-        .header-right { position: relative; }
-        .dropdown-menu { display: none; position: absolute; top: 110%; right: 0; background-color: var(--header-bg); border-radius: 12px; padding: 10px; z-index: 1000; box-shadow: 0 8px 16px rgba(0,0,0,.4); gap: 8px; }
-        .dropdown-menu.show { display: grid; }
-        #toolMenu { width: 360px; grid-template-columns: repeat(3, 1fr); }
-        #themeMenu { width: 150px; display: none; flex-direction: column; }
-        #themeMenu.show { display: flex; }
-        #themeMenu button { background-color: var(--element-bg); color: var(--text-primary); border: 1px solid var(--border-color); width: 100%; text-align: left; padding: 10px 15px; border-radius: 6px; cursor: pointer; transition: background-color .2s; }
-        #themeMenu button:hover { background-color: var(--element-bg-hover); }
-        .toolbar-btn { color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: all .2s; min-height: 70px; }
-        .toolbar-btn:hover { opacity: .9; transform: translateY(-2px); }
-        .toolbar-btn:disabled { background-color: #555 !important; cursor: not-allowed; opacity: .5; transform: none; }
-        .btn-green { background-color: var(--btn-green); } .btn-yellow { background-color: #f7b731; color: #333; } .btn-blue { background-color: #007bff; } .btn-dark-blue { background-color: #0d47a1; } .btn-red { background-color: var(--btn-red); } .btn-purple { background-color: #6f42c1; }
-        .content-container { max-width: 1200px; margin: 0 auto; }
-        .selection-container { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
-        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .panel-header h2 { color: var(--text-primary); margin: 0; }
-        .add-button-inline { background-color: var(--btn-green); border: none; color: var(--text-primary); border-radius: 5px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all .2s; }
-        .add-button-inline:hover { background-color: var(--btn-green-hover); }
-        #category-buttons-container { display: flex; flex-wrap: wrap; gap: 12px; }
-        .category-pill { display: flex; align-items: center; gap: 8px; background-color: var(--element-bg); color: var(--text-secondary); border: 2px solid transparent; border-radius: 20px; padding: 8px 20px; font-size: 16px; cursor: pointer; transition: all .3s; }
-        .category-pill:hover { background-color: var(--element-bg-hover); }
-        .category-pill.active { background-color: var(--primary-accent); color: var(--text-primary); font-weight: 500; }
-        .category-pill .edit-icon { font-size: 12px; color: var(--text-muted); visibility: hidden; opacity: 0; transition: all .2s; }
-        .category-pill:hover .edit-icon { visibility: visible; opacity: 1; }
-        .category-pill .edit-icon:hover { color: var(--text-primary); }
-        #display-area { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; min-height: 200px; }
-        .display-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--element-bg); padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
-        .display-header h3 { margin: 0; font-size: 18px; color: var(--text-secondary); border: none; padding: 0; flex-grow: 1; }
-        .header-buttons { display: flex; gap: 10px; }
-        .add-button { background-color: var(--btn-green); color: white; border: none; border-radius: 5px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: background-color .2s; }
-        .add-button:hover { background-color: var(--btn-green-hover); }
-        .delete-button { background-color: var(--btn-red); } .delete-button:hover { background-color: var(--btn-red-hover); }
-        .item-container { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background-color: var(--element-bg); border-radius: 6px; margin-bottom: 8px; transition: background-color .2s, transform .2s; color: var(--text-secondary); }
-        .item-container:hover { background-color: var(--element-bg-hover); transform: translateX(5px); }
-        .item-name { flex-grow: 1; cursor: pointer; }
-        .item-actions { display: flex; align-items: center; gap: 15px; }
-        .edit-icon, .delete-icon, .unfavorite-icon { color: var(--text-muted); cursor: pointer; padding: 5px; transition: color .2s, transform .2s; }
-        .edit-icon:hover { color: var(--primary-accent); }
-        .delete-icon:hover { color: var(--btn-red); }
-        .unfavorite-icon { color: var(--star-yellow); font-size: 18px; padding: 8px; }
-        .unfavorite-icon:hover { transform: scale(1.2); }
-        .initial-message { text-align: center; color: var(--text-muted); font-size: 18px; padding: 40px; }
-        .prompt-detail-view { color: var(--text-secondary); }
-        .prompt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .back-button { color: var(--text-secondary); cursor: pointer; font-size: 16px; text-decoration: none; }
-        .back-button:hover { color: var(--text-primary); }
-        .prompt-actions-toolbar { display: flex; gap: 15px; }
-        .prompt-actions-toolbar i { cursor: pointer; font-size: 18px; transition: color .2s; }
-        .prompt-actions-toolbar i:hover { color: var(--text-primary); }
-        .prompt-actions-toolbar i.is-favorite { color: var(--star-yellow); }
-        .prompt-title-section { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; text-align: center; }
-        .prompt-title-section h1 { margin: 0; font-size: 32px; color: var(--text-primary); }
-        .prompt-title-section h1[contenteditable="true"] { outline: 2px dashed var(--primary-accent); padding: 0 10px; border-radius: 5px; }
-        #title-actions i { cursor: pointer; font-size: 20px; color: var(--text-muted); transition: color .2s; }
-        #title-actions i:hover { color: var(--text-primary); }
-        #btnSaveTitle { display: none; }
-        .prompt-description-container { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 200px; line-height: 1.7; color: var(--text-primary); }
-        .prompt-description-container a { color: var(--star-yellow); }
-        .prompt-description-container img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; display: block; cursor: pointer; }
-        .prompt-description-container[contenteditable="true"] { outline: 2px dashed var(--primary-accent); background-color: var(--background-dark); }
-        .formatting-toolbar { margin-bottom: 10px; display: none; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .formatting-toolbar.show { display: flex; }
-        .formatting-toolbar button { background: var(--element-bg); border: none; color: var(--text-primary); padding: 8px 12px; border-radius: 5px; cursor: pointer; }
-        .formatting-toolbar button:hover { background: var(--element-bg-hover); }
-        .formatting-toolbar button i { font-size: 16px; }
-        #btnSaveChanges { background-color: var(--primary-accent); display: none; margin-left: auto; }
-        #btnSaveChanges.show { display: inline-block; }
-        .color-picker-wrapper { position: relative; display: flex; align-items: center; justify-content: center; background: var(--element-bg); padding: 8px 12px; border-radius: 5px; }
-        .color-picker-wrapper:hover { background-color: var(--element-bg-hover); }
-        .color-picker-wrapper i { font-size: 16px; pointer-events: none; }
-        .color-picker-wrapper input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-        .search-result-path { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-        .search-result-title { font-weight: 500; color: var(--text-primary); }
-        mark { background-color: var(--star-yellow); color: #121417; padding: 1px 3px; border-radius: 3px; }
-        
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-secondary);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            transition: background-color .3s, color .3s;
+        }
+
+        .app-header {
+            background-color: var(--header-bg);
+            border-radius: 16px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+            margin-bottom: 30px;
+        }
+
+        .header-left,
+        .header-center,
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            color: var(--text-primary);
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--element-bg);
+            border-radius: 12px;
+            padding: 0 15px;
+        }
+
+        .search-bar i {
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .search-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            padding: 12px 10px;
+            font-size: 16px;
+            width: 280px;
+        }
+
+        .tool-button {
+            background-color: var(--element-bg-hover);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color .3s;
+        }
+
+        .tool-button:hover {
+            background-color: #6957d1;
+        }
+
+        #themeBtn {
+            background-color: var(--element-bg-hover);
+        }
+
+        #themeBtn:hover {
+            background-color: var(--primary-accent);
+        }
+
+        .header-right {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background-color: var(--header-bg);
+            border-radius: 12px;
+            padding: 10px;
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, .4);
+            gap: 8px;
+        }
+
+        .dropdown-menu.show {
+            display: grid;
+        }
+
+        #toolMenu {
+            width: 360px;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        #themeMenu {
+            width: 150px;
+            display: none;
+            flex-direction: column;
+        }
+
+        #themeMenu.show {
+            display: flex;
+        }
+
+        #themeMenu button {
+            background-color: var(--element-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            text-align: left;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color .2s;
+        }
+
+        #themeMenu button:hover {
+            background-color: var(--element-bg-hover);
+        }
+
+        .toolbar-btn {
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            transition: all .2s;
+            min-height: 70px;
+        }
+
+        .toolbar-btn:hover {
+            opacity: .9;
+            transform: translateY(-2px);
+        }
+
+        .toolbar-btn:disabled {
+            background-color: #555 !important;
+            cursor: not-allowed;
+            opacity: .5;
+            transform: none;
+        }
+
+        .btn-green {
+            background-color: var(--btn-green);
+        }
+
+        .btn-yellow {
+            background-color: #f7b731;
+            color: #333;
+        }
+
+        .btn-blue {
+            background-color: #007bff;
+        }
+
+        .btn-dark-blue {
+            background-color: #0d47a1;
+        }
+
+        .btn-red {
+            background-color: var(--btn-red);
+        }
+
+        .btn-purple {
+            background-color: #6f42c1;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .selection-container {
+            background-color: var(--container-bg);
+            border-radius: 16px;
+            padding: 25px 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+            margin-bottom: 30px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .panel-header h2 {
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .add-button-inline {
+            background-color: var(--btn-green);
+            border: none;
+            color: var(--text-primary);
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all .2s;
+        }
+
+        .add-button-inline:hover {
+            background-color: var(--btn-green-hover);
+        }
+
+        #category-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .category-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--element-bg);
+            color: var(--text-secondary);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .category-pill:hover {
+            background-color: var(--element-bg-hover);
+        }
+
+        .category-pill.active {
+            background-color: var(--primary-accent);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .category-pill .edit-icon {
+            font-size: 12px;
+            color: var(--text-muted);
+            visibility: hidden;
+            opacity: 0;
+            transition: all .2s;
+        }
+
+        .category-pill:hover .edit-icon {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .category-pill .edit-icon:hover {
+            color: var(--text-primary);
+        }
+
+        #display-area {
+            background-color: var(--container-bg);
+            border-radius: 16px;
+            padding: 25px 30px;
+            min-height: 200px;
+        }
+
+        .display-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--element-bg);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .display-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--text-secondary);
+            border: none;
+            padding: 0;
+            flex-grow: 1;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-button {
+            background-color: var(--btn-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: background-color .2s;
+        }
+
+        .add-button:hover {
+            background-color: var(--btn-green-hover);
+        }
+
+        .delete-button {
+            background-color: var(--btn-red);
+        }
+
+        .delete-button:hover {
+            background-color: var(--btn-red-hover);
+        }
+
+        .item-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: var(--element-bg);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: background-color .2s, transform .2s;
+            color: var(--text-secondary);
+        }
+
+        .item-container:hover {
+            background-color: var(--element-bg-hover);
+            transform: translateX(5px);
+        }
+
+        .item-name {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .edit-icon,
+        .delete-icon,
+        .unfavorite-icon {
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 5px;
+            transition: color .2s, transform .2s;
+        }
+
+        .edit-icon:hover {
+            color: var(--primary-accent);
+        }
+
+        .delete-icon:hover {
+            color: var(--btn-red);
+        }
+
+        .unfavorite-icon {
+            color: var(--star-yellow);
+            font-size: 18px;
+            padding: 8px;
+        }
+
+        .unfavorite-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .initial-message {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 18px;
+            padding: 40px;
+        }
+
+        .prompt-detail-view {
+            color: var(--text-secondary);
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            color: var(--text-primary);
+        }
+
+        .prompt-actions-toolbar {
+            display: flex;
+            gap: 15px;
+        }
+
+        .prompt-actions-toolbar i {
+            cursor: pointer;
+            font-size: 18px;
+            transition: color .2s;
+        }
+
+        .prompt-actions-toolbar i:hover {
+            color: var(--text-primary);
+        }
+
+        .prompt-actions-toolbar i.is-favorite {
+            color: var(--star-yellow);
+        }
+
+        .prompt-title-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .prompt-title-section h1 {
+            margin: 0;
+            font-size: 32px;
+            color: var(--text-primary);
+        }
+
+        .prompt-title-section h1[contenteditable="true"] {
+            outline: 2px dashed var(--primary-accent);
+            padding: 0 10px;
+            border-radius: 5px;
+        }
+
+        #title-actions i {
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-muted);
+            transition: color .2s;
+        }
+
+        #title-actions i:hover {
+            color: var(--text-primary);
+        }
+
+        #btnSaveTitle {
+            display: none;
+        }
+
+        .prompt-description-container {
+            background-color: rgba(0, 0, 0, .2);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .prompt-description-container a {
+            color: var(--star-yellow);
+        }
+
+        .prompt-description-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin: 10px 0;
+            display: block;
+            cursor: pointer;
+        }
+
+        .prompt-description-container[contenteditable="true"] {
+            outline: 2px dashed var(--primary-accent);
+            background-color: var(--background-dark);
+        }
+
+        .formatting-toolbar {
+            margin-bottom: 10px;
+            display: none;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .formatting-toolbar.show {
+            display: flex;
+        }
+
+        .formatting-toolbar button {
+            background: var(--element-bg);
+            border: none;
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .formatting-toolbar button:hover {
+            background: var(--element-bg-hover);
+        }
+
+        .formatting-toolbar button i {
+            font-size: 16px;
+        }
+
+        #btnSaveChanges {
+            background-color: var(--primary-accent);
+            display: none;
+            margin-left: auto;
+        }
+
+        #btnSaveChanges.show {
+            display: inline-block;
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--element-bg);
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        .color-picker-wrapper:hover {
+            background-color: var(--element-bg-hover);
+        }
+
+        .color-picker-wrapper i {
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .search-result-path {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .search-result-title {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        mark {
+            background-color: var(--star-yellow);
+            color: #121417;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
+
         /* Stili per i modali */
-        .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-overlay.show { display: flex; }
-        .modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; }
-        #link-modal-content, #image-modal-content { max-width: 450px; }
-        #add-prompt-modal-content { max-width: 800px; }
-        #merge-modal-content { max-width: 700px; }
-        .modal-content h3 { margin-top: 0; color: var(--text-primary); }
-        #link-url-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
-        #image-preview-container { margin: 15px 0; min-height: 100px; border: 2px dashed var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #image-preview { max-width: 100%; max-height: 200px; display: none; }
-        #image-preview.show { display: block; }
-        #add-prompt-modal-content .formatting-toolbar { display: flex; }
-        #add-prompt-modal-content .prompt-description-container { min-height: 250px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
-        .modal-cancel-btn { background-color: var(--element-bg); color: var(--text-secondary); }
-        .modal-confirm-btn { background-color: var(--primary-accent); color: var(--text-primary); }
-        .modal-confirm-btn:disabled { background-color: #555; cursor: not-allowed; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, .7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--container-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+            width: 90%;
+        }
+
+        #link-modal-content,
+        #image-modal-content {
+            max-width: 450px;
+        }
+
+        #add-prompt-modal-content {
+            max-width: 800px;
+        }
+
+        #merge-modal-content {
+            max-width: 700px;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+        }
+
+        #link-url-input {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--element-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        #image-preview-container {
+            margin: 15px 0;
+            min-height: 100px;
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            max-height: 200px;
+            display: none;
+        }
+
+        #image-preview.show {
+            display: block;
+        }
+
+        #add-prompt-modal-content .formatting-toolbar {
+            display: flex;
+        }
+
+        #add-prompt-modal-content .prompt-description-container {
+            min-height: 250px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .modal-cancel-btn {
+            background-color: var(--element-bg);
+            color: var(--text-secondary);
+        }
+
+        .modal-confirm-btn {
+            background-color: var(--primary-accent);
+            color: var(--text-primary);
+        }
+
+        .modal-confirm-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
 
         /* Stili specifici per il modale di accorpamento */
-        #merge-selection-container { display: flex; gap: 20px; }
-        .merge-column { flex: 1; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
-        .merge-column h4 { margin-top: 0; color: var(--text-secondary); }
-        #merge-source-list, #merge-destination-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .merge-column label { display: block; padding: 8px; border-radius: 4px; cursor: pointer; transition: background-color .2s; }
-        .merge-column label:hover { background-color: var(--element-bg-hover); }
-        .merge-column label.disabled { cursor: not-allowed; opacity: 0.5; text-decoration: line-through; }
-        .merge-column input { margin-right: 10px; }
+        #merge-selection-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .merge-column {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .merge-column h4 {
+            margin-top: 0;
+            color: var(--text-secondary);
+        }
+
+        #merge-source-list,
+        #merge-destination-list {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .merge-column label {
+            display: block;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color .2s;
+        }
+
+        .merge-column label:hover {
+            background-color: var(--element-bg-hover);
+        }
+
+        .merge-column label.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .merge-column input {
+            margin-right: 10px;
+        }
     </style>
 </head>
+
 <body>
-<header class="app-header">
-    <div class="header-left"><div class="logo">PS</div></div>
-    <div class="header-center">
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass" id="search-icon"></i>
-            <input type="text" id="search-input" placeholder="Cerca per titolo, categoria o sottocategoria…">
+    <header class="app-header">
+        <div class="header-left">
+            <div class="logo">PS</div>
         </div>
-    </div>
-    <div class="header-right">
-        <button class="tool-button" id="themeBtn"><i class="fa-solid fa-palette"></i><span>Tema</span></button>
-        <div class="dropdown-menu" id="themeMenu">
-            <button data-theme="dark">Dark</button>
-            <button data-theme="light">Light</button>
-            <button data-theme="blue">Blue</button>
-        </div>
-        <button class="tool-button" id="toolBtn"><i class="fa-solid fa-screwdriver-wrench"></i><span>Tool</span></button>
-        <div class="dropdown-menu" id="toolMenu">
-            <button class="toolbar-btn btn-yellow" id="btnAnnulla"><i class="fa-solid fa-arrow-rotate-left"></i><span>Annulla</span></button>
-            <button class="toolbar-btn btn-yellow" id="btnRipristina"><i class="fa-solid fa-arrow-rotate-right"></i><span>Ripristina</span></button>
-            <button class="toolbar-btn btn-blue" id="btnBackup"><i class="fa-solid fa-download"></i><span>Backup</span></button>
-            <button class="toolbar-btn btn-dark-blue" id="btnImporta"><i class="fa-solid fa-upload"></i><span>Importa</span></button>
-            <button class="toolbar-btn btn-purple" id="btnMerge"><i class="fa-solid fa-object-group"></i><span>Accorpa</span></button>
-        </div>
-    </div>
-</header>
-
-<input type="file" id="backupInput" style="display:none" accept=".json,.txt" />
-
-<main class="content-container">
-    <div class="selection-container" id="selection-panel" style="display:none">
-        <div class="panel-header">
-            <h2>Categorie</h2>
-            <button class="add-button-inline" id="add-category-inline-btn"><i class="fa-solid fa-plus"></i> Aggiungi categoria</button>
-        </div>
-        <div id="category-buttons-container"></div>
-    </div>
-    <div id="display-area"><div class="initial-message"><p>Caricamento dati...</p></div></div>
-</main>
-
-<!-- Modali -->
-<div id="link-modal-overlay" class="modal-overlay">
-    <div id="link-modal-content" class="modal-content">
-        <h3>Inserisci URL</h3>
-        <input type="url" id="link-url-input" placeholder="https://esempio.com" />
-        <div class="modal-actions">
-            <button id="link-modal-cancel" class="modal-cancel-btn">Annulla</button>
-            <button id="link-modal-confirm" class="modal-confirm-btn">Conferma</button>
-        </div>
-    </div>
-</div>
-
-<div id="image-modal-overlay" class="modal-overlay">
-    <div id="image-modal-content" class="modal-content">
-        <h3>Carica Immagine</h3>
-        <input type="file" id="image-upload-input" accept="image/*" />
-        <div id="image-preview-container">
-            <img id="image-preview" alt="Anteprima immagine" />
-        </div>
-        <div class="modal-actions">
-            <button id="image-modal-cancel" class="modal-cancel-btn">Annulla</button>
-            <button id="image-modal-confirm" class="modal-confirm-btn">Conferma</button>
-        </div>
-    </div>
-</div>
-
-<div id="add-prompt-modal-overlay" class="modal-overlay">
-    <div id="add-prompt-modal-content" class="modal-content">
-        <h3>Nuovo Prompt</h3>
-        <div class="formatting-toolbar">
-             <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
-            <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
-            <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
-            <button data-command="insertUnorderedList" title="Elenco puntato"><i class="fa-solid fa-list-ul"></i></button>
-            <button class="create-link-btn" title="Crea Link"><i class="fa-solid fa-link"></i></button>
-            <button class="unlink-btn" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
-            <button class="insert-image-btn" title="Inserisci Immagine"><i class="fa-solid fa-image"></i></button>
-            <button class="increase-font-btn" title="Aumenta testo"><i class="fa-solid fa-plus"></i></button>
-            <button class="decrease-font-btn" title="Riduci testo"><i class="fa-solid fa-minus"></i></button>
-            <div class="color-picker-wrapper" title="Colore testo">
-                <i class="fa-solid fa-palette"></i><input type="color" class="font-color-picker">
-            </div>
-            <button data-command="removeFormat" title="Rimuovi formattazione colore"><i class="fa-solid fa-eraser"></i></button>
-        </div>
-        <div class="prompt-description-container" contenteditable="true" id="add-prompt-description-editor"></div>
-        <div class="modal-actions">
-            <button id="add-prompt-modal-cancel" class="modal-cancel-btn">Annulla</button>
-            <button id="add-prompt-modal-confirm" class="modal-confirm-btn">Conferma</button>
-        </div>
-    </div>
-</div>
-
-<div id="merge-modal-overlay" class="modal-overlay">
-    <div id="merge-modal-content" class="modal-content">
-        <h3>Accorpa Categorie</h3>
-        <div id="merge-selection-container">
-            <div class="merge-column">
-                <h4>Categorie da unire (Sorgenti)</h4>
-                <div id="merge-source-list"></div>
-            </div>
-            <div class="merge-column">
-                <h4>Categoria di destinazione</h4>
-                <div id="merge-destination-list"></div>
+        <div class="header-center">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass" id="search-icon"></i>
+                <input type="text" id="search-input" placeholder="Cerca per titolo, categoria o sottocategoria…">
             </div>
         </div>
-        <div class="modal-actions">
-            <button id="merge-modal-cancel" class="modal-cancel-btn">Annulla</button>
-            <button id="merge-modal-confirm" class="modal-confirm-btn" disabled>Accorpa</button>
+        <div class="header-right">
+            <button class="tool-button" id="themeBtn"><i class="fa-solid fa-palette"></i><span>Tema</span></button>
+            <div class="dropdown-menu" id="themeMenu">
+                <button data-theme="dark">Dark</button>
+                <button data-theme="light">Light</button>
+                <button data-theme="blue">Blue</button>
+            </div>
+            <button class="tool-button" id="toolBtn"><i class="fa-solid fa-screwdriver-wrench"></i><span>Tool</span></button>
+            <div class="dropdown-menu" id="toolMenu">
+                <button class="toolbar-btn btn-yellow" id="btnAnnulla"><i class="fa-solid fa-arrow-rotate-left"></i><span>Annulla</span></button>
+                <button class="toolbar-btn btn-yellow" id="btnRipristina"><i class="fa-solid fa-arrow-rotate-right"></i><span>Ripristina</span></button>
+                <button class="toolbar-btn btn-blue" id="btnBackup"><i class="fa-solid fa-download"></i><span>Backup</span></button>
+                <button class="toolbar-btn btn-dark-blue" id="btnImporta"><i class="fa-solid fa-upload"></i><span>Importa</span></button>
+                <button class="toolbar-btn btn-purple" id="btnMerge"><i class="fa-solid fa-object-group"></i><span>Accorpa</span></button>
+            </div>
+        </div>
+    </header>
+
+    <input type="file" id="backupInput" style="display:none" accept=".json,.txt" />
+
+    <main class="content-container">
+        <div class="selection-container" id="selection-panel" style="display:none">
+            <div class="panel-header">
+                <h2>Categorie</h2>
+                <button class="add-button-inline" id="add-category-inline-btn"><i class="fa-solid fa-plus"></i> Aggiungi categoria</button>
+            </div>
+            <div id="category-buttons-container"></div>
+        </div>
+        <div id="display-area">
+            <div class="initial-message">
+                <p>Caricamento dati...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modali -->
+    <div id="link-modal-overlay" class="modal-overlay">
+        <div id="link-modal-content" class="modal-content">
+            <h3>Inserisci URL</h3>
+            <input type="url" id="link-url-input" placeholder="https://esempio.com" />
+            <div class="modal-actions">
+                <button id="link-modal-cancel" class="modal-cancel-btn">Annulla</button>
+                <button id="link-modal-confirm" class="modal-confirm-btn">Conferma</button>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-(async () => {
-    /*** Helpers ***/
-    const normalizeStr = (s = "") =>
-        s.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    const escapeRegExp = (s = "") => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    <div id="image-modal-overlay" class="modal-overlay">
+        <div id="image-modal-content" class="modal-content">
+            <h3>Carica Immagine</h3>
+            <input type="file" id="image-upload-input" accept="image/*" />
+            <div id="image-preview-container">
+                <img id="image-preview" alt="Anteprima immagine" />
+            </div>
+            <div class="modal-actions">
+                <button id="image-modal-cancel" class="modal-cancel-btn">Annulla</button>
+                <button id="image-modal-confirm" class="modal-confirm-btn">Conferma</button>
+            </div>
+        </div>
+    </div>
 
-    /*** DB ***/
-    const Database = {
-        DB_NAME: "PromptManagerDB_v10",
-        STORE_NAME: "promptsData",
-        DB_VERSION: 1,
-        db: null,
-        async init() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
-                request.onerror = e => reject("Errore IndexedDB: " + e.target.errorCode);
-                request.onsuccess = e => { this.db = e.target.result; resolve(this.db); };
-                request.onupgradeneeded = e => {
-                    if (!e.target.result.objectStoreNames.contains(this.STORE_NAME)) {
-                        e.target.result.createObjectStore(this.STORE_NAME, { keyPath: "id" });
-                    }
-                };
-            });
-        },
-        async save(data) {
-            return new Promise((resolve, reject) => {
-                if (!this.db) return reject("DB non inizializzato.");
-                const tx = this.db.transaction([this.STORE_NAME], "readwrite");
-                tx.objectStore(this.STORE_NAME).put({ id: "main", data });
-                tx.oncomplete = () => resolve();
-                tx.onerror = e => reject("Errore salvataggio: " + e.target.error);
-            });
-        },
-        async load() {
-            return new Promise((resolve, reject) => {
-                if (!this.db) return reject("DB non inizializzato.");
-                const req = this.db.transaction([this.STORE_NAME], "readonly").objectStore(this.STORE_NAME).get("main");
-                req.onsuccess = e => resolve(e.target.result ? e.target.result.data : []);
-                req.onerror = e => reject("Errore caricamento: " + e.target.error);
-            });
-        }
-    };
+    <div id="add-prompt-modal-overlay" class="modal-overlay">
+        <div id="add-prompt-modal-content" class="modal-content">
+            <h3>Nuovo Prompt</h3>
+            <div class="formatting-toolbar">
+                <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+                <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+                <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
+                <button data-command="insertUnorderedList" title="Elenco puntato"><i class="fa-solid fa-list-ul"></i></button>
+                <button class="create-link-btn" title="Crea Link"><i class="fa-solid fa-link"></i></button>
+                <button class="unlink-btn" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
+                <button class="insert-image-btn" title="Inserisci Immagine"><i class="fa-solid fa-image"></i></button>
+                <button class="increase-font-btn" title="Aumenta testo"><i class="fa-solid fa-plus"></i></button>
+                <button class="decrease-font-btn" title="Riduci testo"><i class="fa-solid fa-minus"></i></button>
+                <div class="color-picker-wrapper" title="Colore testo">
+                    <i class="fa-solid fa-palette"></i><input type="color" class="font-color-picker">
+                </div>
+                <button data-command="removeFormat" title="Rimuovi formattazione colore"><i class="fa-solid fa-eraser"></i></button>
+            </div>
+            <div class="prompt-description-container" contenteditable="true" id="add-prompt-description-editor"></div>
+            <div class="modal-actions">
+                <button id="add-prompt-modal-cancel" class="modal-cancel-btn">Annulla</button>
+                <button id="add-prompt-modal-confirm" class="modal-confirm-btn">Conferma</button>
+            </div>
+        </div>
+    </div>
 
-    /*** Stato ***/
-    let state = { allData: [], history: [], redoStack: [], activeCategoryId: null, recents: [] };
-    let savedSelectionRange = null;
-    let addPromptEditorInitialized = false;
+    <div id="merge-modal-overlay" class="modal-overlay">
+        <div id="merge-modal-content" class="modal-content">
+            <h3>Accorpa Categorie</h3>
+            <div id="merge-selection-container">
+                <div class="merge-column">
+                    <h4>Categorie da unire (Sorgenti)</h4>
+                    <div id="merge-source-list"></div>
+                </div>
+                <div class="merge-column">
+                    <h4>Categoria di destinazione</h4>
+                    <div id="merge-destination-list"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="merge-modal-cancel" class="modal-cancel-btn">Annulla</button>
+                <button id="merge-modal-confirm" class="modal-confirm-btn" disabled>Accorpa</button>
+            </div>
+        </div>
+    </div>
 
-    /*** Elementi ***/
-    const toolBtn = document.getElementById("toolBtn");
-    const toolMenu = document.getElementById("toolMenu");
-    const themeBtn = document.getElementById("themeBtn");
-    const themeMenu = document.getElementById("themeMenu");
-    const importBtn = document.getElementById("btnImporta");
-    const backupInput = document.getElementById("backupInput");
-    const selectionPanel = document.getElementById("selection-panel");
-    const categoryButtonsContainer = document.getElementById("category-buttons-container");
-    const displayArea = document.getElementById("display-area");
-    const btnAnnulla = document.getElementById("btnAnnulla");
-    const btnRipristina = document.getElementById("btnRipristina");
-    const btnBackup = document.getElementById("btnBackup");
-    const searchInput = document.getElementById("search-input");
-    const searchIcon = document.getElementById("search-icon");
-    const btnMerge = document.getElementById("btnMerge");
+    <script>
+        (async () => {
+            /*** Helpers ***/
+            const normalizeStr = (s = "") =>
+                s.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            const escapeRegExp = (s = "") => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-
-    /*** Gestione Tema ***/
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('promptManagerTheme', theme);
-    }
-    function loadTheme() {
-        const savedTheme = localStorage.getItem('promptManagerTheme') || 'dark';
-        applyTheme(savedTheme);
-    }
-    loadTheme();
-
-    /*** Undo/Redo ***/
-    function updateUndoRedoButtons() {
-        if (btnAnnulla) btnAnnulla.disabled = state.history.length === 0;
-        if (btnRipristina) btnRipristina.disabled = state.redoStack.length === 0;
-    }
-    async function updateStateAndSave(newData, options = { saveHistory: true }) {
-        if (options.saveHistory) {
-            state.redoStack = [];
-            state.history.push(JSON.parse(JSON.stringify(state.allData)));
-            if (state.history.length > 30) state.history.shift();
-        }
-        state.allData = newData;
-        await Database.save(state.allData);
-        updateUndoRedoButtons();
-        const term = normalizeStr(searchInput?.value || "");
-        if (term) performSearch(term);
-        else renderUI();
-    }
-    async function performUndo() {
-        if (state.history.length > 0) {
-            state.redoStack.push(JSON.parse(JSON.stringify(state.allData)));
-            await updateStateAndSave(state.history.pop(), { saveHistory: false });
-        }
-    }
-    async function performRedo() {
-        if (state.redoStack.length > 0) {
-            state.history.push(JSON.parse(JSON.stringify(state.allData)));
-            await updateStateAndSave(state.redoStack.pop(), { saveHistory: false });
-        }
-    }
-    
-    /*** Logica Editor Riutilizzabile ***/
-    function attachEditorLogic(containerEl) {
-        const descriptionContainer = containerEl.querySelector('.prompt-description-container[contenteditable="true"]');
-        if (!descriptionContainer) return;
-
-        descriptionContainer.addEventListener('paste', (e) => {
-            e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-            const selection = window.getSelection();
-            if (!selection.rangeCount) return;
-            const range = selection.getRangeAt(0);
-            range.deleteContents();
-            const textNode = document.createTextNode(text);
-            range.insertNode(textNode);
-            range.setStartAfter(textNode);
-            range.setEndAfter(textNode);
-            selection.removeAllRanges();
-            selection.addRange(range);
-        });
-
-        containerEl.querySelectorAll(".formatting-toolbar button[data-command]").forEach(btn => {
-            btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };
-        });
-
-        const createLinkBtn = containerEl.querySelector(".create-link-btn");
-        const unlinkBtn = containerEl.querySelector(".unlink-btn");
-        const insertImageBtn = containerEl.querySelector(".insert-image-btn");
-        const increaseFontBtn = containerEl.querySelector(".increase-font-btn");
-        const decreaseFontBtn = containerEl.querySelector(".decrease-font-btn");
-        const colorPicker = containerEl.querySelector(".font-color-picker");
-        const linkModalOverlay = document.getElementById("link-modal-overlay");
-        const linkUrlInput = document.getElementById("link-url-input");
-        const linkConfirmBtn = document.getElementById("link-modal-confirm");
-        const linkCancelBtn = document.getElementById("link-modal-cancel");
-        const imageModalOverlay = document.getElementById("image-modal-overlay");
-        const imageUploadInput = document.getElementById("image-upload-input");
-        const imagePreview = document.getElementById("image-preview");
-        const imageConfirmBtn = document.getElementById("image-modal-confirm");
-        const imageCancelBtn = document.getElementById("image-modal-cancel");
-
-        if(createLinkBtn) createLinkBtn.onclick = (e) => {
-            e.preventDefault();
-            const selection = window.getSelection();
-            if (selection.rangeCount === 0 || selection.toString().trim() === "") { alert("Prima seleziona il testo da trasformare in link."); return; }
-            savedSelectionRange = selection.getRangeAt(0).cloneRange();
-            linkModalOverlay.classList.add("show");
-            linkUrlInput.value = "https://";
-            linkUrlInput.focus();
-        };
-
-        if(unlinkBtn) unlinkBtn.onclick = (e) => { e.preventDefault(); document.execCommand("unlink", false, null); descriptionContainer.focus(); };
-
-        const closeLinkModal = () => { linkModalOverlay.classList.remove("show"); savedSelectionRange = null; };
-        linkConfirmBtn.onclick = () => {
-            const url = linkUrlInput.value.trim();
-            if (url && savedSelectionRange) {
-                descriptionContainer.focus();
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(savedSelectionRange);
-                document.execCommand("createLink", false, url);
-            }
-            closeLinkModal();
-        };
-        linkCancelBtn.onclick = closeLinkModal;
-        linkModalOverlay.onclick = (e) => { if (e.target === linkModalOverlay) closeLinkModal(); };
-        
-        const resetImageModal = () => { imageUploadInput.value = null; imagePreview.src = ""; imagePreview.classList.remove("show"); };
-        if(insertImageBtn) insertImageBtn.onclick = (e) => {
-            e.preventDefault();
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) savedSelectionRange = selection.getRangeAt(0).cloneRange();
-            imageModalOverlay.classList.add("show");
-        };
-
-        imageUploadInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => { imagePreview.src = event.target.result; imagePreview.classList.add("show"); };
-                reader.readAsDataURL(file);
-            }
-        };
-
-        const closeImageModal = () => { imageModalOverlay.classList.remove("show"); resetImageModal(); savedSelectionRange = null; };
-        imageConfirmBtn.onclick = () => {
-            const imgSrc = imagePreview.src;
-            if (imgSrc && savedSelectionRange) {
-                descriptionContainer.focus();
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(savedSelectionRange);
-                const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
-                document.execCommand("insertHTML", false, imgTag);
-            }
-            closeImageModal();
-        };
-        imageCancelBtn.onclick = closeImageModal;
-        imageModalOverlay.onclick = (e) => { if (e.target === imageModalOverlay) closeImageModal(); };
-        
-        const getCurrentFontSize = () => {
-            const sel = window.getSelection();
-            if (!sel.rangeCount) return 3;
-            let p = sel.getRangeAt(0).commonAncestorContainer;
-            if (p.nodeType === 3) p = p.parentNode;
-            while (p && p.tagName !== "FONT" && p !== descriptionContainer) p = p.parentNode;
-            return (p && p.tagName === "FONT" && p.size) ? parseInt(p.size, 10) : 3;
-        };
-
-        const changeFontSize = (dir) => {
-            let s = getCurrentFontSize();
-            let newS = (dir === "increase") ? Math.min(7, s + 1) : Math.max(1, s - 1);
-            document.execCommand("fontSize", false, newS);
-            descriptionContainer.focus();
-        };
-
-        if(increaseFontBtn) increaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("increase"); };
-        if(decreaseFontBtn) decreaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("decrease"); };
-        if(colorPicker) colorPicker.addEventListener("input", (e) => document.execCommand("foreColor", false, e.target.value));
-    }
-
-    /*** Render ***/
-    function renderUI() {
-        selectionPanel.style.display = "block";
-        renderCategories();
-
-        if (state.activeCategoryId === 'favorites') {
-            displayFavorites();
-        } else if (state.activeCategoryId === 'recents') {
-            displayRecents();
-        } else {
-            const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
-            if (activeCategory) {
-                displaySubcategoryList(activeCategory);
-            } else {
-                if (state.allData && state.allData.length > 0) {
-                    displayArea.innerHTML = '<div class="initial-message"><p>Seleziona una categoria.</p></div>';
-                } else {
-                    displayArea.innerHTML = '<div class="initial-message"><p>Nessuna categoria definita. Aggiungi una categoria o importa un file di backup.</p></div>';
+            /*** DB ***/
+            const Database = {
+                DB_NAME: "PromptManagerDB_v10",
+                STORE_NAME: "promptsData",
+                DB_VERSION: 1,
+                db: null,
+                async init() {
+                    return new Promise((resolve, reject) => {
+                        const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                        request.onerror = e => reject("Errore IndexedDB: " + e.target.errorCode);
+                        request.onsuccess = e => {
+                            this.db = e.target.result;
+                            resolve(this.db);
+                        };
+                        request.onupgradeneeded = e => {
+                            if (!e.target.result.objectStoreNames.contains(this.STORE_NAME)) {
+                                e.target.result.createObjectStore(this.STORE_NAME, {
+                                    keyPath: "id"
+                                });
+                            }
+                        };
+                    });
+                },
+                async save(data) {
+                    return new Promise((resolve, reject) => {
+                        if (!this.db) return reject("DB non inizializzato.");
+                        const tx = this.db.transaction([this.STORE_NAME], "readwrite");
+                        tx.objectStore(this.STORE_NAME).put({
+                            id: "main",
+                            data
+                        });
+                        tx.oncomplete = () => resolve();
+                        tx.onerror = e => reject("Errore salvataggio: " + e.target.error);
+                    });
+                },
+                async load() {
+                    return new Promise((resolve, reject) => {
+                        if (!this.db) return reject("DB non inizializzato.");
+                        const req = this.db.transaction([this.STORE_NAME], "readonly").objectStore(this.STORE_NAME).get("main");
+                        req.onsuccess = e => resolve(e.target.result ? e.target.result.data : []);
+                        req.onerror = e => reject("Errore caricamento: " + e.target.error);
+                    });
                 }
-            }
-        }
-        updateUndoRedoButtons();
-    }
-
-    function renderCategories() {
-        categoryButtonsContainer.innerHTML = "";
-
-        const createPill = (text, id, isStandard = false) => {
-            const button = document.createElement("button");
-            button.className = "category-pill";
-            if (id === state.activeCategoryId) button.classList.add("active");
-          
-            const textSpan = document.createElement('span');
-            textSpan.textContent = text;
-            button.appendChild(textSpan);
-
-            button.onclick = (e) => {
-                if (e.target.tagName === 'I') return;
-                state.activeCategoryId = id;
-                renderUI();
             };
 
-            if (!isStandard) {
-                const editIcon = document.createElement('i');
-                editIcon.className = 'fa-solid fa-pencil edit-icon';
-                editIcon.title = 'Modifica nome categoria';
-                editIcon.onclick = (e) => {
-                    e.stopPropagation();
-                    editCategory(id);
-                };
-                button.appendChild(editIcon);
+            /*** Stato ***/
+            let state = {
+                allData: [],
+                history: [],
+                redoStack: [],
+                activeCategoryId: null,
+                recents: []
+            };
+            let savedSelectionRange = null;
+            let addPromptEditorInitialized = false;
+
+            /*** Elementi ***/
+            const toolBtn = document.getElementById("toolBtn");
+            const toolMenu = document.getElementById("toolMenu");
+            const themeBtn = document.getElementById("themeBtn");
+            const themeMenu = document.getElementById("themeMenu");
+            const importBtn = document.getElementById("btnImporta");
+            const backupInput = document.getElementById("backupInput");
+            const selectionPanel = document.getElementById("selection-panel");
+            const categoryButtonsContainer = document.getElementById("category-buttons-container");
+            const displayArea = document.getElementById("display-area");
+            const btnAnnulla = document.getElementById("btnAnnulla");
+            const btnRipristina = document.getElementById("btnRipristina");
+            const btnBackup = document.getElementById("btnBackup");
+            const searchInput = document.getElementById("search-input");
+            const searchIcon = document.getElementById("search-icon");
+            const btnMerge = document.getElementById("btnMerge");
+
+
+            /*** Gestione Tema ***/
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('promptManagerTheme', theme);
             }
-            return button;
-        };
 
-        categoryButtonsContainer.appendChild(createPill("Preferiti", "favorites", true));
-        categoryButtonsContainer.appendChild(createPill("Recenti", "recents", true));
+            function loadTheme() {
+                const savedTheme = localStorage.getItem('promptManagerTheme') || 'dark';
+                applyTheme(savedTheme);
+            }
+            loadTheme();
 
-        state.allData.forEach(category => {
-            categoryButtonsContainer.appendChild(createPill(category.name, category.id));
-        });
-    }
+            /*** Undo/Redo ***/
+            function updateUndoRedoButtons() {
+                if (btnAnnulla) btnAnnulla.disabled = state.history.length === 0;
+                if (btnRipristina) btnRipristina.disabled = state.redoStack.length === 0;
+            }
+            async function updateStateAndSave(newData, options = {
+                saveHistory: true
+            }) {
+                if (options.saveHistory) {
+                    state.redoStack = [];
+                    state.history.push(JSON.parse(JSON.stringify(state.allData)));
+                    if (state.history.length > 30) state.history.shift();
+                }
+                state.allData = newData;
+                await Database.save(state.allData);
+                updateUndoRedoButtons();
+                const term = normalizeStr(searchInput?.value || "");
+                if (term) performSearch(term);
+                else renderUI();
+            }
+            async function performUndo() {
+                if (state.history.length > 0) {
+                    state.redoStack.push(JSON.parse(JSON.stringify(state.allData)));
+                    await updateStateAndSave(state.history.pop(), {
+                        saveHistory: false
+                    });
+                }
+            }
+            async function performRedo() {
+                if (state.redoStack.length > 0) {
+                    state.history.push(JSON.parse(JSON.stringify(state.allData)));
+                    await updateStateAndSave(state.redoStack.pop(), {
+                        saveHistory: false
+                    });
+                }
+            }
 
-    function displayFavorites() {
-        const favoritePrompts = [];
-        state.allData.forEach(cat => {
-            cat.subcategories?.forEach(sub => {
-                sub.prompts?.forEach(p => {
-                    if (p.favorite) {
-                        favoritePrompts.push({ prompt: p, subcategory: sub, category: cat });
-                    }
+            /*** Logica Editor Riutilizzabile ***/
+            function attachEditorLogic(containerEl) {
+                const descriptionContainer = containerEl.querySelector('.prompt-description-container[contenteditable="true"]');
+                if (!descriptionContainer) return;
+
+                descriptionContainer.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                    const selection = window.getSelection();
+                    if (!selection.rangeCount) return;
+                    const range = selection.getRangeAt(0);
+                    range.deleteContents();
+                    const textNode = document.createTextNode(text);
+                    range.insertNode(textNode);
+                    range.setStartAfter(textNode);
+                    range.setEndAfter(textNode);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
                 });
-            });
-        });
 
-        displayArea.innerHTML = `
+                containerEl.querySelectorAll(".formatting-toolbar button[data-command]").forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.preventDefault();
+                        document.execCommand(btn.dataset.command, false, null);
+                        descriptionContainer.focus();
+                    };
+                });
+
+                const createLinkBtn = containerEl.querySelector(".create-link-btn");
+                const unlinkBtn = containerEl.querySelector(".unlink-btn");
+                const insertImageBtn = containerEl.querySelector(".insert-image-btn");
+                const increaseFontBtn = containerEl.querySelector(".increase-font-btn");
+                const decreaseFontBtn = containerEl.querySelector(".decrease-font-btn");
+                const colorPicker = containerEl.querySelector(".font-color-picker");
+                const linkModalOverlay = document.getElementById("link-modal-overlay");
+                const linkUrlInput = document.getElementById("link-url-input");
+                const linkConfirmBtn = document.getElementById("link-modal-confirm");
+                const linkCancelBtn = document.getElementById("link-modal-cancel");
+                const imageModalOverlay = document.getElementById("image-modal-overlay");
+                const imageUploadInput = document.getElementById("image-upload-input");
+                const imagePreview = document.getElementById("image-preview");
+                const imageConfirmBtn = document.getElementById("image-modal-confirm");
+                const imageCancelBtn = document.getElementById("image-modal-cancel");
+
+                if (createLinkBtn) createLinkBtn.onclick = (e) => {
+                    e.preventDefault();
+                    const selection = window.getSelection();
+                    if (selection.rangeCount === 0 || selection.toString().trim() === "") {
+                        alert("Prima seleziona il testo da trasformare in link.");
+                        return;
+                    }
+                    savedSelectionRange = selection.getRangeAt(0).cloneRange();
+                    linkModalOverlay.classList.add("show");
+                    linkUrlInput.value = "https://";
+                    linkUrlInput.focus();
+                };
+
+                if (unlinkBtn) unlinkBtn.onclick = (e) => {
+                    e.preventDefault();
+                    document.execCommand("unlink", false, null);
+                    descriptionContainer.focus();
+                };
+
+                const closeLinkModal = () => {
+                    linkModalOverlay.classList.remove("show");
+                    savedSelectionRange = null;
+                };
+                linkConfirmBtn.onclick = () => {
+                    const url = linkUrlInput.value.trim();
+                    if (url && savedSelectionRange) {
+                        descriptionContainer.focus();
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(savedSelectionRange);
+                        document.execCommand("createLink", false, url);
+                    }
+                    closeLinkModal();
+                };
+                linkCancelBtn.onclick = closeLinkModal;
+                linkModalOverlay.onclick = (e) => {
+                    if (e.target === linkModalOverlay) closeLinkModal();
+                };
+
+                const resetImageModal = () => {
+                    imageUploadInput.value = null;
+                    imagePreview.src = "";
+                    imagePreview.classList.remove("show");
+                };
+                if (insertImageBtn) insertImageBtn.onclick = (e) => {
+                    e.preventDefault();
+                    const selection = window.getSelection();
+                    if (selection.rangeCount > 0) savedSelectionRange = selection.getRangeAt(0).cloneRange();
+                    imageModalOverlay.classList.add("show");
+                };
+
+                imageUploadInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            imagePreview.src = event.target.result;
+                            imagePreview.classList.add("show");
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+
+                const closeImageModal = () => {
+                    imageModalOverlay.classList.remove("show");
+                    resetImageModal();
+                    savedSelectionRange = null;
+                };
+                imageConfirmBtn.onclick = () => {
+                    const imgSrc = imagePreview.src;
+                    if (imgSrc && savedSelectionRange) {
+                        descriptionContainer.focus();
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(savedSelectionRange);
+                        const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
+                        document.execCommand("insertHTML", false, imgTag);
+                    }
+                    closeImageModal();
+                };
+                imageCancelBtn.onclick = closeImageModal;
+                imageModalOverlay.onclick = (e) => {
+                    if (e.target === imageModalOverlay) closeImageModal();
+                };
+
+                const getCurrentFontSize = () => {
+                    const sel = window.getSelection();
+                    if (!sel.rangeCount) return 3;
+                    let p = sel.getRangeAt(0).commonAncestorContainer;
+                    if (p.nodeType === 3) p = p.parentNode;
+                    while (p && p.tagName !== "FONT" && p !== descriptionContainer) p = p.parentNode;
+                    return (p && p.tagName === "FONT" && p.size) ? parseInt(p.size, 10) : 3;
+                };
+
+                const changeFontSize = (dir) => {
+                    let s = getCurrentFontSize();
+                    let newS = (dir === "increase") ? Math.min(7, s + 1) : Math.max(1, s - 1);
+                    document.execCommand("fontSize", false, newS);
+                    descriptionContainer.focus();
+                };
+
+                if (increaseFontBtn) increaseFontBtn.onclick = (e) => {
+                    e.preventDefault();
+                    changeFontSize("increase");
+                };
+                if (decreaseFontBtn) decreaseFontBtn.onclick = (e) => {
+                    e.preventDefault();
+                    changeFontSize("decrease");
+                };
+                if (colorPicker) colorPicker.addEventListener("input", (e) => document.execCommand("foreColor", false, e.target.value));
+            }
+
+            /*** Render ***/
+            function renderUI() {
+                selectionPanel.style.display = "block";
+                renderCategories();
+
+                if (state.activeCategoryId === 'favorites') {
+                    displayFavorites();
+                } else if (state.activeCategoryId === 'recents') {
+                    displayRecents();
+                } else {
+                    const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
+                    if (activeCategory) {
+                        displaySubcategoryList(activeCategory);
+                    } else {
+                        if (state.allData && state.allData.length > 0) {
+                            displayArea.innerHTML = '<div class="initial-message"><p>Seleziona una categoria.</p></div>';
+                        } else {
+                            displayArea.innerHTML = '<div class="initial-message"><p>Nessuna categoria definita. Aggiungi una categoria o importa un file di backup.</p></div>';
+                        }
+                    }
+                }
+                updateUndoRedoButtons();
+            }
+
+            function renderCategories() {
+                categoryButtonsContainer.innerHTML = "";
+
+                const createPill = (text, id, isStandard = false) => {
+                    const button = document.createElement("button");
+                    button.className = "category-pill";
+                    if (id === state.activeCategoryId) button.classList.add("active");
+
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = text;
+                    button.appendChild(textSpan);
+
+                    button.onclick = (e) => {
+                        if (e.target.tagName === 'I') return;
+                        state.activeCategoryId = id;
+                        renderUI();
+                    };
+
+                    if (!isStandard) {
+                        const editIcon = document.createElement('i');
+                        editIcon.className = 'fa-solid fa-pencil edit-icon';
+                        editIcon.title = 'Modifica nome categoria';
+                        editIcon.onclick = (e) => {
+                            e.stopPropagation();
+                            editCategory(id);
+                        };
+                        button.appendChild(editIcon);
+                    }
+                    return button;
+                };
+
+                categoryButtonsContainer.appendChild(createPill("Preferiti", "favorites", true));
+                categoryButtonsContainer.appendChild(createPill("Recenti", "recents", true));
+
+                state.allData.forEach(category => {
+                    categoryButtonsContainer.appendChild(createPill(category.name, category.id));
+                });
+            }
+
+            function displayFavorites() {
+                const favoritePrompts = [];
+                state.allData.forEach(cat => {
+                    cat.subcategories?.forEach(sub => {
+                        sub.prompts?.forEach(p => {
+                            if (p.favorite) {
+                                favoritePrompts.push({
+                                    prompt: p,
+                                    subcategory: sub,
+                                    category: cat
+                                });
+                            }
+                        });
+                    });
+                });
+
+                displayArea.innerHTML = `
             <div class="display-header"><h3>Preferiti</h3></div>
             <div id="prompt-list"></div>`;
-        const listContainer = document.getElementById("prompt-list");
-        if (favoritePrompts.length === 0) {
-            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt aggiunto ai preferiti.</p></div>';
-            return;
-        }
-
-        favoritePrompts.forEach(item => {
-            const el = document.createElement("div");
-            el.className = "item-container";
-
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "item-name";
-            nameSpan.innerHTML = `<span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span><span class="search-result-title">${item.prompt.title}</span>`;
-            nameSpan.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, { origin: 'favorites' });
-
-            const unfavoriteIcon = document.createElement("i");
-            unfavoriteIcon.className = "fa-solid fa-star unfavorite-icon";
-            unfavoriteIcon.title = "Rimuovi dai preferiti";
-            unfavoriteIcon.onclick = async (e) => {
-                e.stopPropagation();
-              
-                const newData = JSON.parse(JSON.stringify(state.allData));
-                const promptToUpdate = newData
-                    .find(c => c.id === item.category.id)?.subcategories
-                    .find(s => s.id === item.subcategory.id)?.prompts
-                    .find(p => p.id === item.prompt.id);
-
-                if (promptToUpdate) {
-                    promptToUpdate.favorite = false;
-                    await updateStateAndSave(newData);
+                const listContainer = document.getElementById("prompt-list");
+                if (favoritePrompts.length === 0) {
+                    listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt aggiunto ai preferiti.</p></div>';
+                    return;
                 }
-            };
-          
-            el.append(nameSpan, unfavoriteIcon);
-            listContainer.appendChild(el);
-        });
-    }
 
-    function displayRecents() {
-        const recentPrompts = [];
-        const catMap = new Map(state.allData.map(c => [c.id, c]));
+                favoritePrompts.forEach(item => {
+                    const el = document.createElement("div");
+                    el.className = "item-container";
 
-        state.recents.forEach(r => {
-            const category = catMap.get(r.catId);
-            const subcategory = category?.subcategories.find(s => s.id === r.subId);
-            const prompt = subcategory?.prompts.find(p => p.id === r.promptId);
-            if (prompt) recentPrompts.push({ prompt, subcategory, category });
-        });
+                    const nameSpan = document.createElement("span");
+                    nameSpan.className = "item-name";
+                    nameSpan.innerHTML = `<span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span><span class="search-result-title">${item.prompt.title}</span>`;
+                    nameSpan.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, {
+                        origin: 'favorites'
+                    });
 
-        displayArea.innerHTML = `
+                    const unfavoriteIcon = document.createElement("i");
+                    unfavoriteIcon.className = "fa-solid fa-star unfavorite-icon";
+                    unfavoriteIcon.title = "Rimuovi dai preferiti";
+                    unfavoriteIcon.onclick = async (e) => {
+                        e.stopPropagation();
+
+                        const newData = JSON.parse(JSON.stringify(state.allData));
+                        const promptToUpdate = newData
+                            .find(c => c.id === item.category.id)?.subcategories
+                            .find(s => s.id === item.subcategory.id)?.prompts
+                            .find(p => p.id === item.prompt.id);
+
+                        if (promptToUpdate) {
+                            promptToUpdate.favorite = false;
+                            await updateStateAndSave(newData);
+                        }
+                    };
+
+                    el.append(nameSpan, unfavoriteIcon);
+                    listContainer.appendChild(el);
+                });
+            }
+
+            function displayRecents() {
+                const recentPrompts = [];
+                const catMap = new Map(state.allData.map(c => [c.id, c]));
+
+                state.recents.forEach(r => {
+                    const category = catMap.get(r.catId);
+                    const subcategory = category?.subcategories.find(s => s.id === r.subId);
+                    const prompt = subcategory?.prompts.find(p => p.id === r.promptId);
+                    if (prompt) recentPrompts.push({
+                        prompt,
+                        subcategory,
+                        category
+                    });
+                });
+
+                displayArea.innerHTML = `
             <div class="display-header"><h3>Recenti</h3></div>
             <div id="prompt-list"></div>`;
-        const listContainer = document.getElementById("prompt-list");
-        if (recentPrompts.length === 0) {
-            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt visualizzato di recente.</p></div>';
-            return;
-        }
-        recentPrompts.forEach(item => {
-            const el = document.createElement("div");
-            el.className = "item-container";
-            el.innerHTML = `<span class="item-name"><span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span></span>`;
-            el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, { origin: 'recents' });
-            listContainer.appendChild(el);
-        });
-    }
+                const listContainer = document.getElementById("prompt-list");
+                if (recentPrompts.length === 0) {
+                    listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt visualizzato di recente.</p></div>';
+                    return;
+                }
+                recentPrompts.forEach(item => {
+                    const el = document.createElement("div");
+                    el.className = "item-container";
+                    el.innerHTML = `<span class="item-name"><span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span></span>`;
+                    el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, {
+                        origin: 'recents'
+                    });
+                    listContainer.appendChild(el);
+                });
+            }
 
-    function displaySubcategoryList(category) {
-        displayArea.innerHTML = `
+            function displaySubcategoryList(category) {
+                displayArea.innerHTML = `
             <div class="display-header">
                 <h3>Sottocategorie in: ${category.name}</h3>
                 <div class="header-buttons">
@@ -644,42 +1385,49 @@
                 </div>
             </div>
             <div id="subcat-list"></div>`;
-        document.getElementById("add-subcat-btn").onclick = () => addSubcategory(category.id);
-        document.getElementById("delete-cat-btn").onclick = () => deleteCategory(category.id);
-        const listContainer = document.getElementById("subcat-list");
-        if (!category.subcategories || category.subcategories.length === 0) {
-            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Questa categoria non ha sottocategorie.</p></div>';
-            return;
-        }
-        category.subcategories.forEach(subcat => {
-            const item = document.createElement("div");
-            item.className = "item-container";
+                document.getElementById("add-subcat-btn").onclick = () => addSubcategory(category.id);
+                document.getElementById("delete-cat-btn").onclick = () => deleteCategory(category.id);
+                const listContainer = document.getElementById("subcat-list");
+                if (!category.subcategories || category.subcategories.length === 0) {
+                    listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Questa categoria non ha sottocategorie.</p></div>';
+                    return;
+                }
+                category.subcategories.forEach(subcat => {
+                    const item = document.createElement("div");
+                    item.className = "item-container";
 
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "item-name";
-            nameSpan.textContent = subcat.name;
-            nameSpan.onclick = () => displayPromptTitles(subcat, category);
+                    const nameSpan = document.createElement("span");
+                    nameSpan.className = "item-name";
+                    nameSpan.textContent = subcat.name;
+                    nameSpan.onclick = () => displayPromptTitles(subcat, category);
 
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'item-actions';
-          
-            const editIcon = document.createElement("i");
-            editIcon.className = "fa-solid fa-pencil edit-icon";
-            editIcon.title = "Modifica nome sottocategoria";
-            editIcon.onclick = e => { e.stopPropagation(); editSubcategory(subcat.id, category.id); };
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'item-actions';
 
-            const deleteIcon = document.createElement("i");
-            deleteIcon.className = "fa-solid fa-trash-can delete-icon";
-            deleteIcon.title = "Elimina sottocategoria";
-            deleteIcon.onclick = e => { e.stopPropagation(); deleteSubcategory(subcat.id, category.id); };
-          
-            actionsDiv.append(editIcon, deleteIcon);
-            item.append(nameSpan, actionsDiv);
-            listContainer.appendChild(item);
-        });
-    }
-    function displayPromptTitles(subcategory, parentCategory) {
-        displayArea.innerHTML = `
+                    const editIcon = document.createElement("i");
+                    editIcon.className = "fa-solid fa-pencil edit-icon";
+                    editIcon.title = "Modifica nome sottocategoria";
+                    editIcon.onclick = e => {
+                        e.stopPropagation();
+                        editSubcategory(subcat.id, category.id);
+                    };
+
+                    const deleteIcon = document.createElement("i");
+                    deleteIcon.className = "fa-solid fa-trash-can delete-icon";
+                    deleteIcon.title = "Elimina sottocategoria";
+                    deleteIcon.onclick = e => {
+                        e.stopPropagation();
+                        deleteSubcategory(subcat.id, category.id);
+                    };
+
+                    actionsDiv.append(editIcon, deleteIcon);
+                    item.append(nameSpan, actionsDiv);
+                    listContainer.appendChild(item);
+                });
+            }
+
+            function displayPromptTitles(subcategory, parentCategory) {
+                displayArea.innerHTML = `
             <div class="display-header">
                 <h3>Prompt in: ${subcategory.name}</h3>
                 <div class="header-buttons">
@@ -687,54 +1435,65 @@
                 </div>
             </div>
             <div id="prompt-list"></div>`;
-        document.getElementById("add-prompt-btn").onclick = () => addPrompt(subcategory.id, parentCategory.id);
-        const listContainer = document.getElementById("prompt-list");
-        if (!subcategory.prompts || subcategory.prompts.length === 0) {
-            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt in questa sottocategoria.</p></div>';
-            return;
-        }
-        subcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
-        subcategory.prompts.forEach(prompt => {
-            const item = document.createElement("div");
-            item.className = "item-container";
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "item-name";
-            nameSpan.textContent = prompt.title;
-            nameSpan.onclick = () => displayPromptDetail(prompt, subcategory, parentCategory);
+                document.getElementById("add-prompt-btn").onclick = () => addPrompt(subcategory.id, parentCategory.id);
+                const listContainer = document.getElementById("prompt-list");
+                if (!subcategory.prompts || subcategory.prompts.length === 0) {
+                    listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt in questa sottocategoria.</p></div>';
+                    return;
+                }
+                subcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", {
+                    sensitivity: "base"
+                }));
+                subcategory.prompts.forEach(prompt => {
+                    const item = document.createElement("div");
+                    item.className = "item-container";
+                    const nameSpan = document.createElement("span");
+                    nameSpan.className = "item-name";
+                    nameSpan.textContent = prompt.title;
+                    nameSpan.onclick = () => displayPromptDetail(prompt, subcategory, parentCategory);
 
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'item-actions';
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'item-actions';
 
-            const deleteIcon = document.createElement("i");
-            deleteIcon.className = "fa-solid fa-trash-can delete-icon";
-            deleteIcon.title = "Elimina prompt";
-            deleteIcon.onclick = e => { e.stopPropagation(); deletePrompt(prompt.id, subcategory.id, parentCategory.id); };
-          
-            actionsDiv.append(deleteIcon);
-            item.append(nameSpan, actionsDiv);
-            listContainer.appendChild(item);
-        });
-    }
+                    const deleteIcon = document.createElement("i");
+                    deleteIcon.className = "fa-solid fa-trash-can delete-icon";
+                    deleteIcon.title = "Elimina prompt";
+                    deleteIcon.onclick = e => {
+                        e.stopPropagation();
+                        deletePrompt(prompt.id, subcategory.id, parentCategory.id);
+                    };
 
-    function displayPromptDetail(prompt, parentSub, parentCat, options = {}) {
-        const { origin = 'category' } = options; 
+                    actionsDiv.append(deleteIcon);
+                    item.append(nameSpan, actionsDiv);
+                    listContainer.appendChild(item);
+                });
+            }
 
-        if (origin !== 'search') { 
-            const recentEntry = { promptId: prompt.id, subId: parentSub.id, catId: parentCat.id };
-            state.recents = state.recents.filter(r => r.promptId !== prompt.id);
-            state.recents.unshift(recentEntry);
-            if (state.recents.length > 20) state.recents.pop();
-        }
-      
-        let backText = "Torna alla categoria";
-        if (origin === 'search') backText = "Torna ai risultati";
-        if (origin === 'favorites') backText = "Torna ai preferiti";
-        if (origin === 'recents') backText = "Torna ai recenti";
+            function displayPromptDetail(prompt, parentSub, parentCat, options = {}) {
+                const {
+                    origin = 'category'
+                } = options;
 
-        const showDeleteIcon = origin !== 'favorites' && origin !== 'recents';
+                if (origin !== 'search') {
+                    const recentEntry = {
+                        promptId: prompt.id,
+                        subId: parentSub.id,
+                        catId: parentCat.id
+                    };
+                    state.recents = state.recents.filter(r => r.promptId !== prompt.id);
+                    state.recents.unshift(recentEntry);
+                    if (state.recents.length > 20) state.recents.pop();
+                }
 
-        selectionPanel.style.display = "none";
-        displayArea.innerHTML = `
+                let backText = "Torna alla categoria";
+                if (origin === 'search') backText = "Torna ai risultati";
+                if (origin === 'favorites') backText = "Torna ai preferiti";
+                if (origin === 'recents') backText = "Torna ai recenti";
+
+                const showDeleteIcon = origin !== 'favorites' && origin !== 'recents';
+
+                selectionPanel.style.display = "none";
+                displayArea.innerHTML = `
             <div class="prompt-detail-view">
                 <div class="prompt-header">
                     <a href="#" class="back-button" id="back-to-list"><i class="fa-solid fa-arrow-left"></i> ${backText}</a>
@@ -771,517 +1530,577 @@
                 <div class="prompt-description-container" id="detail-description">${prompt.description || ""}</div>
             </div>`;
 
-        const backBtn = document.getElementById("back-to-list");
-        const editBtn = document.getElementById("edit-prompt-btn");
-        const descriptionContainer = document.getElementById("detail-description");
-        const formattingToolbar = document.getElementById("detail-formatting-toolbar");
-        const saveChangesBtn = document.getElementById("btnSaveChanges");
-        const copyBtn = document.querySelector("#prompt-actions .fa-copy");
-        const starBtn = document.querySelector("#prompt-actions .fa-star");
+                const backBtn = document.getElementById("back-to-list");
+                const editBtn = document.getElementById("edit-prompt-btn");
+                const descriptionContainer = document.getElementById("detail-description");
+                const formattingToolbar = document.getElementById("detail-formatting-toolbar");
+                const saveChangesBtn = document.getElementById("btnSaveChanges");
+                const copyBtn = document.querySelector("#prompt-actions .fa-copy");
+                const starBtn = document.querySelector("#prompt-actions .fa-star");
 
-        const titleH1 = document.getElementById("prompt-title-h1");
-        const editTitleBtn = document.getElementById("edit-title-btn");
-        const saveTitleBtn = document.getElementById("btnSaveTitle");
+                const titleH1 = document.getElementById("prompt-title-h1");
+                const editTitleBtn = document.getElementById("edit-title-btn");
+                const saveTitleBtn = document.getElementById("btnSaveTitle");
 
-        attachEditorLogic(document.querySelector('.prompt-detail-view'));
-        
-        copyBtn.onclick = () => {
-            if (!descriptionContainer.innerText) return alert("Nessuna descrizione da copiare.");
-            navigator.clipboard.writeText(descriptionContainer.innerText)
-                .then(() => alert("Descrizione copiata!"))
-                .catch(err => console.error("Errore copia:", err));
-        };
-      
-        backBtn.onclick = (e) => {
-            e.preventDefault();
-            if (origin === 'search') {
-                performSearch(normalizeStr(searchInput.value));
-            } else if (origin === 'favorites') {
-                state.activeCategoryId = 'favorites';
-                renderUI();
-            } else if (origin === 'recents') {
-                state.activeCategoryId = 'recents';
-                renderUI();
-            } else {
-                selectionPanel.style.display = "block";
-                state.activeCategoryId = parentCat.id;
-                renderUI();
-            }
-        };
+                attachEditorLogic(document.querySelector('.prompt-detail-view'));
 
-        if (showDeleteIcon) {
-            document.getElementById("delete-prompt-detail-btn").onclick = () => deletePrompt(prompt.id, parentSub.id, parentCat.id);
-        }
+                copyBtn.onclick = () => {
+                    if (!descriptionContainer.innerText) return alert("Nessuna descrizione da copiare.");
+                    navigator.clipboard.writeText(descriptionContainer.innerText)
+                        .then(() => alert("Descrizione copiata!"))
+                        .catch(err => console.error("Errore copia:", err));
+                };
 
-        editBtn.onclick = () => { 
-            descriptionContainer.contentEditable = true; 
-            formattingToolbar.classList.add("show"); 
-            saveChangesBtn.classList.add("show"); 
-            descriptionContainer.focus(); 
-        };
-        
-        saveChangesBtn.onclick = async () => {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const promptToUpdate = newData.find(c => c.id === parentCat.id)
-                ?.subcategories.find(s => s.id === parentSub.id)
-                ?.prompts.find(p => p.id === prompt.id);
-            if (promptToUpdate) {
-                promptToUpdate.description = descriptionContainer.innerHTML;
-                await updateStateAndSave(newData);
-                displayPromptDetail(promptToUpdate, parentSub, parentCat, { origin });
-            }
-        };
-        starBtn.onclick = async () => {
-            const isFavorite = starBtn.classList.contains("fa-solid");
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const promptToUpdate = newData.find(c => c.id === parentCat.id)
-                ?.subcategories.find(s => s.id === parentSub.id)
-                ?.prompts.find(p => p.id === prompt.id);
-            if (promptToUpdate) {
-                promptToUpdate.favorite = !isFavorite;
-                await updateStateAndSave(newData);
-                starBtn.classList.toggle("fa-solid", !isFavorite);
-                starBtn.classList.toggle("fa-regular", isFavorite);
-            }
-        };
-
-        editTitleBtn.onclick = () => {
-            titleH1.contentEditable = true;
-            titleH1.focus();
-            saveTitleBtn.style.display = 'inline-block';
-            editTitleBtn.style.display = 'none';
-        };
-        saveTitleBtn.onclick = async () => {
-            const newTitle = titleH1.innerText.trim();
-            if (!newTitle || newTitle === prompt.title) {
-                titleH1.contentEditable = false;
-                saveTitleBtn.style.display = 'none';
-                editTitleBtn.style.display = 'inline-block';
-                titleH1.innerText = prompt.title;
-                return;
-            }
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
-            const promptToUpdate = subcat?.prompts.find(p => p.id === prompt.id);
-            if (promptToUpdate) {
-                promptToUpdate.title = newTitle;
-                subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
-                await updateStateAndSave(newData);
-                displayPromptDetail(promptToUpdate, parentSub, parentCat, { origin });
-            }
-        };
-    }
-
-    /*** Ricerca ***/
-    function performSearch(rawTerm) {
-        const term = normalizeStr(rawTerm);
-        const results = [];
-        const seen = new Set();
-        const tempDiv = document.createElement("div");
-
-        if (!term) { renderUI(); return; }
-
-        state.allData.forEach(cat => {
-            const catMatch = normalizeStr(cat.name).includes(term);
-            cat.subcategories?.forEach(sub => {
-                const subMatch = normalizeStr(sub.name).includes(term);
-                sub.prompts?.forEach(p => {
-                    if (seen.has(p.id)) return;
-                    tempDiv.innerHTML = p.description || "";
-                    const descText = normalizeStr(tempDiv.textContent || "");
-                    const titleMatch = normalizeStr(p.title).includes(term);
-                    const descMatch  = descText.includes(term);
-                    if (catMatch || subMatch || titleMatch || descMatch) {
-                        results.push({
-                            prompt: p, subcategory: sub, category: cat,
-                            score: (titleMatch ? 3 : 0) + (subMatch ? 2 : 0) + (catMatch ? 1 : 0) + (descMatch ? 0.5 : 0)
-                        });
-                        seen.add(p.id);
+                backBtn.onclick = (e) => {
+                    e.preventDefault();
+                    if (origin === 'search') {
+                        performSearch(normalizeStr(searchInput.value));
+                    } else if (origin === 'favorites') {
+                        state.activeCategoryId = 'favorites';
+                        renderUI();
+                    } else if (origin === 'recents') {
+                        state.activeCategoryId = 'recents';
+                        renderUI();
+                    } else {
+                        selectionPanel.style.display = "block";
+                        state.activeCategoryId = parentCat.id;
+                        renderUI();
                     }
+                };
+
+                if (showDeleteIcon) {
+                    document.getElementById("delete-prompt-detail-btn").onclick = () => deletePrompt(prompt.id, parentSub.id, parentCat.id);
+                }
+
+                editBtn.onclick = () => {
+                    descriptionContainer.contentEditable = true;
+                    formattingToolbar.classList.add("show");
+                    saveChangesBtn.classList.add("show");
+                    descriptionContainer.focus();
+                };
+
+                saveChangesBtn.onclick = async () => {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const promptToUpdate = newData.find(c => c.id === parentCat.id)
+                        ?.subcategories.find(s => s.id === parentSub.id)
+                        ?.prompts.find(p => p.id === prompt.id);
+                    if (promptToUpdate) {
+                        promptToUpdate.description = descriptionContainer.innerHTML;
+                        await updateStateAndSave(newData);
+                        displayPromptDetail(promptToUpdate, parentSub, parentCat, {
+                            origin
+                        });
+                    }
+                };
+                starBtn.onclick = async () => {
+                    const isFavorite = starBtn.classList.contains("fa-solid");
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const promptToUpdate = newData.find(c => c.id === parentCat.id)
+                        ?.subcategories.find(s => s.id === parentSub.id)
+                        ?.prompts.find(p => p.id === prompt.id);
+                    if (promptToUpdate) {
+                        promptToUpdate.favorite = !isFavorite;
+                        await updateStateAndSave(newData);
+                        starBtn.classList.toggle("fa-solid", !isFavorite);
+                        starBtn.classList.toggle("fa-regular", isFavorite);
+                    }
+                };
+
+                editTitleBtn.onclick = () => {
+                    titleH1.contentEditable = true;
+                    titleH1.focus();
+                    saveTitleBtn.style.display = 'inline-block';
+                    editTitleBtn.style.display = 'none';
+                };
+                saveTitleBtn.onclick = async () => {
+                    const newTitle = titleH1.innerText.trim();
+                    if (!newTitle || newTitle === prompt.title) {
+                        titleH1.contentEditable = false;
+                        saveTitleBtn.style.display = 'none';
+                        editTitleBtn.style.display = 'inline-block';
+                        titleH1.innerText = prompt.title;
+                        return;
+                    }
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
+                    const promptToUpdate = subcat?.prompts.find(p => p.id === prompt.id);
+                    if (promptToUpdate) {
+                        promptToUpdate.title = newTitle;
+                        subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", {
+                            sensitivity: "base"
+                        }));
+                        await updateStateAndSave(newData);
+                        displayPromptDetail(promptToUpdate, parentSub, parentCat, {
+                            origin
+                        });
+                    }
+                };
+            }
+
+            /*** Ricerca ***/
+            function performSearch(rawTerm) {
+                const term = normalizeStr(rawTerm);
+                const results = [];
+                const seen = new Set();
+                const tempDiv = document.createElement("div");
+
+                if (!term) {
+                    renderUI();
+                    return;
+                }
+
+                state.allData.forEach(cat => {
+                    const catMatch = normalizeStr(cat.name).includes(term);
+                    cat.subcategories?.forEach(sub => {
+                        const subMatch = normalizeStr(sub.name).includes(term);
+                        sub.prompts?.forEach(p => {
+                            if (seen.has(p.id)) return;
+                            tempDiv.innerHTML = p.description || "";
+                            const descText = normalizeStr(tempDiv.textContent || "");
+                            const titleMatch = normalizeStr(p.title).includes(term);
+                            const descMatch = descText.includes(term);
+                            if (catMatch || subMatch || titleMatch || descMatch) {
+                                results.push({
+                                    prompt: p,
+                                    subcategory: sub,
+                                    category: cat,
+                                    score: (titleMatch ? 3 : 0) + (subMatch ? 2 : 0) + (catMatch ? 1 : 0) + (descMatch ? 0.5 : 0)
+                                });
+                                seen.add(p.id);
+                            }
+                        });
+                    });
                 });
-            });
-        });
 
-        results.sort((a, b) => b.score - a.score);
-        displaySearchResults(results, rawTerm);
-    }
+                results.sort((a, b) => b.score - a.score);
+                displaySearchResults(results, rawTerm);
+            }
 
-    function displaySearchResults(results, rawTerm) {
-        selectionPanel.style.display = "none";
-        if (!results.length) {
-            displayArea.innerHTML = `<div class="initial-message"><p>Nessun risultato per "<strong>${rawTerm}</strong>"</p></div>`;
-            return;
-        }
-        const safe = escapeRegExp(rawTerm);
-        const hi = (text) => text.replace(new RegExp(safe, "gi"), m => `<mark>${m}</mark>`);
+            function displaySearchResults(results, rawTerm) {
+                selectionPanel.style.display = "none";
+                if (!results.length) {
+                    displayArea.innerHTML = `<div class="initial-message"><p>Nessun risultato per "<strong>${rawTerm}</strong>"</p></div>`;
+                    return;
+                }
+                const safe = escapeRegExp(rawTerm);
+                const hi = (text) => text.replace(new RegExp(safe, "gi"), m => `<mark>${m}</mark>`);
 
-        let html = `<div class="display-header"><h3>${results.length} risultati trovati</h3></div><div id="search-results-list">`;
-        results.forEach((res, idx) => {
-            html += `
+                let html = `<div class="display-header"><h3>${results.length} risultati trovati</h3></div><div id="search-results-list">`;
+                results.forEach((res, idx) => {
+                    html += `
                 <div class="item-container search-result-item" data-idx="${idx}">
                     <div class="item-name">
                         <span class="search-result-title">${hi(res.prompt.title)}</span>
                         <span class="search-result-path">In: ${hi(res.category.name)} > ${hi(res.subcategory.name)}</span>
                     </div>
                 </div>`;
-        });
-        html += `</div>`;
-        displayArea.innerHTML = html;
+                });
+                html += `</div>`;
+                displayArea.innerHTML = html;
 
-        document.querySelectorAll(".search-result-item").forEach(el => {
-            el.onclick = () => {
-                const r = results[parseInt(el.dataset.idx, 10)];
-                displayPromptDetail(r.prompt, r.subcategory, r.category, { origin: 'search' });
-            };
-        });
-    }
-
-    function handleSearchInput() {
-        const term = searchInput.value;
-        if (normalizeStr(term)) performSearch(term);
-        else renderUI();
-    }
-
-    /*** CRUD ***/
-    async function addCategory() {
-        const name = prompt("Nome nuova categoria:");
-        if (name && name.trim()) {
-            const newData = [...state.allData, { id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), subcategories: [] }];
-            newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
-        }
-    }
-    async function editCategory(categoryId) {
-        const category = state.allData.find(c => c.id === categoryId);
-        if (!category) return;
-        const newName = prompt("Nuovo nome per la categoria:", category.name);
-        if (newName && newName.trim() && newName.trim() !== category.name) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const catToUpdate = newData.find(c => c.id === categoryId);
-            catToUpdate.name = newName.trim();
-            newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
-        }
-    }
-    async function addSubcategory(categoryId) {
-        const name = prompt("Nome della nuova sottocategoria:");
-        if (name && name.trim()) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const cat = newData.find(c => c.id === categoryId);
-            if (cat) {
-                cat.subcategories.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), prompts: [] });
-                cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-                await updateStateAndSave(newData);
+                document.querySelectorAll(".search-result-item").forEach(el => {
+                    el.onclick = () => {
+                        const r = results[parseInt(el.dataset.idx, 10)];
+                        displayPromptDetail(r.prompt, r.subcategory, r.category, {
+                            origin: 'search'
+                        });
+                    };
+                });
             }
-        }
-    }
-    async function editSubcategory(subcategoryId, parentCategoryId) {
-        const category = state.allData.find(c => c.id === parentCategoryId);
-        const subcategory = category?.subcategories.find(s => s.id === subcategoryId);
-        if (!subcategory) return;
-        const newName = prompt("Nuovo nome per la sottocategoria:", subcategory.name);
-        if (newName && newName.trim() && newName.trim() !== subcategory.name) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const cat = newData.find(c => c.id === parentCategoryId);
-            const subcatToUpdate = cat.subcategories.find(s => s.id === subcategoryId);
-            subcatToUpdate.name = newName.trim();
-            cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
-        }
-    }
-    
-    async function addPrompt(subcategoryId, categoryId) {
-        const title = prompt("Titolo del nuovo prompt:");
-        if (!title || !title.trim()) return;
 
-        const getDescriptionFromModal = () => {
-            return new Promise(resolve => {
-                const overlay = document.getElementById('add-prompt-modal-overlay');
-                const editor = document.getElementById('add-prompt-description-editor');
-                const confirmBtn = document.getElementById('add-prompt-modal-confirm');
-                const cancelBtn = document.getElementById('add-prompt-modal-cancel');
+            function handleSearchInput() {
+                const term = searchInput.value;
+                if (normalizeStr(term)) performSearch(term);
+                else renderUI();
+            }
 
-                editor.innerHTML = '';
-                overlay.classList.add('show');
-                editor.focus();
-                
-                if(!addPromptEditorInitialized) {
-                    attachEditorLogic(document.getElementById('add-prompt-modal-content'));
-                    addPromptEditorInitialized = true;
+            /*** CRUD ***/
+            async function addCategory() {
+                const name = prompt("Nome nuova categoria:");
+                if (name && name.trim()) {
+                    const newData = [...state.allData, {
+                        id: `_${Math.random().toString(36).slice(2, 11)}`,
+                        name: name.trim(),
+                        subcategories: []
+                    }];
+                    newData.sort((a, b) => a.name.localeCompare(b.name, "it", {
+                        sensitivity: "base"
+                    }));
+                    await updateStateAndSave(newData);
                 }
+            }
+            async function editCategory(categoryId) {
+                const category = state.allData.find(c => c.id === categoryId);
+                if (!category) return;
+                const newName = prompt("Nuovo nome per la categoria:", category.name);
+                if (newName && newName.trim() && newName.trim() !== category.name) {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const catToUpdate = newData.find(c => c.id === categoryId);
+                    catToUpdate.name = newName.trim();
+                    newData.sort((a, b) => a.name.localeCompare(b.name, "it", {
+                        sensitivity: "base"
+                    }));
+                    await updateStateAndSave(newData);
+                }
+            }
+            async function addSubcategory(categoryId) {
+                const name = prompt("Nome della nuova sottocategoria:");
+                if (name && name.trim()) {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const cat = newData.find(c => c.id === categoryId);
+                    if (cat) {
+                        cat.subcategories.push({
+                            id: `_${Math.random().toString(36).slice(2, 11)}`,
+                            name: name.trim(),
+                            prompts: []
+                        });
+                        cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", {
+                            sensitivity: "base"
+                        }));
+                        await updateStateAndSave(newData);
+                    }
+                }
+            }
+            async function editSubcategory(subcategoryId, parentCategoryId) {
+                const category = state.allData.find(c => c.id === parentCategoryId);
+                const subcategory = category?.subcategories.find(s => s.id === subcategoryId);
+                if (!subcategory) return;
+                const newName = prompt("Nuovo nome per la sottocategoria:", subcategory.name);
+                if (newName && newName.trim() && newName.trim() !== subcategory.name) {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const cat = newData.find(c => c.id === parentCategoryId);
+                    const subcatToUpdate = cat.subcategories.find(s => s.id === subcategoryId);
+                    subcatToUpdate.name = newName.trim();
+                    cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", {
+                        sensitivity: "base"
+                    }));
+                    await updateStateAndSave(newData);
+                }
+            }
 
-                const confirmHandler = () => cleanupAndResolve(editor.innerHTML);
-                const cancelHandler = () => cleanupAndResolve(null);
-                const overlayHandler = (e) => { if (e.target === overlay) cleanupAndResolve(null); };
+            async function addPrompt(subcategoryId, categoryId) {
+                const title = prompt("Titolo del nuovo prompt:");
+                if (!title || !title.trim()) return;
 
-                const cleanupAndResolve = (value) => {
-                    overlay.classList.remove('show');
-                    confirmBtn.removeEventListener('click', confirmHandler);
-                    cancelBtn.removeEventListener('click', cancelHandler);
-                    overlay.removeEventListener('click', overlayHandler);
-                    resolve(value);
+                const getDescriptionFromModal = () => {
+                    return new Promise(resolve => {
+                        const overlay = document.getElementById('add-prompt-modal-overlay');
+                        const editor = document.getElementById('add-prompt-description-editor');
+                        const confirmBtn = document.getElementById('add-prompt-modal-confirm');
+                        const cancelBtn = document.getElementById('add-prompt-modal-cancel');
+
+                        editor.innerHTML = '';
+                        overlay.classList.add('show');
+                        editor.focus();
+
+                        if (!addPromptEditorInitialized) {
+                            attachEditorLogic(document.getElementById('add-prompt-modal-content'));
+                            addPromptEditorInitialized = true;
+                        }
+
+                        const confirmHandler = () => cleanupAndResolve(editor.innerHTML);
+                        const cancelHandler = () => cleanupAndResolve(null);
+                        const overlayHandler = (e) => {
+                            if (e.target === overlay) cleanupAndResolve(null);
+                        };
+
+                        const cleanupAndResolve = (value) => {
+                            overlay.classList.remove('show');
+                            confirmBtn.removeEventListener('click', confirmHandler);
+                            cancelBtn.removeEventListener('click', cancelHandler);
+                            overlay.removeEventListener('click', overlayHandler);
+                            resolve(value);
+                        };
+
+                        confirmBtn.addEventListener('click', confirmHandler, {
+                            once: true
+                        });
+                        cancelBtn.addEventListener('click', cancelHandler, {
+                            once: true
+                        });
+                        overlay.addEventListener('click', overlayHandler, {
+                            once: true
+                        });
+                    });
                 };
 
-                confirmBtn.addEventListener('click', confirmHandler, { once: true });
-                cancelBtn.addEventListener('click', cancelHandler, { once: true });
-                overlay.addEventListener('click', overlayHandler, { once: true });
-            });
-        };
+                const description = await getDescriptionFromModal();
+                if (description === null) return;
 
-        const description = await getDescriptionFromModal();
-        if (description === null) return; 
-
-        const newData = JSON.parse(JSON.stringify(state.allData));
-        const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
-        if (subcat) {
-            subcat.prompts.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, title: title.trim(), description: description.trim(), favorite: false });
-            subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
-        }
-    }
-
-    async function deleteCategory(categoryId) {
-        if (confirm("Sei sicuro di voler eliminare questa categoria e TUTTO il suo contenuto?")) {
-            const newData = state.allData.filter(c => c.id !== categoryId);
-            if (state.activeCategoryId === categoryId) state.activeCategoryId = 'favorites';
-            await updateStateAndSave(newData);
-        }
-    }
-    async function deleteSubcategory(subcategoryId, parentCategoryId) {
-        if (confirm("Sei sicuro di voler eliminare questa sottocategoria e tutti i prompt al suo interno?")) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const cat = newData.find(c => c.id === parentCategoryId);
-            if (cat) {
-                cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcategoryId);
-                await updateStateAndSave(newData);
-            }
-        }
-    }
-    async function deletePrompt(promptId, subcategoryId, categoryId) {
-        if (confirm("Sei sicuro di voler eliminare questo prompt?")) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
-            if (subcat) {
-                const index = subcat.prompts.findIndex(p => p.id === promptId);
-                if (index > -1) {
-                    subcat.prompts.splice(index, 1);
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
+                if (subcat) {
+                    subcat.prompts.push({
+                        id: `_${Math.random().toString(36).slice(2, 11)}`,
+                        title: title.trim(),
+                        description: description.trim(),
+                        favorite: false
+                    });
+                    subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", {
+                        sensitivity: "base"
+                    }));
                     await updateStateAndSave(newData);
-                    state.activeCategoryId = categoryId;
-                    renderUI();
-                }
-            }
-        }
-    }
-
-    /*** Logica di Accorpamento Categorie ***/
-    function openMergeModal() {
-        if (state.allData.length < 2) {
-            alert("Devono esserci almeno due categorie per poterle accorpare.");
-            return;
-        }
-
-        const overlay = document.getElementById('merge-modal-overlay');
-        const sourceList = document.getElementById('merge-source-list');
-        const destList = document.getElementById('merge-destination-list');
-        const confirmBtn = document.getElementById('merge-modal-confirm');
-        const cancelBtn = document.getElementById('merge-modal-cancel');
-        const content = document.getElementById('merge-modal-content');
-
-        sourceList.innerHTML = '';
-        destList.innerHTML = '';
-        confirmBtn.disabled = true;
-
-        state.allData.forEach(cat => {
-            sourceList.innerHTML += `
-                <label>
-                    <input type="checkbox" name="source-category" value="${cat.id}">
-                    ${cat.name}
-                </label>`;
-            destList.innerHTML += `
-                <label>
-                    <input type="radio" name="destination-category" value="${cat.id}">
-                    ${cat.name}
-                </label>`;
-        });
-
-        const updateMergeModalState = () => {
-            const sources = content.querySelectorAll('input[name="source-category"]:checked');
-            const dest = content.querySelector('input[name="destination-category"]:checked');
-
-            content.querySelectorAll('input[name="source-category"], input[name="destination-category"]').forEach(el => {
-                el.disabled = false;
-                el.parentElement.classList.remove('disabled');
-            });
-
-            if (dest) {
-                const sourceCheckbox = content.querySelector(`input[name="source-category"][value="${dest.value}"]`);
-                if(sourceCheckbox) {
-                    sourceCheckbox.disabled = true;
-                    sourceCheckbox.parentElement.classList.add('disabled');
                 }
             }
 
-            sources.forEach(source => {
-                const destRadio = content.querySelector(`input[name="destination-category"][value="${source.value}"]`);
-                if(destRadio) {
-                    destRadio.disabled = true;
-                    destRadio.parentElement.classList.add('disabled');
+            async function deleteCategory(categoryId) {
+                if (confirm("Sei sicuro di voler eliminare questa categoria e TUTTO il suo contenuto?")) {
+                    const newData = state.allData.filter(c => c.id !== categoryId);
+                    if (state.activeCategoryId === categoryId) state.activeCategoryId = 'favorites';
+                    await updateStateAndSave(newData);
                 }
-            });
-
-            confirmBtn.disabled = !(sources.length > 0 && dest);
-        };
-        
-        const onConfirm = () => {
-            performMerge();
-            closeModal();
-        };
-
-        const closeModal = () => {
-            overlay.classList.remove('show');
-            content.removeEventListener('change', updateMergeModalState);
-            confirmBtn.removeEventListener('click', onConfirm);
-            cancelBtn.removeEventListener('click', closeModal);
-        };
-        
-        content.addEventListener('change', updateMergeModalState);
-        confirmBtn.addEventListener('click', onConfirm);
-        cancelBtn.addEventListener('click', closeModal);
-        overlay.classList.add('show');
-    }
-
-    async function performMerge() {
-        const content = document.getElementById('merge-modal-content');
-        const sourceInputs = [...content.querySelectorAll('input[name="source-category"]:checked')];
-        const destInput = content.querySelector('input[name="destination-category"]:checked');
-
-        if (!destInput || sourceInputs.length === 0) return;
-
-        const sourceIds = sourceInputs.map(el => el.value);
-        const destinationId = destInput.value;
-        const destCategoryName = state.allData.find(c => c.id === destinationId)?.name;
-
-        if (confirm(`Sei sicuro di voler accorpare ${sourceIds.length} categorie in "${destCategoryName}"? Le categorie sorgenti originali verranno eliminate.`)) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-
-            const destCat = newData.find(c => c.id === destinationId);
-            if (!destCat) return;
-
-            const subcatMap = new Map(destCat.subcategories.map(s => [normalizeStr(s.name), s]));
-
-            for (const sourceId of sourceIds) {
-                const sourceCat = newData.find(c => c.id === sourceId);
-                if (!sourceCat || !sourceCat.subcategories) continue;
-
-                for (const sourceSub of sourceCat.subcategories) {
-                    const normalizedName = normalizeStr(sourceSub.name);
-                    const existingDestSub = subcatMap.get(normalizedName);
-
-                    if (existingDestSub) {
-                        existingDestSub.prompts.push(...sourceSub.prompts);
-                    } else {
-                        destCat.subcategories.push(sourceSub);
-                        subcatMap.set(normalizedName, sourceSub);
+            }
+            async function deleteSubcategory(subcategoryId, parentCategoryId) {
+                if (confirm("Sei sicuro di voler eliminare questa sottocategoria e tutti i prompt al suo interno?")) {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const cat = newData.find(c => c.id === parentCategoryId);
+                    if (cat) {
+                        cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcategoryId);
+                        await updateStateAndSave(newData);
+                    }
+                }
+            }
+            async function deletePrompt(promptId, subcategoryId, categoryId) {
+                if (confirm("Sei sicuro di voler eliminare questo prompt?")) {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
+                    if (subcat) {
+                        const index = subcat.prompts.findIndex(p => p.id === promptId);
+                        if (index > -1) {
+                            subcat.prompts.splice(index, 1);
+                            await updateStateAndSave(newData);
+                            state.activeCategoryId = categoryId;
+                            renderUI();
+                        }
                     }
                 }
             }
 
-            destCat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-            const finalData = newData.filter(c => !sourceIds.includes(c.id));
-            state.activeCategoryId = destinationId;
-            await updateStateAndSave(finalData);
-        }
-    }
-
-
-    /*** Eventi UI ***/
-    const setupEventListeners = () => {
-        const closeAllMenus = () => {
-            toolMenu.classList.remove("show");
-            themeMenu.classList.remove("show");
-        };
-
-        window.addEventListener("click", closeAllMenus);
-
-        themeBtn?.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const isShown = themeMenu.classList.toggle("show");
-            if (isShown) toolMenu.classList.remove("show");
-        });
-        
-        toolBtn?.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const isShown = toolMenu.classList.toggle("show");
-            if(isShown) themeMenu.classList.remove("show");
-        });
-
-        themeMenu.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const theme = e.target.closest('button')?.dataset.theme;
-            if (theme) {
-                applyTheme(theme);
-                closeAllMenus();
-            }
-        });
-
-        btnMerge?.addEventListener("click", openMergeModal);
-        importBtn?.addEventListener("click", () => backupInput.click());
-        backupInput?.addEventListener("change", async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    await updateStateAndSave(Array.isArray(data) ? data : []);
-                    alert("Backup importato!");
-                } catch {
-                    alert("File di backup non valido.");
+            /*** Logica di Accorpamento Categorie ***/
+            function openMergeModal() {
+                if (state.allData.length < 2) {
+                    alert("Devono esserci almeno due categorie per poterle accorpare.");
+                    return;
                 }
+
+                const overlay = document.getElementById('merge-modal-overlay');
+                const sourceList = document.getElementById('merge-source-list');
+                const destList = document.getElementById('merge-destination-list');
+                const confirmBtn = document.getElementById('merge-modal-confirm');
+                const cancelBtn = document.getElementById('merge-modal-cancel');
+                const content = document.getElementById('merge-modal-content');
+
+                sourceList.innerHTML = '';
+                destList.innerHTML = '';
+                confirmBtn.disabled = true;
+
+                state.allData.forEach(cat => {
+                    sourceList.innerHTML += `
+                <label>
+                    <input type="checkbox" name="source-category" value="${cat.id}">
+                    ${cat.name}
+                </label>`;
+                    destList.innerHTML += `
+                <label>
+                    <input type="radio" name="destination-category" value="${cat.id}">
+                    ${cat.name}
+                </label>`;
+                });
+
+                const updateMergeModalState = () => {
+                    const sources = content.querySelectorAll('input[name="source-category"]:checked');
+                    const dest = content.querySelector('input[name="destination-category"]:checked');
+
+                    content.querySelectorAll('input[name="source-category"], input[name="destination-category"]').forEach(el => {
+                        el.disabled = false;
+                        el.parentElement.classList.remove('disabled');
+                    });
+
+                    if (dest) {
+                        const sourceCheckbox = content.querySelector(`input[name="source-category"][value="${dest.value}"]`);
+                        if (sourceCheckbox) {
+                            sourceCheckbox.disabled = true;
+                            sourceCheckbox.parentElement.classList.add('disabled');
+                        }
+                    }
+
+                    sources.forEach(source => {
+                        const destRadio = content.querySelector(`input[name="destination-category"][value="${source.value}"]`);
+                        if (destRadio) {
+                            destRadio.disabled = true;
+                            destRadio.parentElement.classList.add('disabled');
+                        }
+                    });
+
+                    confirmBtn.disabled = !(sources.length > 0 && dest);
+                };
+
+                const onConfirm = () => {
+                    performMerge();
+                    closeModal();
+                };
+
+                const closeModal = () => {
+                    overlay.classList.remove('show');
+                    content.removeEventListener('change', updateMergeModalState);
+                    confirmBtn.removeEventListener('click', onConfirm);
+                    cancelBtn.removeEventListener('click', closeModal);
+                };
+
+                content.addEventListener('change', updateMergeModalState);
+                confirmBtn.addEventListener('click', onConfirm);
+                cancelBtn.addEventListener('click', closeModal);
+                overlay.classList.add('show');
+            }
+
+            async function performMerge() {
+                const content = document.getElementById('merge-modal-content');
+                const sourceInputs = [...content.querySelectorAll('input[name="source-category"]:checked')];
+                const destInput = content.querySelector('input[name="destination-category"]:checked');
+
+                if (!destInput || sourceInputs.length === 0) return;
+
+                const sourceIds = sourceInputs.map(el => el.value);
+                const destinationId = destInput.value;
+                const destCategoryName = state.allData.find(c => c.id === destinationId)?.name;
+
+                if (confirm(`Sei sicuro di voler accorpare ${sourceIds.length} categorie in "${destCategoryName}"? Le categorie sorgenti originali verranno eliminate.`)) {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+
+                    const destCat = newData.find(c => c.id === destinationId);
+                    if (!destCat) return;
+
+                    const subcatMap = new Map(destCat.subcategories.map(s => [normalizeStr(s.name), s]));
+
+                    for (const sourceId of sourceIds) {
+                        const sourceCat = newData.find(c => c.id === sourceId);
+                        if (!sourceCat || !sourceCat.subcategories) continue;
+
+                        for (const sourceSub of sourceCat.subcategories) {
+                            const normalizedName = normalizeStr(sourceSub.name);
+                            const existingDestSub = subcatMap.get(normalizedName);
+
+                            if (existingDestSub) {
+                                existingDestSub.prompts.push(...sourceSub.prompts);
+                            } else {
+                                destCat.subcategories.push(sourceSub);
+                                subcatMap.set(normalizedName, sourceSub);
+                            }
+                        }
+                    }
+
+                    destCat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", {
+                        sensitivity: "base"
+                    }));
+                    const finalData = newData.filter(c => !sourceIds.includes(c.id));
+                    state.activeCategoryId = destinationId;
+                    await updateStateAndSave(finalData);
+                }
+            }
+
+
+            /*** Eventi UI ***/
+            const setupEventListeners = () => {
+                const closeAllMenus = () => {
+                    toolMenu.classList.remove("show");
+                    themeMenu.classList.remove("show");
+                };
+
+                window.addEventListener("click", closeAllMenus);
+
+                themeBtn?.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const isShown = themeMenu.classList.toggle("show");
+                    if (isShown) toolMenu.classList.remove("show");
+                });
+
+                toolBtn?.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const isShown = toolMenu.classList.toggle("show");
+                    if (isShown) themeMenu.classList.remove("show");
+                });
+
+                themeMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const theme = e.target.closest('button')?.dataset.theme;
+                    if (theme) {
+                        applyTheme(theme);
+                        closeAllMenus();
+                    }
+                });
+
+                btnMerge?.addEventListener("click", openMergeModal);
+                importBtn?.addEventListener("click", () => backupInput.click());
+                backupInput?.addEventListener("change", async (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            await updateStateAndSave(Array.isArray(data) ? data : []);
+                            alert("Backup importato!");
+                        } catch {
+                            alert("File di backup non valido.");
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+
+                btnBackup?.addEventListener("click", () => {
+                    if (state.allData.length === 0) {
+                        alert("Nessun dato da esportare.");
+                        return;
+                    }
+                    const dataStr = JSON.stringify(state.allData, null, 2);
+                    const blob = new Blob([dataStr], {
+                        type: "application/json"
+                    });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `prompts_backup_${new Date().toISOString().slice(0,10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                });
+
+                document.getElementById("add-category-inline-btn")?.addEventListener("click", addCategory);
+                btnAnnulla?.addEventListener("click", performUndo);
+                btnRipristina?.addEventListener("click", performRedo);
+
+                searchInput?.addEventListener("input", handleSearchInput);
+                searchInput?.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSearchInput();
+                    }
+                });
+                searchIcon?.addEventListener("click", () => {
+                    searchInput.focus();
+                    handleSearchInput();
+                });
             };
-            reader.readAsText(file);
-        });
 
-        btnBackup?.addEventListener("click", () => {
-            if (state.allData.length === 0) { alert("Nessun dato da esportare."); return; }
-            const dataStr = JSON.stringify(state.allData, null, 2);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `prompts_backup_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-        });
+            /*** Bootstrap ***/
+            try {
+                await Database.init();
+                state.allData = await Database.load();
+                const savedRecents = localStorage.getItem("promptManagerRecents");
+                if (savedRecents) state.recents = JSON.parse(savedRecents);
 
-        document.getElementById("add-category-inline-btn")?.addEventListener("click", addCategory);
-        btnAnnulla?.addEventListener("click", performUndo);
-        btnRipristina?.addEventListener("click", performRedo);
+                state.activeCategoryId = 'favorites';
+                setupEventListeners();
+                renderUI();
 
-        searchInput?.addEventListener("input", handleSearchInput);
-        searchInput?.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); handleSearchInput(); } });
-        searchIcon?.addEventListener("click", () => { searchInput.focus(); handleSearchInput(); });
-    };
+                window.addEventListener('beforeunload', () => {
+                    localStorage.setItem("promptManagerRecents", JSON.stringify(state.recents));
+                });
 
-    /*** Bootstrap ***/
-    try {
-        await Database.init();
-        state.allData = await Database.load();
-        const savedRecents = localStorage.getItem("promptManagerRecents");
-        if (savedRecents) state.recents = JSON.parse(savedRecents);
-        
-        state.activeCategoryId = 'favorites';
-        setupEventListeners();
-        renderUI();
-
-        window.addEventListener('beforeunload', () => {
-            localStorage.setItem("promptManagerRecents", JSON.stringify(state.recents));
-        });
-
-    } catch (error) {
-        console.error("Inizializzazione fallita:", error);
-        displayArea.innerHTML = '<div class="initial-message"><p>Errore critico: impossibile avviare l\'app.</p></div>';
-    }
-})();
-</script>
+            } catch (error) {
+                console.error("Inizializzazione fallita:", error);
+                displayArea.innerHTML = '<div class="initial-message"><p>Errore critico: impossibile avviare l\'app.</p></div>';
+            }
+        })();
+    </script>
 </body>
+
 </html>

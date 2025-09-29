@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <style>
+        /* TEMA DARK (PREDEFINITO) */
         :root {
             --background-dark: #121417; --container-bg: #22252A; --header-bg: #2D2F3E;
             --element-bg: #3A3D4D; --element-bg-hover: #4a4e5a; --primary-accent: #007BFF;
@@ -15,18 +16,40 @@
             --text-muted: #9E9E9E; --border-color: #3A3D4D; --star-yellow: #FFC107;
             --btn-green: #28a745; --btn-green-hover: #218838; --btn-red: #dc3545; --btn-red-hover: #c82333;
         }
-        body { background-color: var(--background-dark); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        /* TEMA LIGHT */
+        html[data-theme="light"] {
+            --background-dark: #F0F2F5; --container-bg: #FFFFFF; --header-bg: #FFFFFF;
+            --element-bg: #E4E6EB; --element-bg-hover: #D8DBE0; --primary-accent: #007BFF;
+            --primary-accent-dark: #0056b3; --text-primary: #121417; --text-secondary: #4A4E5A;
+            --text-muted: #65676B; --border-color: #CED0D4; --star-yellow: #FFC107;
+        }
+        /* TEMA BLUE */
+        html[data-theme="blue"] {
+            --background-dark: #0d1117; --container-bg: #161b22; --header-bg: #161b22;
+            --element-bg: #21262d; --element-bg-hover: #30363d; --primary-accent: #58a6ff;
+            --primary-accent-dark: #1f6feb; --text-primary: #c9d1d9; --text-secondary: #8b949e;
+            --text-muted: #8b949e; --border-color: #30363d; --star-yellow: #FFC107;
+        }
+
+        body { background-color: var(--background-dark); color: var(--text-secondary); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; transition: background-color .3s, color .3s; }
         .app-header { background-color: var(--header-bg); border-radius: 16px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
         .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 16px; }
         .logo { color: var(--text-primary); font-size: 28px; font-weight: bold; }
         .search-bar { display: flex; align-items: center; background-color: var(--element-bg); border-radius: 12px; padding: 0 15px; }
         .search-bar i { color: var(--text-muted); cursor: pointer; }
         .search-bar input { background: transparent; border: none; outline: none; color: var(--text-primary); padding: 12px 10px; font-size: 16px; width: 280px; }
-        .tool-button { background-color: #7A69E9; color: var(--text-primary); border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color .3s; }
+        .tool-button { background-color: var(--element-bg-hover); color: var(--text-primary); border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color .3s; }
         .tool-button:hover { background-color: #6957d1; }
+        #themeBtn { background-color: var(--element-bg-hover); }
+        #themeBtn:hover { background-color: var(--primary-accent); }
         .header-right { position: relative; }
-        .toolbar-dropdown-menu { display: none; position: absolute; top: 110%; right: 0; background-color: #1c1c1c; border-radius: 12px; padding: 10px; z-index: 1000; width: 360px; box-shadow: 0 8px 16px rgba(0,0,0,.4); grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .toolbar-dropdown-menu.show { display: grid; }
+        .dropdown-menu { display: none; position: absolute; top: 110%; right: 0; background-color: var(--header-bg); border-radius: 12px; padding: 10px; z-index: 1000; box-shadow: 0 8px 16px rgba(0,0,0,.4); gap: 8px; }
+        .dropdown-menu.show { display: grid; }
+        #toolMenu { width: 360px; grid-template-columns: repeat(3, 1fr); }
+        #themeMenu { width: 150px; display: none; flex-direction: column; }
+        #themeMenu.show { display: flex; }
+        #themeMenu button { background-color: var(--element-bg); color: var(--text-primary); border: 1px solid var(--border-color); width: 100%; text-align: left; padding: 10px 15px; border-radius: 6px; cursor: pointer; transition: background-color .2s; }
+        #themeMenu button:hover { background-color: var(--element-bg-hover); }
         .toolbar-btn { color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: all .2s; min-height: 70px; }
         .toolbar-btn:hover { opacity: .9; transform: translateY(-2px); }
         .toolbar-btn:disabled { background-color: #555 !important; cursor: not-allowed; opacity: .5; transform: none; }
@@ -75,36 +98,42 @@
         #title-actions i { cursor: pointer; font-size: 20px; color: var(--text-muted); transition: color .2s; }
         #title-actions i:hover { color: var(--text-primary); }
         #btnSaveTitle { display: none; }
-        .prompt-description-container { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 200px; line-height: 1.7; }
+        .prompt-description-container { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 200px; line-height: 1.7; color: var(--text-primary); }
         .prompt-description-container a { color: var(--star-yellow); }
         .prompt-description-container img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; display: block; cursor: pointer; }
-        .prompt-description-container[contenteditable="true"] { outline: 2px dashed var(--primary-accent); background-color: #1c1c1c; }
-        #formatting-toolbar { margin-bottom: 10px; display: none; gap: 10px; align-items: center; flex-wrap: wrap; }
-        #formatting-toolbar.show { display: flex; }
-        #formatting-toolbar button { background: var(--element-bg); border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
-        #formatting-toolbar button:hover { background: var(--element-bg-hover); }
-        #formatting-toolbar button i { font-size: 16px; }
+        .prompt-description-container[contenteditable="true"] { outline: 2px dashed var(--primary-accent); background-color: var(--background-dark); }
+        .formatting-toolbar { margin-bottom: 10px; display: none; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .formatting-toolbar.show { display: flex; }
+        .formatting-toolbar button { background: var(--element-bg); border: none; color: var(--text-primary); padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        .formatting-toolbar button:hover { background: var(--element-bg-hover); }
+        .formatting-toolbar button i { font-size: 16px; }
         #btnSaveChanges { background-color: var(--primary-accent); display: none; margin-left: auto; }
         #btnSaveChanges.show { display: inline-block; }
         .color-picker-wrapper { position: relative; display: flex; align-items: center; justify-content: center; background: var(--element-bg); padding: 8px 12px; border-radius: 5px; }
         .color-picker-wrapper:hover { background-color: var(--element-bg-hover); }
         .color-picker-wrapper i { font-size: 16px; pointer-events: none; }
-        #fontColorPicker { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .color-picker-wrapper input[type="color"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         .search-result-path { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-        .search-result-title { font-weight: 500; }
-        mark { background-color: var(--star-yellow); color: var(--background-dark); padding: 1px 3px; border-radius: 3px; }
-        #link-modal-overlay, #image-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        #link-modal-overlay.show, #image-modal-overlay.show { display: flex; }
-        #link-modal-content, #image-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 450px; }
-        #link-modal-content h3, #image-modal-content h3 { margin-top: 0; color: var(--text-primary); }
+        .search-result-title { font-weight: 500; color: var(--text-primary); }
+        mark { background-color: var(--star-yellow); color: #121417; padding: 1px 3px; border-radius: 3px; }
+        
+        /* Stili per i modali */
+        #link-modal-overlay, #image-modal-overlay, #add-prompt-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        #link-modal-overlay.show, #image-modal-overlay.show, #add-prompt-modal-overlay.show { display: flex; }
+        #link-modal-content, #image-modal-content, #add-prompt-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; }
+        #link-modal-content, #image-modal-content { max-width: 450px; }
+        #add-prompt-modal-content { max-width: 800px; } /* Box più grande per l'editor */
+        #link-modal-content h3, #image-modal-content h3, #add-prompt-modal-content h3 { margin-top: 0; color: var(--text-primary); }
         #link-url-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
         #image-preview-container { margin: 15px 0; min-height: 100px; border: 2px dashed var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #image-preview { max-width: 100%; max-height: 200px; display: none; }
         #image-preview.show { display: block; }
-        #link-modal-actions, #image-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-        #link-modal-actions button, #image-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
-        #link-modal-cancel, #image-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
-        #link-modal-confirm, #image-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
+        #add-prompt-modal-content .formatting-toolbar { display: flex; } /* Rendi la toolbar sempre visibile nel modale */
+        #add-prompt-modal-content .prompt-description-container { min-height: 250px; }
+        #link-modal-actions, #image-modal-actions, #add-prompt-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        #link-modal-actions button, #image-modal-actions button, #add-prompt-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+        #link-modal-cancel, #image-modal-cancel, #add-prompt-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
+        #link-modal-confirm, #image-modal-confirm, #add-prompt-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
     </style>
 </head>
 <body>
@@ -117,8 +146,14 @@
         </div>
     </div>
     <div class="header-right">
+        <button class="tool-button" id="themeBtn"><i class="fa-solid fa-palette"></i><span>Tema</span></button>
+        <div class="dropdown-menu" id="themeMenu">
+            <button data-theme="dark">Dark</button>
+            <button data-theme="light">Light</button>
+            <button data-theme="blue">Blue</button>
+        </div>
         <button class="tool-button" id="toolBtn"><i class="fa-solid fa-screwdriver-wrench"></i><span>Tool</span></button>
-        <div class="toolbar-dropdown-menu" id="toolMenu">
+        <div class="dropdown-menu" id="toolMenu">
             <button class="toolbar-btn btn-yellow" id="btnAnnulla"><i class="fa-solid fa-arrow-rotate-left"></i><span>Annulla</span></button>
             <button class="toolbar-btn btn-yellow" id="btnRipristina"><i class="fa-solid fa-arrow-rotate-right"></i><span>Ripristina</span></button>
             <button class="toolbar-btn btn-blue" id="btnBackup"><i class="fa-solid fa-download"></i><span>Backup</span></button>
@@ -165,6 +200,33 @@
         </div>
     </div>
 </div>
+
+<div id="add-prompt-modal-overlay">
+    <div id="add-prompt-modal-content">
+        <h3>Nuovo Prompt</h3>
+        <div class="formatting-toolbar">
+            <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+            <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+            <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
+            <button data-command="insertUnorderedList" title="Elenco puntato"><i class="fa-solid fa-list-ul"></i></button>
+            <button class="create-link-btn" title="Crea Link"><i class="fa-solid fa-link"></i></button>
+            <button class="unlink-btn" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
+            <button class="insert-image-btn" title="Inserisci Immagine"><i class="fa-solid fa-image"></i></button>
+            <button class="increase-font-btn" title="Aumenta testo"><i class="fa-solid fa-plus"></i></button>
+            <button class="decrease-font-btn" title="Riduci testo"><i class="fa-solid fa-minus"></i></button>
+            <div class="color-picker-wrapper" title="Colore testo">
+                <i class="fa-solid fa-palette"></i><input type="color" class="font-color-picker">
+            </div>
+            <button data-command="removeFormat" title="Rimuovi formattazione colore"><i class="fa-solid fa-eraser"></i></button>
+        </div>
+        <div class="prompt-description-container" contenteditable="true" id="add-prompt-description-editor"></div>
+        <div id="add-prompt-modal-actions">
+            <button id="add-prompt-modal-cancel">Annulla</button>
+            <button id="add-prompt-modal-confirm">Conferma</button>
+        </div>
+    </div>
+</div>
+
 
 <script>
 (async () => {
@@ -213,10 +275,13 @@
     /*** Stato ***/
     let state = { allData: [], history: [], redoStack: [], activeCategoryId: null, recents: [] };
     let savedSelectionRange = null;
+    let addPromptEditorInitialized = false;
 
     /*** Elementi ***/
     const toolBtn = document.getElementById("toolBtn");
     const toolMenu = document.getElementById("toolMenu");
+    const themeBtn = document.getElementById("themeBtn");
+    const themeMenu = document.getElementById("themeMenu");
     const importBtn = document.getElementById("btnImporta");
     const backupInput = document.getElementById("backupInput");
     const selectionPanel = document.getElementById("selection-panel");
@@ -227,6 +292,17 @@
     const btnBackup = document.getElementById("btnBackup");
     const searchInput = document.getElementById("search-input");
     const searchIcon = document.getElementById("search-icon");
+
+    /*** Gestione Tema ***/
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('promptManagerTheme', theme);
+    }
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('promptManagerTheme') || 'dark';
+        applyTheme(savedTheme);
+    }
+    loadTheme(); // Applica il tema salvato il prima possibile
 
     /*** Undo/Redo ***/
     function updateUndoRedoButtons() {
@@ -257,6 +333,114 @@
             state.history.push(JSON.parse(JSON.stringify(state.allData)));
             await updateStateAndSave(state.redoStack.pop(), { saveHistory: false });
         }
+    }
+    
+    /*** Logica Editor Riutilizzabile ***/
+    function attachEditorLogic(containerEl) {
+        const descriptionContainer = containerEl.querySelector('.prompt-description-container[contenteditable="true"]');
+        if (!descriptionContainer) return;
+
+        containerEl.querySelectorAll(".formatting-toolbar button[data-command]").forEach(btn => {
+            btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };
+        });
+
+        const createLinkBtn = containerEl.querySelector(".create-link-btn");
+        const unlinkBtn = containerEl.querySelector(".unlink-btn");
+        const insertImageBtn = containerEl.querySelector(".insert-image-btn");
+        const increaseFontBtn = containerEl.querySelector(".increase-font-btn");
+        const decreaseFontBtn = containerEl.querySelector(".decrease-font-btn");
+        const colorPicker = containerEl.querySelector(".font-color-picker");
+
+        const linkModalOverlay = document.getElementById("link-modal-overlay");
+        const linkUrlInput = document.getElementById("link-url-input");
+        const linkConfirmBtn = document.getElementById("link-modal-confirm");
+        const linkCancelBtn = document.getElementById("link-modal-cancel");
+
+        const imageModalOverlay = document.getElementById("image-modal-overlay");
+        const imageUploadInput = document.getElementById("image-upload-input");
+        const imagePreview = document.getElementById("image-preview");
+        const imageConfirmBtn = document.getElementById("image-modal-confirm");
+        const imageCancelBtn = document.getElementById("image-modal-cancel");
+
+        if(createLinkBtn) createLinkBtn.onclick = (e) => {
+            e.preventDefault();
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0 || selection.toString().trim() === "") { alert("Prima seleziona il testo da trasformare in link."); return; }
+            savedSelectionRange = selection.getRangeAt(0).cloneRange();
+            linkModalOverlay.classList.add("show");
+            linkUrlInput.value = "https://";
+            linkUrlInput.focus();
+        };
+
+        if(unlinkBtn) unlinkBtn.onclick = (e) => { e.preventDefault(); document.execCommand("unlink", false, null); descriptionContainer.focus(); };
+
+        const closeLinkModal = () => { linkModalOverlay.classList.remove("show"); savedSelectionRange = null; };
+        linkConfirmBtn.onclick = () => {
+            const url = linkUrlInput.value.trim();
+            if (url && savedSelectionRange) {
+                descriptionContainer.focus();
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelectionRange);
+                document.execCommand("createLink", false, url);
+            }
+            closeLinkModal();
+        };
+        linkCancelBtn.onclick = closeLinkModal;
+        linkModalOverlay.onclick = (e) => { if (e.target === linkModalOverlay) closeLinkModal(); };
+        
+        const resetImageModal = () => { imageUploadInput.value = null; imagePreview.src = ""; imagePreview.classList.remove("show"); };
+        if(insertImageBtn) insertImageBtn.onclick = (e) => {
+            e.preventDefault();
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) savedSelectionRange = selection.getRangeAt(0).cloneRange();
+            imageModalOverlay.classList.add("show");
+        };
+
+        imageUploadInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => { imagePreview.src = event.target.result; imagePreview.classList.add("show"); };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        const closeImageModal = () => { imageModalOverlay.classList.remove("show"); resetImageModal(); savedSelectionRange = null; };
+        imageConfirmBtn.onclick = () => {
+            const imgSrc = imagePreview.src;
+            if (imgSrc && savedSelectionRange) {
+                descriptionContainer.focus();
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelectionRange);
+                const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
+                document.execCommand("insertHTML", false, imgTag);
+            }
+            closeImageModal();
+        };
+        imageCancelBtn.onclick = closeImageModal;
+        imageModalOverlay.onclick = (e) => { if (e.target === imageModalOverlay) closeImageModal(); };
+        
+        const getCurrentFontSize = () => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return 3;
+            let p = sel.getRangeAt(0).commonAncestorContainer;
+            if (p.nodeType === 3) p = p.parentNode;
+            while (p && p.tagName !== "FONT" && p !== descriptionContainer) p = p.parentNode;
+            return (p && p.tagName === "FONT" && p.size) ? parseInt(p.size, 10) : 3;
+        };
+
+        const changeFontSize = (dir) => {
+            let s = getCurrentFontSize();
+            let newS = (dir === "increase") ? Math.min(7, s + 1) : Math.max(1, s - 1);
+            document.execCommand("fontSize", false, newS);
+            descriptionContainer.focus();
+        };
+
+        if(increaseFontBtn) increaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("increase"); };
+        if(decreaseFontBtn) decreaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("decrease"); };
+        if(colorPicker) colorPicker.addEventListener("input", (e) => document.execCommand("foreColor", false, e.target.value));
     }
 
     /*** Render ***/
@@ -290,7 +474,7 @@
             const button = document.createElement("button");
             button.className = "category-pill";
             if (id === state.activeCategoryId) button.classList.add("active");
-            
+          
             const textSpan = document.createElement('span');
             textSpan.textContent = text;
             button.appendChild(textSpan);
@@ -357,7 +541,7 @@
             unfavoriteIcon.title = "Rimuovi dai preferiti";
             unfavoriteIcon.onclick = async (e) => {
                 e.stopPropagation();
-                
+              
                 const newData = JSON.parse(JSON.stringify(state.allData));
                 const promptToUpdate = newData
                     .find(c => c.id === item.category.id)?.subcategories
@@ -369,7 +553,7 @@
                     await updateStateAndSave(newData);
                 }
             };
-            
+          
             el.append(nameSpan, unfavoriteIcon);
             listContainer.appendChild(el);
         });
@@ -431,7 +615,7 @@
 
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'item-actions';
-            
+          
             const editIcon = document.createElement("i");
             editIcon.className = "fa-solid fa-pencil edit-icon";
             editIcon.title = "Modifica nome sottocategoria";
@@ -441,7 +625,7 @@
             deleteIcon.className = "fa-solid fa-trash-can delete-icon";
             deleteIcon.title = "Elimina sottocategoria";
             deleteIcon.onclick = e => { e.stopPropagation(); deleteSubcategory(subcat.id, category.id); };
-            
+          
             actionsDiv.append(editIcon, deleteIcon);
             item.append(nameSpan, actionsDiv);
             listContainer.appendChild(item);
@@ -478,7 +662,7 @@
             deleteIcon.className = "fa-solid fa-trash-can delete-icon";
             deleteIcon.title = "Elimina prompt";
             deleteIcon.onclick = e => { e.stopPropagation(); deletePrompt(prompt.id, subcategory.id, parentCategory.id); };
-            
+          
             actionsDiv.append(deleteIcon);
             item.append(nameSpan, actionsDiv);
             listContainer.appendChild(item);
@@ -494,7 +678,7 @@
             state.recents.unshift(recentEntry);
             if (state.recents.length > 20) state.recents.pop();
         }
-        
+      
         let backText = "Torna alla categoria";
         if (origin === 'search') backText = "Torna ai risultati";
         if (origin === 'favorites') backText = "Torna ai preferiti";
@@ -521,19 +705,20 @@
                         <button id="btnSaveTitle" class="add-button">Salva Titolo</button>
                     </div>
                 </div>
-                <div id="formatting-toolbar">
+                <div class="formatting-toolbar" id="detail-formatting-toolbar">
                     <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
                     <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
                     <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
                     <button data-command="insertUnorderedList" title="Elenco puntato"><i class="fa-solid fa-list-ul"></i></button>
-                    <button id="create-link-btn" title="Crea Link"><i class="fa-solid fa-link"></i></button>
-                    <button id="unlink-btn" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
-                    <button id="insert-image-btn" title="Inserisci Immagine"><i class="fa-solid fa-image"></i></button>
-                    <button id="increase-font-btn" title="Aumenta testo"><i class="fa-solid fa-plus"></i></button>
-                    <button id="decrease-font-btn" title="Riduci testo"><i class="fa-solid fa-minus"></i></button>
+                    <button class="create-link-btn" title="Crea Link"><i class="fa-solid fa-link"></i></button>
+                    <button class="unlink-btn" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
+                    <button class="insert-image-btn" title="Inserisci Immagine"><i class="fa-solid fa-image"></i></button>
+                    <button class="increase-font-btn" title="Aumenta testo"><i class="fa-solid fa-plus"></i></button>
+                    <button class="decrease-font-btn" title="Riduci testo"><i class="fa-solid fa-minus"></i></button>
                     <div class="color-picker-wrapper" title="Colore testo">
-                        <i class="fa-solid fa-palette"></i><input type="color" id="fontColorPicker">
+                        <i class="fa-solid fa-palette"></i><input type="color" class="font-color-picker">
                     </div>
+                    <button data-command="removeFormat" title="Rimuovi formattazione colore"><i class="fa-solid fa-eraser"></i></button>
                     <button id="btnSaveChanges" class="add-button">Salva Modifiche</button>
                 </div>
                 <div class="prompt-description-container" id="detail-description">${prompt.description || ""}</div>
@@ -542,115 +727,24 @@
         const backBtn = document.getElementById("back-to-list");
         const editBtn = document.getElementById("edit-prompt-btn");
         const descriptionContainer = document.getElementById("detail-description");
-        const formattingToolbar = document.getElementById("formatting-toolbar");
+        const formattingToolbar = document.getElementById("detail-formatting-toolbar");
         const saveChangesBtn = document.getElementById("btnSaveChanges");
         const copyBtn = document.querySelector("#prompt-actions .fa-copy");
         const starBtn = document.querySelector("#prompt-actions .fa-star");
-        const colorPicker = document.getElementById("fontColorPicker");
-        const increaseFontBtn = document.getElementById("increase-font-btn");
-        const decreaseFontBtn = document.getElementById("decrease-font-btn");
 
-        // Title editing elements
         const titleH1 = document.getElementById("prompt-title-h1");
         const editTitleBtn = document.getElementById("edit-title-btn");
         const saveTitleBtn = document.getElementById("btnSaveTitle");
 
-        // Link modal
-        const createLinkBtn = document.getElementById("create-link-btn");
-        const unlinkBtn = document.getElementById("unlink-btn");
-        const linkModalOverlay = document.getElementById("link-modal-overlay");
-        const linkUrlInput = document.getElementById("link-url-input");
-        const linkConfirmBtn = document.getElementById("link-modal-confirm");
-        const linkCancelBtn = document.getElementById("link-modal-cancel");
-
-        // Image modal
-        const insertImageBtn = document.getElementById("insert-image-btn");
-        const imageModalOverlay = document.getElementById("image-modal-overlay");
-        const imageUploadInput = document.getElementById("image-upload-input");
-        const imagePreview = document.getElementById("image-preview");
-        const imageConfirmBtn = document.getElementById("image-modal-confirm");
-        const imageCancelBtn = document.getElementById("image-modal-cancel");
-
-        createLinkBtn.onclick = (e) => {
-            e.preventDefault();
-            const selection = window.getSelection();
-            if (selection.rangeCount === 0 || selection.toString().trim() === "") { alert("Prima seleziona il testo da trasformare in link."); return; }
-            savedSelectionRange = selection.getRangeAt(0).cloneRange();
-            linkModalOverlay.classList.add("show");
-            linkUrlInput.value = "https://";
-            linkUrlInput.focus();
-        };
-        unlinkBtn.onclick = (e) => { e.preventDefault(); document.execCommand("unlink", false, null); descriptionContainer.focus(); };
-        const closeLinkModal = () => { linkModalOverlay.classList.remove("show"); savedSelectionRange = null; };
-        linkConfirmBtn.onclick = () => {
-            const url = linkUrlInput.value.trim();
-            if (url && savedSelectionRange) {
-                descriptionContainer.focus();
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(savedSelectionRange);
-                document.execCommand("createLink", false, url);
-            }
-            closeLinkModal();
-        };
-        linkCancelBtn.onclick = closeLinkModal;
-        linkModalOverlay.onclick = (e) => { if (e.target === linkModalOverlay) closeLinkModal(); };
-
-        const resetImageModal = () => { imageUploadInput.value = null; imagePreview.src = ""; imagePreview.classList.remove("show"); };
-        insertImageBtn.onclick = (e) => {
-            e.preventDefault();
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) savedSelectionRange = selection.getRangeAt(0).cloneRange();
-            imageModalOverlay.classList.add("show");
-        };
-        imageUploadInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => { imagePreview.src = event.target.result; imagePreview.classList.add("show"); };
-                reader.readAsDataURL(file);
-            }
-        };
-        const closeImageModal = () => { imageModalOverlay.classList.remove("show"); resetImageModal(); savedSelectionRange = null; };
-        imageConfirmBtn.onclick = () => {
-            const imgSrc = imagePreview.src;
-            if (imgSrc && savedSelectionRange) {
-                descriptionContainer.focus();
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(savedSelectionRange);
-                const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
-                document.execCommand("insertHTML", false, imgTag);
-            }
-            closeImageModal();
-        };
-        imageCancelBtn.onclick = closeImageModal;
-        imageModalOverlay.onclick = (e) => { if (e.target === imageModalOverlay) closeImageModal(); };
-
-        const getCurrentFontSize = () => {
-            const sel = window.getSelection();
-            if (!sel.rangeCount) return 3;
-            let p = sel.getRangeAt(0).commonAncestorContainer;
-            if (p.nodeType === 3) p = p.parentNode;
-            while (p && p.tagName !== "FONT" && p !== descriptionContainer) p = p.parentNode;
-            return (p && p.tagName === "FONT" && p.size) ? parseInt(p.size, 10) : 3;
-        };
-        const changeFontSize = (dir) => {
-            let s = getCurrentFontSize();
-            let newS = (dir === "increase") ? Math.min(7, s + 1) : Math.max(1, s - 1);
-            document.execCommand("fontSize", false, newS);
-            descriptionContainer.focus();
-        };
-        increaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("increase"); };
-        decreaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("decrease"); };
-        colorPicker.addEventListener("input", (e) => document.execCommand("foreColor", false, e.target.value));
+        attachEditorLogic(document.querySelector('.prompt-detail-view'));
+        
         copyBtn.onclick = () => {
             if (!descriptionContainer.innerText) return alert("Nessuna descrizione da copiare.");
             navigator.clipboard.writeText(descriptionContainer.innerText)
                 .then(() => alert("Descrizione copiata!"))
                 .catch(err => console.error("Errore copia:", err));
         };
-        
+      
         backBtn.onclick = (e) => {
             e.preventDefault();
             if (origin === 'search') {
@@ -672,10 +766,13 @@
             document.getElementById("delete-prompt-detail-btn").onclick = () => deletePrompt(prompt.id, parentSub.id, parentCat.id);
         }
 
-        editBtn.onclick = () => { descriptionContainer.contentEditable = true; formattingToolbar.classList.add("show"); saveChangesBtn.classList.add("show"); descriptionContainer.focus(); };
-        formattingToolbar.querySelectorAll("button[data-command]").forEach(btn => {
-            btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };
-        });
+        editBtn.onclick = () => { 
+            descriptionContainer.contentEditable = true; 
+            formattingToolbar.classList.add("show"); 
+            saveChangesBtn.classList.add("show"); 
+            descriptionContainer.focus(); 
+        };
+        
         saveChangesBtn.onclick = async () => {
             const newData = JSON.parse(JSON.stringify(state.allData));
             const promptToUpdate = newData.find(c => c.id === parentCat.id)
@@ -701,7 +798,6 @@
             }
         };
 
-        // Title editing logic
         editTitleBtn.onclick = () => {
             titleH1.contentEditable = true;
             titleH1.focus();
@@ -714,7 +810,7 @@
                 titleH1.contentEditable = false;
                 saveTitleBtn.style.display = 'none';
                 editTitleBtn.style.display = 'inline-block';
-                titleH1.innerText = prompt.title; // revert if empty or unchanged
+                titleH1.innerText = prompt.title;
                 return;
             }
             const newData = JSON.parse(JSON.stringify(state.allData));
@@ -740,23 +836,17 @@
 
         state.allData.forEach(cat => {
             const catMatch = normalizeStr(cat.name).includes(term);
-
             cat.subcategories?.forEach(sub => {
                 const subMatch = normalizeStr(sub.name).includes(term);
-
                 sub.prompts?.forEach(p => {
                     if (seen.has(p.id)) return;
-
                     tempDiv.innerHTML = p.description || "";
                     const descText = normalizeStr(tempDiv.textContent || "");
                     const titleMatch = normalizeStr(p.title).includes(term);
                     const descMatch  = descText.includes(term);
-
                     if (catMatch || subMatch || titleMatch || descMatch) {
                         results.push({
-                            prompt: p,
-                            subcategory: sub,
-                            category: cat,
+                            prompt: p, subcategory: sub, category: cat,
                             score: (titleMatch ? 3 : 0) + (subMatch ? 2 : 0) + (catMatch ? 1 : 0) + (descMatch ? 0.5 : 0)
                         });
                         seen.add(p.id);
@@ -852,10 +942,48 @@
             await updateStateAndSave(newData);
         }
     }
+    
     async function addPrompt(subcategoryId, categoryId) {
         const title = prompt("Titolo del nuovo prompt:");
         if (!title || !title.trim()) return;
-        const description = prompt("Descrizione del prompt:", "") || "";
+
+        const getDescriptionFromModal = () => {
+            return new Promise(resolve => {
+                const overlay = document.getElementById('add-prompt-modal-overlay');
+                const editor = document.getElementById('add-prompt-description-editor');
+                const confirmBtn = document.getElementById('add-prompt-modal-confirm');
+                const cancelBtn = document.getElementById('add-prompt-modal-cancel');
+
+                editor.innerHTML = '';
+                overlay.classList.add('show');
+                editor.focus();
+                
+                if(!addPromptEditorInitialized) {
+                    attachEditorLogic(document.getElementById('add-prompt-modal-content'));
+                    addPromptEditorInitialized = true;
+                }
+
+                const confirmHandler = () => cleanupAndResolve(editor.innerHTML);
+                const cancelHandler = () => cleanupAndResolve(null);
+                const overlayHandler = (e) => { if (e.target === overlay) cleanupAndResolve(null); };
+
+                const cleanupAndResolve = (value) => {
+                    overlay.classList.remove('show');
+                    confirmBtn.removeEventListener('click', confirmHandler);
+                    cancelBtn.removeEventListener('click', cancelHandler);
+                    overlay.removeEventListener('click', overlayHandler);
+                    resolve(value);
+                };
+
+                confirmBtn.addEventListener('click', confirmHandler, { once: true });
+                cancelBtn.addEventListener('click', cancelHandler, { once: true });
+                overlay.addEventListener('click', overlayHandler, { once: true });
+            });
+        };
+
+        const description = await getDescriptionFromModal();
+        if (description === null) return; 
+
         const newData = JSON.parse(JSON.stringify(state.allData));
         const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
         if (subcat) {
@@ -864,6 +992,7 @@
             await updateStateAndSave(newData);
         }
     }
+
     async function deleteCategory(categoryId) {
         if (confirm("Sei sicuro di voler eliminare questa categoria e TUTTO il suo contenuto?")) {
             const newData = state.allData.filter(c => c.id !== categoryId);
@@ -899,8 +1028,33 @@
 
     /*** Eventi UI ***/
     const setupEventListeners = () => {
-        toolBtn?.addEventListener("click", (e) => { e.stopPropagation(); toolMenu.classList.toggle("show"); });
-        window.addEventListener("click", () => toolMenu.classList.remove("show"));
+        const closeAllMenus = () => {
+            toolMenu.classList.remove("show");
+            themeMenu.classList.remove("show");
+        };
+
+        window.addEventListener("click", closeAllMenus);
+
+        themeBtn?.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isShown = themeMenu.classList.toggle("show");
+            if (isShown) toolMenu.classList.remove("show");
+        });
+        
+        toolBtn?.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isShown = toolMenu.classList.toggle("show");
+            if(isShown) themeMenu.classList.remove("show");
+        });
+
+        themeMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const theme = e.target.closest('button')?.dataset.theme;
+            if (theme) {
+                applyTheme(theme);
+                closeAllMenus();
+            }
+        });
 
         importBtn?.addEventListener("click", () => backupInput.click());
         backupInput?.addEventListener("change", async (event) => {
@@ -944,9 +1098,8 @@
         await Database.init();
         state.allData = await Database.load();
         const savedRecents = localStorage.getItem("promptManagerRecents");
-        if (savedRecents) {
-            state.recents = JSON.parse(savedRecents);
-        }
+        if (savedRecents) state.recents = JSON.parse(savedRecents);
+        
         state.activeCategoryId = 'favorites';
         setupEventListeners();
         renderUI();

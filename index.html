@@ -122,13 +122,13 @@
         #link-modal-overlay.show, #image-modal-overlay.show, #add-prompt-modal-overlay.show { display: flex; }
         #link-modal-content, #image-modal-content, #add-prompt-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; }
         #link-modal-content, #image-modal-content { max-width: 450px; }
-        #add-prompt-modal-content { max-width: 800px; } /* Box più grande per l'editor */
+        #add-prompt-modal-content { max-width: 800px; }
         #link-modal-content h3, #image-modal-content h3, #add-prompt-modal-content h3 { margin-top: 0; color: var(--text-primary); }
         #link-url-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
         #image-preview-container { margin: 15px 0; min-height: 100px; border: 2px dashed var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #image-preview { max-width: 100%; max-height: 200px; display: none; }
         #image-preview.show { display: block; }
-        #add-prompt-modal-content .formatting-toolbar { display: flex; } /* Rendi la toolbar sempre visibile nel modale */
+        #add-prompt-modal-content .formatting-toolbar { display: flex; }
         #add-prompt-modal-content .prompt-description-container { min-height: 250px; }
         #link-modal-actions, #image-modal-actions, #add-prompt-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         #link-modal-actions button, #image-modal-actions button, #add-prompt-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
@@ -302,7 +302,7 @@
         const savedTheme = localStorage.getItem('promptManagerTheme') || 'dark';
         applyTheme(savedTheme);
     }
-    loadTheme(); // Applica il tema salvato il prima possibile
+    loadTheme();
 
     /*** Undo/Redo ***/
     function updateUndoRedoButtons() {
@@ -339,6 +339,22 @@
     function attachEditorLogic(containerEl) {
         const descriptionContainer = containerEl.querySelector('.prompt-description-container[contenteditable="true"]');
         if (!descriptionContainer) return;
+
+        // NUOVA GESTIONE 'PASTE' PER PREVENIRE BLOCCHI
+        descriptionContainer.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            const range = selection.getRangeAt(0);
+            range.deleteContents();
+            const textNode = document.createTextNode(text);
+            range.insertNode(textNode);
+            range.setStartAfter(textNode);
+            range.setEndAfter(textNode);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        });
 
         containerEl.querySelectorAll(".formatting-toolbar button[data-command]").forEach(btn => {
             btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };

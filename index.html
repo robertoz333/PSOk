@@ -53,7 +53,7 @@
         .toolbar-btn { color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: all .2s; min-height: 70px; }
         .toolbar-btn:hover { opacity: .9; transform: translateY(-2px); }
         .toolbar-btn:disabled { background-color: #555 !important; cursor: not-allowed; opacity: .5; transform: none; }
-        .btn-green { background-color: var(--btn-green); } .btn-yellow { background-color: #f7b731; color: #333; } .btn-blue { background-color: #007bff; } .btn-dark-blue { background-color: #0d47a1; } .btn-red { background-color: var(--btn-red); }
+        .btn-green { background-color: var(--btn-green); } .btn-yellow { background-color: #f7b731; color: #333; } .btn-blue { background-color: #007bff; } .btn-dark-blue { background-color: #0d47a1; } .btn-red { background-color: var(--btn-red); } .btn-purple { background-color: #6f42c1; }
         .content-container { max-width: 1200px; margin: 0 auto; }
         .selection-container { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -118,22 +118,34 @@
         mark { background-color: var(--star-yellow); color: #121417; padding: 1px 3px; border-radius: 3px; }
         
         /* Stili per i modali */
-        #link-modal-overlay, #image-modal-overlay, #add-prompt-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        #link-modal-overlay.show, #image-modal-overlay.show, #add-prompt-modal-overlay.show { display: flex; }
-        #link-modal-content, #image-modal-content, #add-prompt-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; }
+        .modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; }
         #link-modal-content, #image-modal-content { max-width: 450px; }
         #add-prompt-modal-content { max-width: 800px; }
-        #link-modal-content h3, #image-modal-content h3, #add-prompt-modal-content h3 { margin-top: 0; color: var(--text-primary); }
+        #merge-modal-content { max-width: 700px; }
+        .modal-content h3 { margin-top: 0; color: var(--text-primary); }
         #link-url-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
         #image-preview-container { margin: 15px 0; min-height: 100px; border: 2px dashed var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #image-preview { max-width: 100%; max-height: 200px; display: none; }
         #image-preview.show { display: block; }
         #add-prompt-modal-content .formatting-toolbar { display: flex; }
         #add-prompt-modal-content .prompt-description-container { min-height: 250px; }
-        #link-modal-actions, #image-modal-actions, #add-prompt-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        #link-modal-actions button, #image-modal-actions button, #add-prompt-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
-        #link-modal-cancel, #image-modal-cancel, #add-prompt-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
-        #link-modal-confirm, #image-modal-confirm, #add-prompt-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+        .modal-cancel-btn { background-color: var(--element-bg); color: var(--text-secondary); }
+        .modal-confirm-btn { background-color: var(--primary-accent); color: var(--text-primary); }
+        .modal-confirm-btn:disabled { background-color: #555; cursor: not-allowed; }
+
+        /* Stili specifici per il modale di accorpamento */
+        #merge-selection-container { display: flex; gap: 20px; }
+        .merge-column { flex: 1; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
+        .merge-column h4 { margin-top: 0; color: var(--text-secondary); }
+        #merge-source-list, #merge-destination-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .merge-column label { display: block; padding: 8px; border-radius: 4px; cursor: pointer; transition: background-color .2s; }
+        .merge-column label:hover { background-color: var(--element-bg-hover); }
+        .merge-column label.disabled { cursor: not-allowed; opacity: 0.5; text-decoration: line-through; }
+        .merge-column input { margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -158,6 +170,7 @@
             <button class="toolbar-btn btn-yellow" id="btnRipristina"><i class="fa-solid fa-arrow-rotate-right"></i><span>Ripristina</span></button>
             <button class="toolbar-btn btn-blue" id="btnBackup"><i class="fa-solid fa-download"></i><span>Backup</span></button>
             <button class="toolbar-btn btn-dark-blue" id="btnImporta"><i class="fa-solid fa-upload"></i><span>Importa</span></button>
+            <button class="toolbar-btn btn-purple" id="btnMerge"><i class="fa-solid fa-object-group"></i><span>Accorpa</span></button>
         </div>
     </div>
 </header>
@@ -176,36 +189,36 @@
 </main>
 
 <!-- Modali -->
-<div id="link-modal-overlay">
-    <div id="link-modal-content">
+<div id="link-modal-overlay" class="modal-overlay">
+    <div id="link-modal-content" class="modal-content">
         <h3>Inserisci URL</h3>
         <input type="url" id="link-url-input" placeholder="https://esempio.com" />
-        <div id="link-modal-actions">
-            <button id="link-modal-cancel">Annulla</button>
-            <button id="link-modal-confirm">Conferma</button>
+        <div class="modal-actions">
+            <button id="link-modal-cancel" class="modal-cancel-btn">Annulla</button>
+            <button id="link-modal-confirm" class="modal-confirm-btn">Conferma</button>
         </div>
     </div>
 </div>
 
-<div id="image-modal-overlay">
-    <div id="image-modal-content">
+<div id="image-modal-overlay" class="modal-overlay">
+    <div id="image-modal-content" class="modal-content">
         <h3>Carica Immagine</h3>
         <input type="file" id="image-upload-input" accept="image/*" />
         <div id="image-preview-container">
             <img id="image-preview" alt="Anteprima immagine" />
         </div>
-        <div id="image-modal-actions">
-            <button id="image-modal-cancel">Annulla</button>
-            <button id="image-modal-confirm">Conferma</button>
+        <div class="modal-actions">
+            <button id="image-modal-cancel" class="modal-cancel-btn">Annulla</button>
+            <button id="image-modal-confirm" class="modal-confirm-btn">Conferma</button>
         </div>
     </div>
 </div>
 
-<div id="add-prompt-modal-overlay">
-    <div id="add-prompt-modal-content">
+<div id="add-prompt-modal-overlay" class="modal-overlay">
+    <div id="add-prompt-modal-content" class="modal-content">
         <h3>Nuovo Prompt</h3>
         <div class="formatting-toolbar">
-            <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+             <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
             <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
             <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
             <button data-command="insertUnorderedList" title="Elenco puntato"><i class="fa-solid fa-list-ul"></i></button>
@@ -220,13 +233,32 @@
             <button data-command="removeFormat" title="Rimuovi formattazione colore"><i class="fa-solid fa-eraser"></i></button>
         </div>
         <div class="prompt-description-container" contenteditable="true" id="add-prompt-description-editor"></div>
-        <div id="add-prompt-modal-actions">
-            <button id="add-prompt-modal-cancel">Annulla</button>
-            <button id="add-prompt-modal-confirm">Conferma</button>
+        <div class="modal-actions">
+            <button id="add-prompt-modal-cancel" class="modal-cancel-btn">Annulla</button>
+            <button id="add-prompt-modal-confirm" class="modal-confirm-btn">Conferma</button>
         </div>
     </div>
 </div>
 
+<div id="merge-modal-overlay" class="modal-overlay">
+    <div id="merge-modal-content" class="modal-content">
+        <h3>Accorpa Categorie</h3>
+        <div id="merge-selection-container">
+            <div class="merge-column">
+                <h4>Categorie da unire (Sorgenti)</h4>
+                <div id="merge-source-list"></div>
+            </div>
+            <div class="merge-column">
+                <h4>Categoria di destinazione</h4>
+                <div id="merge-destination-list"></div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button id="merge-modal-cancel" class="modal-cancel-btn">Annulla</button>
+            <button id="merge-modal-confirm" class="modal-confirm-btn" disabled>Accorpa</button>
+        </div>
+    </div>
+</div>
 
 <script>
 (async () => {
@@ -292,6 +324,8 @@
     const btnBackup = document.getElementById("btnBackup");
     const searchInput = document.getElementById("search-input");
     const searchIcon = document.getElementById("search-icon");
+    const btnMerge = document.getElementById("btnMerge");
+
 
     /*** Gestione Tema ***/
     function applyTheme(theme) {
@@ -340,7 +374,6 @@
         const descriptionContainer = containerEl.querySelector('.prompt-description-container[contenteditable="true"]');
         if (!descriptionContainer) return;
 
-        // NUOVA GESTIONE 'PASTE' PER PREVENIRE BLOCCHI
         descriptionContainer.addEventListener('paste', (e) => {
             e.preventDefault();
             const text = (e.clipboardData || window.clipboardData).getData('text/plain');
@@ -366,12 +399,10 @@
         const increaseFontBtn = containerEl.querySelector(".increase-font-btn");
         const decreaseFontBtn = containerEl.querySelector(".decrease-font-btn");
         const colorPicker = containerEl.querySelector(".font-color-picker");
-
         const linkModalOverlay = document.getElementById("link-modal-overlay");
         const linkUrlInput = document.getElementById("link-url-input");
         const linkConfirmBtn = document.getElementById("link-modal-confirm");
         const linkCancelBtn = document.getElementById("link-modal-cancel");
-
         const imageModalOverlay = document.getElementById("image-modal-overlay");
         const imageUploadInput = document.getElementById("image-upload-input");
         const imagePreview = document.getElementById("image-preview");
@@ -1042,6 +1073,127 @@
         }
     }
 
+    /*** Logica di Accorpamento Categorie ***/
+    function openMergeModal() {
+        if (state.allData.length < 2) {
+            alert("Devono esserci almeno due categorie per poterle accorpare.");
+            return;
+        }
+
+        const overlay = document.getElementById('merge-modal-overlay');
+        const sourceList = document.getElementById('merge-source-list');
+        const destList = document.getElementById('merge-destination-list');
+        const confirmBtn = document.getElementById('merge-modal-confirm');
+        const cancelBtn = document.getElementById('merge-modal-cancel');
+        const content = document.getElementById('merge-modal-content');
+
+        sourceList.innerHTML = '';
+        destList.innerHTML = '';
+        confirmBtn.disabled = true;
+
+        state.allData.forEach(cat => {
+            sourceList.innerHTML += `
+                <label>
+                    <input type="checkbox" name="source-category" value="${cat.id}">
+                    ${cat.name}
+                </label>`;
+            destList.innerHTML += `
+                <label>
+                    <input type="radio" name="destination-category" value="${cat.id}">
+                    ${cat.name}
+                </label>`;
+        });
+
+        const updateMergeModalState = () => {
+            const sources = content.querySelectorAll('input[name="source-category"]:checked');
+            const dest = content.querySelector('input[name="destination-category"]:checked');
+
+            content.querySelectorAll('input[name="source-category"], input[name="destination-category"]').forEach(el => {
+                el.disabled = false;
+                el.parentElement.classList.remove('disabled');
+            });
+
+            if (dest) {
+                const sourceCheckbox = content.querySelector(`input[name="source-category"][value="${dest.value}"]`);
+                if(sourceCheckbox) {
+                    sourceCheckbox.disabled = true;
+                    sourceCheckbox.parentElement.classList.add('disabled');
+                }
+            }
+
+            sources.forEach(source => {
+                const destRadio = content.querySelector(`input[name="destination-category"][value="${source.value}"]`);
+                if(destRadio) {
+                    destRadio.disabled = true;
+                    destRadio.parentElement.classList.add('disabled');
+                }
+            });
+
+            confirmBtn.disabled = !(sources.length > 0 && dest);
+        };
+        
+        const onConfirm = () => {
+            performMerge();
+            closeModal();
+        };
+
+        const closeModal = () => {
+            overlay.classList.remove('show');
+            content.removeEventListener('change', updateMergeModalState);
+            confirmBtn.removeEventListener('click', onConfirm);
+            cancelBtn.removeEventListener('click', closeModal);
+        };
+        
+        content.addEventListener('change', updateMergeModalState);
+        confirmBtn.addEventListener('click', onConfirm);
+        cancelBtn.addEventListener('click', closeModal);
+        overlay.classList.add('show');
+    }
+
+    async function performMerge() {
+        const content = document.getElementById('merge-modal-content');
+        const sourceInputs = [...content.querySelectorAll('input[name="source-category"]:checked')];
+        const destInput = content.querySelector('input[name="destination-category"]:checked');
+
+        if (!destInput || sourceInputs.length === 0) return;
+
+        const sourceIds = sourceInputs.map(el => el.value);
+        const destinationId = destInput.value;
+        const destCategoryName = state.allData.find(c => c.id === destinationId)?.name;
+
+        if (confirm(`Sei sicuro di voler accorpare ${sourceIds.length} categorie in "${destCategoryName}"? Le categorie sorgenti originali verranno eliminate.`)) {
+            const newData = JSON.parse(JSON.stringify(state.allData));
+
+            const destCat = newData.find(c => c.id === destinationId);
+            if (!destCat) return;
+
+            const subcatMap = new Map(destCat.subcategories.map(s => [normalizeStr(s.name), s]));
+
+            for (const sourceId of sourceIds) {
+                const sourceCat = newData.find(c => c.id === sourceId);
+                if (!sourceCat || !sourceCat.subcategories) continue;
+
+                for (const sourceSub of sourceCat.subcategories) {
+                    const normalizedName = normalizeStr(sourceSub.name);
+                    const existingDestSub = subcatMap.get(normalizedName);
+
+                    if (existingDestSub) {
+                        existingDestSub.prompts.push(...sourceSub.prompts);
+                    } else {
+                        destCat.subcategories.push(sourceSub);
+                        subcatMap.set(normalizedName, sourceSub);
+                    }
+                }
+            }
+
+            destCat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+            const finalData = newData.filter(c => !sourceIds.includes(c.id));
+            state.activeCategoryId = destinationId;
+            await updateStateAndSave(finalData);
+        }
+    }
+
+
     /*** Eventi UI ***/
     const setupEventListeners = () => {
         const closeAllMenus = () => {
@@ -1072,6 +1224,7 @@
             }
         });
 
+        btnMerge?.addEventListener("click", openMergeModal);
         importBtn?.addEventListener("click", () => backupInput.click());
         backupInput?.addEventListener("change", async (event) => {
             const file = event.target.files[0];

@@ -546,6 +546,7 @@
             min-height: 200px;
             line-height: 1.7;
             color: var(--text-primary);
+            white-space: pre-wrap;
         }
 
         .prompt-description-container a {
@@ -1068,17 +1069,48 @@
                 const descriptionContainer = containerEl.querySelector('.prompt-description-container[contenteditable="true"]');
                 if (!descriptionContainer) return;
 
+                // EVENTO PASTE CORRETTO - Preserva la formattazione
                 descriptionContainer.addEventListener('paste', (e) => {
                     e.preventDefault();
-                    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                    
+                    // Prova prima a ottenere l'HTML formattato
+                    let htmlContent = (e.clipboardData || window.clipboardData).getData('text/html');
+                    
                     const selection = window.getSelection();
                     if (!selection.rangeCount) return;
                     const range = selection.getRangeAt(0);
                     range.deleteContents();
-                    const textNode = document.createTextNode(text);
-                    range.insertNode(textNode);
-                    range.setStartAfter(textNode);
-                    range.setEndAfter(textNode);
+                    
+                    if (htmlContent) {
+                        // Se c'è HTML, usalo preservando la formattazione
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = htmlContent;
+                        
+                        // Inserisci il contenuto HTML
+                        const frag = document.createDocumentFragment();
+                        let node;
+                        while ((node = tempDiv.firstChild)) {
+                            frag.appendChild(node);
+                        }
+                        range.insertNode(frag);
+                    } else {
+                        // Fallback: usa il testo normale e preserva gli a capo
+                        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                        
+                        // Converti gli a capo in <br>
+                        const lines = text.split('\n');
+                        const frag = document.createDocumentFragment();
+                        lines.forEach((line, index) => {
+                            frag.appendChild(document.createTextNode(line));
+                            if (index < lines.length - 1) {
+                                frag.appendChild(document.createElement('br'));
+                            }
+                        });
+                        range.insertNode(frag);
+                    }
+                    
+                    // Riposiziona il cursore alla fine del contenuto incollato
+                    range.collapse(false);
                     selection.removeAllRanges();
                     selection.addRange(range);
                 });

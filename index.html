@@ -93,18 +93,33 @@
         .search-result-path { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
         .search-result-title { font-weight: 500; }
         mark { background-color: var(--star-yellow); color: var(--background-dark); padding: 1px 3px; border-radius: 3px; }
-        #link-modal-overlay, #image-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        #link-modal-overlay.show, #image-modal-overlay.show { display: flex; }
+        #link-modal-overlay, #image-modal-overlay, #new-prompt-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        #link-modal-overlay.show, #image-modal-overlay.show, #new-prompt-modal-overlay.show { display: flex; }
         #link-modal-content, #image-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 450px; }
-        #link-modal-content h3, #image-modal-content h3 { margin-top: 0; color: var(--text-primary); }
-        #link-url-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
+        #new-prompt-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+        #link-modal-content h3, #image-modal-content h3, #new-prompt-modal-content h3 { margin-top: 0; color: var(--text-primary); }
+        #link-url-input, #new-prompt-title-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
         #image-preview-container { margin: 15px 0; min-height: 100px; border: 2px dashed var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #image-preview { max-width: 100%; max-height: 200px; display: none; }
         #image-preview.show { display: block; }
-        #link-modal-actions, #image-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-        #link-modal-actions button, #image-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
-        #link-modal-cancel, #image-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
-        #link-modal-confirm, #image-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
+        #link-modal-actions, #image-modal-actions, #new-prompt-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        #link-modal-actions button, #image-modal-actions button, #new-prompt-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+        #link-modal-cancel, #image-modal-cancel, #new-prompt-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
+        #link-modal-confirm, #image-modal-confirm, #new-prompt-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
+        
+        /* Stili per il nuovo editor del prompt */
+        #new-prompt-description { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 300px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; }
+        #new-prompt-description:focus { outline: 2px dashed var(--primary-accent); background-color: #1c1c1c; }
+        #new-prompt-description a { color: var(--star-yellow); }
+        #new-prompt-description img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; display: block; }
+        #new-prompt-formatting-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
+        #new-prompt-formatting-toolbar button { background: var(--element-bg); border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        #new-prompt-formatting-toolbar button:hover { background: var(--element-bg-hover); }
+        #new-prompt-formatting-toolbar button i { font-size: 16px; }
+        .new-prompt-color-picker-wrapper { position: relative; display: flex; align-items: center; justify-content: center; background: var(--element-bg); padding: 8px 12px; border-radius: 5px; }
+        .new-prompt-color-picker-wrapper:hover { background-color: var(--element-bg-hover); }
+        .new-prompt-color-picker-wrapper i { font-size: 16px; pointer-events: none; }
+        #newPromptFontColorPicker { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -162,6 +177,37 @@
         <div id="image-modal-actions">
             <button id="image-modal-cancel">Annulla</button>
             <button id="image-modal-confirm">Conferma</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal per nuovo prompt -->
+<div id="new-prompt-modal-overlay">
+    <div id="new-prompt-modal-content">
+        <h3>Crea Nuovo Prompt</h3>
+        <label style="color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Titolo:</label>
+        <input type="text" id="new-prompt-title-input" placeholder="Inserisci il titolo del prompt..." />
+        
+        <label style="color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Descrizione:</label>
+        <div id="new-prompt-formatting-toolbar">
+            <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+            <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+            <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
+            <button data-command="insertUnorderedList" title="Elenco puntato"><i class="fa-solid fa-list-ul"></i></button>
+            <button id="new-prompt-create-link-btn" title="Crea Link"><i class="fa-solid fa-link"></i></button>
+            <button id="new-prompt-unlink-btn" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
+            <button id="new-prompt-insert-image-btn" title="Inserisci Immagine"><i class="fa-solid fa-image"></i></button>
+            <button id="new-prompt-increase-font-btn" title="Aumenta testo"><i class="fa-solid fa-plus"></i></button>
+            <button id="new-prompt-decrease-font-btn" title="Riduci testo"><i class="fa-solid fa-minus"></i></button>
+            <div class="new-prompt-color-picker-wrapper" title="Colore testo">
+                <i class="fa-solid fa-palette"></i><input type="color" id="newPromptFontColorPicker">
+            </div>
+        </div>
+        <div id="new-prompt-description" contenteditable="true">Inserisci qui la descrizione del prompt...</div>
+        
+        <div id="new-prompt-modal-actions">
+            <button id="new-prompt-modal-cancel">Annulla</button>
+            <button id="new-prompt-modal-confirm">Salva Prompt</button>
         </div>
     </div>
 </div>
@@ -852,18 +898,205 @@
             await updateStateAndSave(newData);
         }
     }
+    
+    // Nuova funzione addPrompt con modal editor
     async function addPrompt(subcategoryId, categoryId) {
-        const title = prompt("Titolo del nuovo prompt:");
-        if (!title || !title.trim()) return;
-        const description = prompt("Descrizione del prompt:", "") || "";
-        const newData = JSON.parse(JSON.stringify(state.allData));
-        const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
-        if (subcat) {
-            subcat.prompts.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, title: title.trim(), description: description.trim(), favorite: false });
-            subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
-        }
+        const modal = document.getElementById("new-prompt-modal-overlay");
+        const titleInput = document.getElementById("new-prompt-title-input");
+        const descriptionEditor = document.getElementById("new-prompt-description");
+        const confirmBtn = document.getElementById("new-prompt-modal-confirm");
+        const cancelBtn = document.getElementById("new-prompt-modal-cancel");
+        const toolbar = document.getElementById("new-prompt-formatting-toolbar");
+        
+        // Reset del modal
+        titleInput.value = "";
+        descriptionEditor.innerHTML = "Inserisci qui la descrizione del prompt...";
+        
+        // Setup toolbar formattazione
+        const setupFormattingToolbar = () => {
+            const colorPicker = document.getElementById("newPromptFontColorPicker");
+            const increaseFontBtn = document.getElementById("new-prompt-increase-font-btn");
+            const decreaseFontBtn = document.getElementById("new-prompt-decrease-font-btn");
+            const createLinkBtn = document.getElementById("new-prompt-create-link-btn");
+            const unlinkBtn = document.getElementById("new-prompt-unlink-btn");
+            const insertImageBtn = document.getElementById("new-prompt-insert-image-btn");
+
+            // Comandi base di formattazione
+            toolbar.querySelectorAll("button[data-command]").forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    document.execCommand(btn.dataset.command, false, null);
+                    descriptionEditor.focus();
+                };
+            });
+
+            // Color picker
+            colorPicker.addEventListener("input", (e) => {
+                document.execCommand("foreColor", false, e.target.value);
+            });
+
+            // Font size
+            const getCurrentFontSize = () => {
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return 3;
+                let p = sel.getRangeAt(0).commonAncestorContainer;
+                if (p.nodeType === 3) p = p.parentNode;
+                while (p && p.tagName !== "FONT" && p !== descriptionEditor) p = p.parentNode;
+                return (p && p.tagName === "FONT" && p.size) ? parseInt(p.size, 10) : 3;
+            };
+
+            const changeFontSize = (dir) => {
+                let s = getCurrentFontSize();
+                let newS = (dir === "increase") ? Math.min(7, s + 1) : Math.max(1, s - 1);
+                document.execCommand("fontSize", false, newS);
+                descriptionEditor.focus();
+            };
+
+            increaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("increase"); };
+            decreaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("decrease"); };
+
+            // Link
+            createLinkBtn.onclick = (e) => {
+                e.preventDefault();
+                const selection = window.getSelection();
+                if (selection.rangeCount === 0 || selection.toString().trim() === "") {
+                    alert("Prima seleziona il testo da trasformare in link.");
+                    return;
+                }
+                savedSelectionRange = selection.getRangeAt(0).cloneRange();
+                const linkModalOverlay = document.getElementById("link-modal-overlay");
+                const linkUrlInput = document.getElementById("link-url-input");
+                linkModalOverlay.classList.add("show");
+                linkUrlInput.value = "https://";
+                linkUrlInput.focus();
+            };
+
+            unlinkBtn.onclick = (e) => {
+                e.preventDefault();
+                document.execCommand("unlink", false, null);
+                descriptionEditor.focus();
+            };
+
+            // Image
+            insertImageBtn.onclick = (e) => {
+                e.preventDefault();
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    savedSelectionRange = selection.getRangeAt(0).cloneRange();
+                }
+                const imageModalOverlay = document.getElementById("image-modal-overlay");
+                imageModalOverlay.classList.add("show");
+            };
+        };
+
+        setupFormattingToolbar();
+        
+        // Setup link modal confirm per il nuovo editor
+        const linkConfirmBtn = document.getElementById("link-modal-confirm");
+        const newLinkHandler = () => {
+            const linkUrlInput = document.getElementById("link-url-input");
+            const url = linkUrlInput.value.trim();
+            if (url && savedSelectionRange) {
+                descriptionEditor.focus();
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelectionRange);
+                document.execCommand("createLink", false, url);
+            }
+            document.getElementById("link-modal-overlay").classList.remove("show");
+            savedSelectionRange = null;
+        };
+        
+        // Setup image modal confirm per il nuovo editor
+        const imageConfirmBtn = document.getElementById("image-modal-confirm");
+        const newImageHandler = () => {
+            const imagePreview = document.getElementById("image-preview");
+            const imgSrc = imagePreview.src;
+            if (imgSrc && savedSelectionRange) {
+                descriptionEditor.focus();
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedSelectionRange);
+                const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
+                document.execCommand("insertHTML", false, imgTag);
+            }
+            document.getElementById("image-modal-overlay").classList.remove("show");
+            const imageUploadInput = document.getElementById("image-upload-input");
+            imageUploadInput.value = null;
+            imagePreview.src = "";
+            imagePreview.classList.remove("show");
+            savedSelectionRange = null;
+        };
+
+        // Rimuovi vecchi event listener se esistono
+        const newLinkConfirmBtn = linkConfirmBtn.cloneNode(true);
+        linkConfirmBtn.parentNode.replaceChild(newLinkConfirmBtn, linkConfirmBtn);
+        newLinkConfirmBtn.addEventListener("click", newLinkHandler);
+
+        const newImageConfirmBtn = imageConfirmBtn.cloneNode(true);
+        imageConfirmBtn.parentNode.replaceChild(newImageConfirmBtn, imageConfirmBtn);
+        newImageConfirmBtn.addEventListener("click", newImageHandler);
+        
+        // Pulisce il placeholder quando si clicca
+        descriptionEditor.onclick = function() {
+            if (this.innerHTML === "Inserisci qui la descrizione del prompt...") {
+                this.innerHTML = "";
+            }
+        };
+        
+        // Mostra il modal
+        modal.classList.add("show");
+        titleInput.focus();
+        
+        // Handler per conferma
+        const handleConfirm = async () => {
+            const title = titleInput.value.trim();
+            const description = descriptionEditor.innerHTML === "Inserisci qui la descrizione del prompt..." ? "" : descriptionEditor.innerHTML;
+            
+            if (!title) {
+                alert("Il titolo è obbligatorio!");
+                return;
+            }
+            
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
+            
+            if (subcat) {
+                subcat.prompts.push({
+                    id: `_${Math.random().toString(36).slice(2, 11)}`,
+                    title: title,
+                    description: description,
+                    favorite: false
+                });
+                subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
+                await updateStateAndSave(newData);
+            }
+            
+            modal.classList.remove("show");
+        };
+        
+        // Handler per annulla
+        const handleCancel = () => {
+            modal.classList.remove("show");
+        };
+        
+        // Rimuovi vecchi event listener
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        newConfirmBtn.addEventListener("click", handleConfirm);
+        
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener("click", handleCancel);
+        
+        // Chiudi modal cliccando fuori
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                handleCancel();
+            }
+        };
     }
+    
     async function deleteCategory(categoryId) {
         if (confirm("Sei sicuro di voler eliminare questa categoria e TUTTO il suo contenuto?")) {
             const newData = state.allData.filter(c => c.id !== categoryId);

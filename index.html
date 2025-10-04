@@ -30,7 +30,7 @@
         .toolbar-btn { color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: all .2s; min-height: 70px; }
         .toolbar-btn:hover { opacity: .9; transform: translateY(-2px); }
         .toolbar-btn:disabled { background-color: #555 !important; cursor: not-allowed; opacity: .5; transform: none; }
-        .btn-green { background-color: var(--btn-green); } .btn-yellow { background-color: #f7b731; color: #333; } .btn-blue { background-color: #007bff; } .btn-dark-blue { background-color: #0d47a1; } .btn-red { background-color: var(--btn-red); }
+        .btn-green { background-color: var(--btn-green); } .btn-yellow { background-color: #f7b731; color: #333; } .btn-blue { background-color: #007bff; } .btn-dark-blue { background-color: #0d47a1; } .btn-red { background-color: var(--btn-red); } .btn-purple { background-color: #9b59b6; } .btn-orange { background-color: #e67e22; }
         .content-container { max-width: 1200px; margin: 0 auto; }
         .selection-container { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -93,19 +93,19 @@
         .search-result-path { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
         .search-result-title { font-weight: 500; }
         mark { background-color: var(--star-yellow); color: var(--background-dark); padding: 1px 3px; border-radius: 3px; }
-        #link-modal-overlay, #image-modal-overlay, #new-prompt-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        #link-modal-overlay.show, #image-modal-overlay.show, #new-prompt-modal-overlay.show { display: flex; }
+        #link-modal-overlay, #image-modal-overlay, #new-prompt-modal-overlay, #merge-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        #link-modal-overlay.show, #image-modal-overlay.show, #new-prompt-modal-overlay.show, #merge-modal-overlay.show { display: flex; }
         #link-modal-content, #image-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 450px; }
-        #new-prompt-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
-        #link-modal-content h3, #image-modal-content h3, #new-prompt-modal-content h3 { margin-top: 0; color: var(--text-primary); }
-        #link-url-input, #new-prompt-title-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
+        #new-prompt-modal-content, #merge-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+        #link-modal-content h3, #image-modal-content h3, #new-prompt-modal-content h3, #merge-modal-content h3 { margin-top: 0; color: var(--text-primary); }
+        #link-url-input, #new-prompt-title-input, #merge-name-input { width: 100%; padding: 10px; background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); margin-bottom: 20px; box-sizing: border-box; }
         #image-preview-container { margin: 15px 0; min-height: 100px; border: 2px dashed var(--border-color); border-radius: 6px; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #image-preview { max-width: 100%; max-height: 200px; display: none; }
         #image-preview.show { display: block; }
-        #link-modal-actions, #image-modal-actions, #new-prompt-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-        #link-modal-actions button, #image-modal-actions button, #new-prompt-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
-        #link-modal-cancel, #image-modal-cancel, #new-prompt-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
-        #link-modal-confirm, #image-modal-confirm, #new-prompt-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
+        #link-modal-actions, #image-modal-actions, #new-prompt-modal-actions, #merge-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        #link-modal-actions button, #image-modal-actions button, #new-prompt-modal-actions button, #merge-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
+        #link-modal-cancel, #image-modal-cancel, #new-prompt-modal-cancel, #merge-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
+        #link-modal-confirm, #image-modal-confirm, #new-prompt-modal-confirm, #merge-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
         
         /* Stili per il nuovo editor del prompt */
         #new-prompt-description { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 300px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; }
@@ -120,6 +120,16 @@
         .new-prompt-color-picker-wrapper:hover { background-color: var(--element-bg-hover); }
         .new-prompt-color-picker-wrapper i { font-size: 16px; pointer-events: none; }
         #newPromptFontColorPicker { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        
+        /* Stili per il merge modal */
+        .merge-list { max-height: 400px; overflow-y: auto; margin-bottom: 20px; }
+        .merge-item { display: flex; align-items: center; padding: 12px; background-color: var(--element-bg); border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: background-color .2s; }
+        .merge-item:hover { background-color: var(--element-bg-hover); }
+        .merge-item input[type="checkbox"] { margin-right: 12px; width: 18px; height: 18px; cursor: pointer; }
+        .merge-item label { flex-grow: 1; cursor: pointer; color: var(--text-secondary); font-size: 16px; }
+        .merge-item.selected { background-color: var(--primary-accent); }
+        .merge-item.selected label { color: var(--text-primary); font-weight: 500; }
+        .merge-instructions { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; padding: 10px; background-color: rgba(0,0,0,.2); border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -136,6 +146,8 @@
         <div class="toolbar-dropdown-menu" id="toolMenu">
             <button class="toolbar-btn btn-yellow" id="btnAnnulla"><i class="fa-solid fa-arrow-rotate-left"></i><span>Annulla</span></button>
             <button class="toolbar-btn btn-yellow" id="btnRipristina"><i class="fa-solid fa-arrow-rotate-right"></i><span>Ripristina</span></button>
+            <button class="toolbar-btn btn-purple" id="btnMergeCategories"><i class="fa-solid fa-layer-group"></i><span>Unisci Categorie</span></button>
+            <button class="toolbar-btn btn-orange" id="btnMergeSubcategories"><i class="fa-solid fa-object-group"></i><span>Unisci Sottocategorie</span></button>
             <button class="toolbar-btn btn-blue" id="btnBackup"><i class="fa-solid fa-download"></i><span>Backup</span></button>
             <button class="toolbar-btn btn-dark-blue" id="btnImporta"><i class="fa-solid fa-upload"></i><span>Importa</span></button>
         </div>
@@ -212,6 +224,24 @@
     </div>
 </div>
 
+<!-- Modal per merge -->
+<div id="merge-modal-overlay">
+    <div id="merge-modal-content">
+        <h3 id="merge-modal-title">Unisci Elementi</h3>
+        <div class="merge-instructions" id="merge-instructions"></div>
+        <label style="color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Nome finale:</label>
+        <input type="text" id="merge-name-input" placeholder="Inserisci il nome per l'elemento unificato..." />
+        
+        <label style="color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Seleziona elementi da unire:</label>
+        <div class="merge-list" id="merge-list"></div>
+        
+        <div id="merge-modal-actions">
+            <button id="merge-modal-cancel">Annulla</button>
+            <button id="merge-modal-confirm">Unisci</button>
+        </div>
+    </div>
+</div>
+
 <script>
 (async () => {
     /*** Helpers ***/
@@ -271,6 +301,8 @@
     const btnAnnulla = document.getElementById("btnAnnulla");
     const btnRipristina = document.getElementById("btnRipristina");
     const btnBackup = document.getElementById("btnBackup");
+    const btnMergeCategories = document.getElementById("btnMergeCategories");
+    const btnMergeSubcategories = document.getElementById("btnMergeSubcategories");
     const searchInput = document.getElementById("search-input");
     const searchIcon = document.getElementById("search-icon");
 
@@ -303,6 +335,245 @@
             state.history.push(JSON.parse(JSON.stringify(state.allData)));
             await updateStateAndSave(state.redoStack.pop(), { saveHistory: false });
         }
+    }
+
+    /*** Merge Functions ***/
+    function openMergeCategoriesModal() {
+        if (state.allData.length < 2) {
+            alert("Devi avere almeno 2 categorie per poterle unire.");
+            return;
+        }
+
+        const modal = document.getElementById("merge-modal-overlay");
+        const title = document.getElementById("merge-modal-title");
+        const instructions = document.getElementById("merge-instructions");
+        const nameInput = document.getElementById("merge-name-input");
+        const listContainer = document.getElementById("merge-list");
+        const confirmBtn = document.getElementById("merge-modal-confirm");
+        const cancelBtn = document.getElementById("merge-modal-cancel");
+
+        title.textContent = "Unisci Categorie";
+        instructions.textContent = "Seleziona almeno 2 categorie da unire. Tutte le sottocategorie e i prompt verranno combinati nella nuova categoria.";
+        nameInput.value = "";
+        listContainer.innerHTML = "";
+
+        const selectedCategories = new Set();
+
+        state.allData.forEach(category => {
+            const item = document.createElement("div");
+            item.className = "merge-item";
+            
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = `merge-cat-${category.id}`;
+            checkbox.onchange = () => {
+                if (checkbox.checked) {
+                    selectedCategories.add(category.id);
+                    item.classList.add("selected");
+                } else {
+                    selectedCategories.delete(category.id);
+                    item.classList.remove("selected");
+                }
+            };
+
+            const label = document.createElement("label");
+            label.htmlFor = `merge-cat-${category.id}`;
+            label.textContent = `${category.name} (${category.subcategories?.length || 0} sottocategorie)`;
+
+            item.onclick = (e) => {
+                if (e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.onchange();
+                }
+            };
+
+            item.append(checkbox, label);
+            listContainer.appendChild(item);
+        });
+
+        modal.classList.add("show");
+        nameInput.focus();
+
+        const handleConfirm = async () => {
+            if (selectedCategories.size < 2) {
+                alert("Devi selezionare almeno 2 categorie!");
+                return;
+            }
+
+            const newName = nameInput.value.trim();
+            if (!newName) {
+                alert("Il nome della categoria unificata è obbligatorio!");
+                return;
+            }
+
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const mergedSubcategories = [];
+            const categoriesToMerge = Array.from(selectedCategories);
+
+            // Raccogli tutte le sottocategorie
+            categoriesToMerge.forEach(catId => {
+                const cat = newData.find(c => c.id === catId);
+                if (cat && cat.subcategories) {
+                    mergedSubcategories.push(...cat.subcategories);
+                }
+            });
+
+            // Crea la nuova categoria
+            const newCategory = {
+                id: `_${Math.random().toString(36).slice(2, 11)}`,
+                name: newName,
+                subcategories: mergedSubcategories
+            };
+
+            // Rimuovi le categorie originali e aggiungi la nuova
+            const filteredData = newData.filter(c => !categoriesToMerge.includes(c.id));
+            filteredData.push(newCategory);
+            filteredData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+
+            await updateStateAndSave(filteredData);
+            state.activeCategoryId = newCategory.id;
+            modal.classList.remove("show");
+            alert(`${selectedCategories.size} categorie unite con successo!`);
+        };
+
+        const handleCancel = () => {
+            modal.classList.remove("show");
+        };
+
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        newConfirmBtn.addEventListener("click", handleConfirm);
+
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener("click", handleCancel);
+
+        modal.onclick = (e) => {
+            if (e.target === modal) handleCancel();
+        };
+    }
+
+    function openMergeSubcategoriesModal() {
+        const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
+        
+        if (!activeCategory || !activeCategory.subcategories || activeCategory.subcategories.length < 2) {
+            alert("Seleziona una categoria con almeno 2 sottocategorie per poterle unire.");
+            return;
+        }
+
+        const modal = document.getElementById("merge-modal-overlay");
+        const title = document.getElementById("merge-modal-title");
+        const instructions = document.getElementById("merge-instructions");
+        const nameInput = document.getElementById("merge-name-input");
+        const listContainer = document.getElementById("merge-list");
+        const confirmBtn = document.getElementById("merge-modal-confirm");
+        const cancelBtn = document.getElementById("merge-modal-cancel");
+
+        title.textContent = "Unisci Sottocategorie";
+        instructions.textContent = `Seleziona almeno 2 sottocategorie da unire nella categoria "${activeCategory.name}". Tutti i prompt verranno combinati nella nuova sottocategoria.`;
+        nameInput.value = "";
+        listContainer.innerHTML = "";
+
+        const selectedSubcategories = new Set();
+
+        activeCategory.subcategories.forEach(subcategory => {
+            const item = document.createElement("div");
+            item.className = "merge-item";
+            
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = `merge-sub-${subcategory.id}`;
+            checkbox.onchange = () => {
+                if (checkbox.checked) {
+                    selectedSubcategories.add(subcategory.id);
+                    item.classList.add("selected");
+                } else {
+                    selectedSubcategories.delete(subcategory.id);
+                    item.classList.remove("selected");
+                }
+            };
+
+            const label = document.createElement("label");
+            label.htmlFor = `merge-sub-${subcategory.id}`;
+            label.textContent = `${subcategory.name} (${subcategory.prompts?.length || 0} prompt)`;
+
+            item.onclick = (e) => {
+                if (e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.onchange();
+                }
+            };
+
+            item.append(checkbox, label);
+            listContainer.appendChild(item);
+        });
+
+        modal.classList.add("show");
+        nameInput.focus();
+
+        const handleConfirm = async () => {
+            if (selectedSubcategories.size < 2) {
+                alert("Devi selezionare almeno 2 sottocategorie!");
+                return;
+            }
+
+            const newName = nameInput.value.trim();
+            if (!newName) {
+                alert("Il nome della sottocategoria unificata è obbligatorio!");
+                return;
+            }
+
+            const newData = JSON.parse(JSON.stringify(state.allData));
+            const category = newData.find(c => c.id === state.activeCategoryId);
+            
+            if (!category) return;
+
+            const mergedPrompts = [];
+            const subcategoriesToMerge = Array.from(selectedSubcategories);
+
+            // Raccogli tutti i prompt
+            subcategoriesToMerge.forEach(subId => {
+                const sub = category.subcategories.find(s => s.id === subId);
+                if (sub && sub.prompts) {
+                    mergedPrompts.push(...sub.prompts);
+                }
+            });
+
+            // Crea la nuova sottocategoria
+            const newSubcategory = {
+                id: `_${Math.random().toString(36).slice(2, 11)}`,
+                name: newName,
+                prompts: mergedPrompts
+            };
+
+            // Ordina i prompt per titolo
+            newSubcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
+
+            // Rimuovi le sottocategorie originali e aggiungi la nuova
+            category.subcategories = category.subcategories.filter(s => !subcategoriesToMerge.includes(s.id));
+            category.subcategories.push(newSubcategory);
+            category.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+
+            await updateStateAndSave(newData);
+            modal.classList.remove("show");
+            alert(`${selectedSubcategories.size} sottocategorie unite con successo!`);
+        };
+
+        const handleCancel = () => {
+            modal.classList.remove("show");
+        };
+
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        newConfirmBtn.addEventListener("click", handleConfirm);
+
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener("click", handleCancel);
+
+        modal.onclick = (e) => {
+            if (e.target === modal) handleCancel();
+        };
     }
 
     /*** Render ***/
@@ -760,7 +1031,7 @@
                 titleH1.contentEditable = false;
                 saveTitleBtn.style.display = 'none';
                 editTitleBtn.style.display = 'inline-block';
-                titleH1.innerText = prompt.title; // revert if empty or unchanged
+                titleH1.innerText = prompt.title;
                 return;
             }
             const newData = JSON.parse(JSON.stringify(state.allData));
@@ -908,11 +1179,9 @@
         const cancelBtn = document.getElementById("new-prompt-modal-cancel");
         const toolbar = document.getElementById("new-prompt-formatting-toolbar");
         
-        // Reset del modal
         titleInput.value = "";
         descriptionEditor.innerHTML = "Inserisci qui la descrizione del prompt...";
         
-        // Setup toolbar formattazione
         const setupFormattingToolbar = () => {
             const colorPicker = document.getElementById("newPromptFontColorPicker");
             const increaseFontBtn = document.getElementById("new-prompt-increase-font-btn");
@@ -921,7 +1190,6 @@
             const unlinkBtn = document.getElementById("new-prompt-unlink-btn");
             const insertImageBtn = document.getElementById("new-prompt-insert-image-btn");
 
-            // Comandi base di formattazione
             toolbar.querySelectorAll("button[data-command]").forEach(btn => {
                 btn.onclick = (e) => {
                     e.preventDefault();
@@ -930,12 +1198,10 @@
                 };
             });
 
-            // Color picker
             colorPicker.addEventListener("input", (e) => {
                 document.execCommand("foreColor", false, e.target.value);
             });
 
-            // Font size
             const getCurrentFontSize = () => {
                 const sel = window.getSelection();
                 if (!sel.rangeCount) return 3;
@@ -955,7 +1221,6 @@
             increaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("increase"); };
             decreaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("decrease"); };
 
-            // Link
             createLinkBtn.onclick = (e) => {
                 e.preventDefault();
                 const selection = window.getSelection();
@@ -977,7 +1242,6 @@
                 descriptionEditor.focus();
             };
 
-            // Image
             insertImageBtn.onclick = (e) => {
                 e.preventDefault();
                 const selection = window.getSelection();
@@ -991,7 +1255,6 @@
 
         setupFormattingToolbar();
         
-        // Setup link modal confirm per il nuovo editor
         const linkConfirmBtn = document.getElementById("link-modal-confirm");
         const newLinkHandler = () => {
             const linkUrlInput = document.getElementById("link-url-input");
@@ -1007,7 +1270,6 @@
             savedSelectionRange = null;
         };
         
-        // Setup image modal confirm per il nuovo editor
         const imageConfirmBtn = document.getElementById("image-modal-confirm");
         const newImageHandler = () => {
             const imagePreview = document.getElementById("image-preview");
@@ -1028,7 +1290,6 @@
             savedSelectionRange = null;
         };
 
-        // Rimuovi vecchi event listener se esistono
         const newLinkConfirmBtn = linkConfirmBtn.cloneNode(true);
         linkConfirmBtn.parentNode.replaceChild(newLinkConfirmBtn, linkConfirmBtn);
         newLinkConfirmBtn.addEventListener("click", newLinkHandler);
@@ -1037,18 +1298,15 @@
         imageConfirmBtn.parentNode.replaceChild(newImageConfirmBtn, imageConfirmBtn);
         newImageConfirmBtn.addEventListener("click", newImageHandler);
         
-        // Pulisce il placeholder quando si clicca
         descriptionEditor.onclick = function() {
             if (this.innerHTML === "Inserisci qui la descrizione del prompt...") {
                 this.innerHTML = "";
             }
         };
         
-        // Mostra il modal
         modal.classList.add("show");
         titleInput.focus();
         
-        // Handler per conferma
         const handleConfirm = async () => {
             const title = titleInput.value.trim();
             const description = descriptionEditor.innerHTML === "Inserisci qui la descrizione del prompt..." ? "" : descriptionEditor.innerHTML;
@@ -1075,12 +1333,10 @@
             modal.classList.remove("show");
         };
         
-        // Handler per annulla
         const handleCancel = () => {
             modal.classList.remove("show");
         };
         
-        // Rimuovi vecchi event listener
         const newConfirmBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
         newConfirmBtn.addEventListener("click", handleConfirm);
@@ -1089,7 +1345,6 @@
         cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
         newCancelBtn.addEventListener("click", handleCancel);
         
-        // Chiudi modal cliccando fuori
         modal.onclick = (e) => {
             if (e.target === modal) {
                 handleCancel();
@@ -1162,6 +1417,9 @@
             a.click();
             URL.revokeObjectURL(a.href);
         });
+
+        btnMergeCategories?.addEventListener("click", openMergeCategoriesModal);
+        btnMergeSubcategories?.addEventListener("click", openMergeSubcategoriesModal);
 
         document.getElementById("add-category-inline-btn")?.addEventListener("click", addCategory);
         btnAnnulla?.addEventListener("click", performUndo);

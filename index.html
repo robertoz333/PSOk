@@ -15,6 +15,17 @@
             --text-muted: #9E9E9E; --border-color: #3A3D4D; --star-yellow: #FFC107;
             --btn-green: #28a745; --btn-green-hover: #218838; --btn-red: #dc3545; --btn-red-hover: #c82333;
         }
+        
+        [data-theme="light"] {
+            --background-dark: #F5F5F5; --container-bg: #FFFFFF; --header-bg: #E3E6F0;
+            --element-bg: #F8F9FA; --element-bg-hover: #E9ECEF; --primary-accent: #0066CC;
+            --primary-accent-dark: #004C99; --text-primary: #212529; --text-secondary: #495057;
+            --text-muted: #6C757D; --border-color: #DEE2E6; --star-yellow: #F59E0B;
+            --btn-green: #28a745; --btn-green-hover: #218838; --btn-red: #dc3545; --btn-red-hover: #c82333;
+        }
+        
+        * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        
         body { background-color: var(--background-dark); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .app-header { background-color: var(--header-bg); border-radius: 16px; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
         .header-left, .header-center, .header-right { display: flex; align-items: center; gap: 16px; }
@@ -22,10 +33,12 @@
         .search-bar { display: flex; align-items: center; background-color: var(--element-bg); border-radius: 12px; padding: 0 15px; }
         .search-bar i { color: var(--text-muted); cursor: pointer; }
         .search-bar input { background: transparent; border: none; outline: none; color: var(--text-primary); padding: 12px 10px; font-size: 16px; width: 280px; }
-        .tool-button { background-color: #7A69E9; color: var(--text-primary); border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color .3s; }
+        .tool-button { background-color: #7A69E9; color: #FFFFFF; border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color .3s; }
         .tool-button:hover { background-color: #6957d1; }
+        .theme-toggle { background-color: var(--element-bg); color: var(--text-primary); border: none; border-radius: 12px; padding: 10px 16px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color .3s; }
+        .theme-toggle:hover { background-color: var(--element-bg-hover); }
         .header-right { position: relative; }
-        .toolbar-dropdown-menu { display: none; position: absolute; top: 110%; right: 0; background-color: #1c1c1c; border-radius: 12px; padding: 10px; z-index: 1000; width: 360px; box-shadow: 0 8px 16px rgba(0,0,0,.4); grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .toolbar-dropdown-menu { display: none; position: absolute; top: 110%; right: 0; background-color: var(--container-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; z-index: 1000; width: 360px; box-shadow: 0 8px 16px rgba(0,0,0,.4); grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .toolbar-dropdown-menu.show { display: grid; }
         .toolbar-btn { color: white; border: none; border-radius: 8px; padding: 10px; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; transition: all .2s; min-height: 70px; }
         .toolbar-btn:hover { opacity: .9; transform: translateY(-2px); }
@@ -35,12 +48,12 @@
         .selection-container { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .panel-header h2 { color: var(--text-primary); margin: 0; }
-        .add-button-inline { background-color: var(--btn-green); border: none; color: var(--text-primary); border-radius: 5px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all .2s; }
+        .add-button-inline { background-color: var(--btn-green); border: none; color: #FFFFFF; border-radius: 5px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all .2s; }
         .add-button-inline:hover { background-color: var(--btn-green-hover); }
         #category-buttons-container { display: flex; flex-wrap: wrap; gap: 12px; }
         .category-pill { display: flex; align-items: center; gap: 8px; background-color: var(--element-bg); color: var(--text-secondary); border: 2px solid transparent; border-radius: 20px; padding: 8px 20px; font-size: 16px; cursor: pointer; transition: all .3s; }
         .category-pill:hover { background-color: var(--element-bg-hover); }
-        .category-pill.active { background-color: var(--primary-accent); color: var(--text-primary); font-weight: 500; }
+        .category-pill.active { background-color: var(--primary-accent); color: #FFFFFF; font-weight: 500; }
         .category-pill .edit-icon { font-size: 12px; color: var(--text-muted); visibility: hidden; opacity: 0; transition: all .2s; }
         .category-pill:hover .edit-icon { visibility: visible; opacity: 1; }
         .category-pill .edit-icon:hover { color: var(--text-primary); }
@@ -75,20 +88,20 @@
         #title-actions i { cursor: pointer; font-size: 20px; color: var(--text-muted); transition: color .2s; }
         #title-actions i:hover { color: var(--text-primary); }
         #btnSaveTitle { display: none; }
-        .prompt-description-container { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 200px; line-height: 1.7; }
+        .prompt-description-container { background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 200px; line-height: 1.7; }
         .prompt-description-container a { color: var(--star-yellow); }
         .prompt-description-container img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; display: block; cursor: pointer; }
-        .prompt-description-container[contenteditable="true"] { outline: 2px dashed var(--primary-accent); background-color: #1c1c1c; }
+        .prompt-description-container[contenteditable="true"] { outline: 2px dashed var(--primary-accent); }
         #formatting-toolbar { margin-bottom: 10px; display: none; gap: 10px; align-items: center; flex-wrap: wrap; }
         #formatting-toolbar.show { display: flex; }
-        #formatting-toolbar button { background: var(--element-bg); border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        #formatting-toolbar button { background: var(--element-bg); border: none; color: var(--text-primary); padding: 8px 12px; border-radius: 5px; cursor: pointer; }
         #formatting-toolbar button:hover { background: var(--element-bg-hover); }
         #formatting-toolbar button i { font-size: 16px; }
-        #btnSaveChanges { background-color: var(--primary-accent); display: none; margin-left: auto; }
+        #btnSaveChanges { background-color: var(--primary-accent); display: none; margin-left: auto; color: #FFFFFF; }
         #btnSaveChanges.show { display: inline-block; }
         .color-picker-wrapper { position: relative; display: flex; align-items: center; justify-content: center; background: var(--element-bg); padding: 8px 12px; border-radius: 5px; }
         .color-picker-wrapper:hover { background-color: var(--element-bg-hover); }
-        .color-picker-wrapper i { font-size: 16px; pointer-events: none; }
+        .color-picker-wrapper i { font-size: 16px; pointer-events: none; color: var(--text-primary); }
         #fontColorPicker { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         .search-result-path { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
         .search-result-title { font-weight: 500; }
@@ -105,31 +118,29 @@
         #link-modal-actions, #image-modal-actions, #new-prompt-modal-actions, #merge-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
         #link-modal-actions button, #image-modal-actions button, #new-prompt-modal-actions button, #merge-modal-actions button { padding: 8px 16px; border-radius: 5px; border: none; cursor: pointer; font-weight: 500; }
         #link-modal-cancel, #image-modal-cancel, #new-prompt-modal-cancel, #merge-modal-cancel { background-color: var(--element-bg); color: var(--text-secondary); }
-        #link-modal-confirm, #image-modal-confirm, #new-prompt-modal-confirm, #merge-modal-confirm { background-color: var(--primary-accent); color: var(--text-primary); }
+        #link-modal-confirm, #image-modal-confirm, #new-prompt-modal-confirm, #merge-modal-confirm { background-color: var(--primary-accent); color: #FFFFFF; }
         
-        /* Stili per il nuovo editor del prompt */
-        #new-prompt-description { background-color: rgba(0,0,0,.2); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 300px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; }
-        #new-prompt-description:focus { outline: 2px dashed var(--primary-accent); background-color: #1c1c1c; }
+        #new-prompt-description { background-color: var(--element-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; min-height: 300px; line-height: 1.7; color: var(--text-secondary); margin-bottom: 20px; }
+        #new-prompt-description:focus { outline: 2px dashed var(--primary-accent); }
         #new-prompt-description a { color: var(--star-yellow); }
         #new-prompt-description img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border-color); margin: 10px 0; display: block; }
         #new-prompt-formatting-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
-        #new-prompt-formatting-toolbar button { background: var(--element-bg); border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+        #new-prompt-formatting-toolbar button { background: var(--element-bg); border: none; color: var(--text-primary); padding: 8px 12px; border-radius: 5px; cursor: pointer; }
         #new-prompt-formatting-toolbar button:hover { background: var(--element-bg-hover); }
         #new-prompt-formatting-toolbar button i { font-size: 16px; }
         .new-prompt-color-picker-wrapper { position: relative; display: flex; align-items: center; justify-content: center; background: var(--element-bg); padding: 8px 12px; border-radius: 5px; }
         .new-prompt-color-picker-wrapper:hover { background-color: var(--element-bg-hover); }
-        .new-prompt-color-picker-wrapper i { font-size: 16px; pointer-events: none; }
+        .new-prompt-color-picker-wrapper i { font-size: 16px; pointer-events: none; color: var(--text-primary); }
         #newPromptFontColorPicker { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         
-        /* Stili per il merge modal */
         .merge-list { max-height: 400px; overflow-y: auto; margin-bottom: 20px; }
         .merge-item { display: flex; align-items: center; padding: 12px; background-color: var(--element-bg); border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: background-color .2s; }
         .merge-item:hover { background-color: var(--element-bg-hover); }
         .merge-item input[type="checkbox"] { margin-right: 12px; width: 18px; height: 18px; cursor: pointer; }
         .merge-item label { flex-grow: 1; cursor: pointer; color: var(--text-secondary); font-size: 16px; }
         .merge-item.selected { background-color: var(--primary-accent); }
-        .merge-item.selected label { color: var(--text-primary); font-weight: 500; }
-        .merge-instructions { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; padding: 10px; background-color: rgba(0,0,0,.2); border-radius: 6px; }
+        .merge-item.selected label { color: #FFFFFF; font-weight: 500; }
+        .merge-instructions { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; padding: 10px; background-color: var(--element-bg); border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -142,6 +153,9 @@
         </div>
     </div>
     <div class="header-right">
+        <button class="theme-toggle" id="themeToggle" title="Cambia tema">
+            <i class="fa-solid fa-moon"></i>
+        </button>
         <button class="tool-button" id="toolBtn"><i class="fa-solid fa-screwdriver-wrench"></i><span>Tool</span></button>
         <div class="toolbar-dropdown-menu" id="toolMenu">
             <button class="toolbar-btn btn-yellow" id="btnAnnulla"><i class="fa-solid fa-arrow-rotate-left"></i><span>Annulla</span></button>
@@ -167,7 +181,6 @@
     <div id="display-area"><div class="initial-message"><p>Caricamento dati...</p></div></div>
 </main>
 
-<!-- Modali -->
 <div id="link-modal-overlay">
     <div id="link-modal-content">
         <h3>Inserisci URL</h3>
@@ -193,7 +206,6 @@
     </div>
 </div>
 
-<!-- Modal per nuovo prompt -->
 <div id="new-prompt-modal-overlay">
     <div id="new-prompt-modal-content">
         <h3>Crea Nuovo Prompt</h3>
@@ -224,7 +236,6 @@
     </div>
 </div>
 
-<!-- Modal per merge -->
 <div id="merge-modal-overlay">
     <div id="merge-modal-content">
         <h3 id="merge-modal-title">Unisci Elementi</h3>
@@ -244,6 +255,34 @@
 
 <script>
 (async () => {
+    /*** Theme Management ***/
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = themeToggle.querySelector("i");
+    
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        if (theme === 'light') {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+            themeToggle.title = 'Tema scuro';
+        } else {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+            themeToggle.title = 'Tema chiaro';
+        }
+    }
+    
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+    });
+
     /*** Helpers ***/
     const normalizeStr = (s = "") =>
         s.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -410,7 +449,6 @@
             const mergedSubcategories = [];
             const categoriesToMerge = Array.from(selectedCategories);
 
-            // Raccogli tutte le sottocategorie
             categoriesToMerge.forEach(catId => {
                 const cat = newData.find(c => c.id === catId);
                 if (cat && cat.subcategories) {
@@ -418,14 +456,12 @@
                 }
             });
 
-            // Crea la nuova categoria
             const newCategory = {
                 id: `_${Math.random().toString(36).slice(2, 11)}`,
                 name: newName,
                 subcategories: mergedSubcategories
             };
 
-            // Rimuovi le categorie originali e aggiungi la nuova
             const filteredData = newData.filter(c => !categoriesToMerge.includes(c.id));
             filteredData.push(newCategory);
             filteredData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
@@ -531,7 +567,6 @@
             const mergedPrompts = [];
             const subcategoriesToMerge = Array.from(selectedSubcategories);
 
-            // Raccogli tutti i prompt
             subcategoriesToMerge.forEach(subId => {
                 const sub = category.subcategories.find(s => s.id === subId);
                 if (sub && sub.prompts) {
@@ -539,17 +574,14 @@
                 }
             });
 
-            // Crea la nuova sottocategoria
             const newSubcategory = {
                 id: `_${Math.random().toString(36).slice(2, 11)}`,
                 name: newName,
                 prompts: mergedPrompts
             };
 
-            // Ordina i prompt per titolo
             newSubcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
 
-            // Rimuovi le sottocategorie originali e aggiungi la nuova
             category.subcategories = category.subcategories.filter(s => !subcategoriesToMerge.includes(s.id));
             category.subcategories.push(newSubcategory);
             category.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
@@ -867,12 +899,10 @@
         const increaseFontBtn = document.getElementById("increase-font-btn");
         const decreaseFontBtn = document.getElementById("decrease-font-btn");
 
-        // Title editing elements
         const titleH1 = document.getElementById("prompt-title-h1");
         const editTitleBtn = document.getElementById("edit-title-btn");
         const saveTitleBtn = document.getElementById("btnSaveTitle");
 
-        // Link modal
         const createLinkBtn = document.getElementById("create-link-btn");
         const unlinkBtn = document.getElementById("unlink-btn");
         const linkModalOverlay = document.getElementById("link-modal-overlay");
@@ -880,7 +910,6 @@
         const linkConfirmBtn = document.getElementById("link-modal-confirm");
         const linkCancelBtn = document.getElementById("link-modal-cancel");
 
-        // Image modal
         const insertImageBtn = document.getElementById("insert-image-btn");
         const imageModalOverlay = document.getElementById("image-modal-overlay");
         const imageUploadInput = document.getElementById("image-upload-input");
@@ -1018,7 +1047,6 @@
             }
         };
 
-        // Title editing logic
         editTitleBtn.onclick = () => {
             titleH1.contentEditable = true;
             titleH1.focus();
@@ -1170,7 +1198,6 @@
         }
     }
     
-    // Nuova funzione addPrompt con modal editor
     async function addPrompt(subcategoryId, categoryId) {
         const modal = document.getElementById("new-prompt-modal-overlay");
         const titleInput = document.getElementById("new-prompt-title-input");

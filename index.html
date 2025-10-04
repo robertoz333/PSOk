@@ -14,6 +14,7 @@
             --primary-accent-dark: #0056b3; --text-primary: #FFFFFF; --text-secondary: #E0E0E0;
             --text-muted: #9E9E9E; --border-color: #3A3D4D; --star-yellow: #FFC107;
             --btn-green: #28a745; --btn-green-hover: #218838; --btn-red: #dc3545; --btn-red-hover: #c82333;
+            --toast-success: #28a745; --toast-error: #dc3545; --toast-warning: #f7b731; --toast-info: #007BFF;
         }
         
         [data-theme="light"] {
@@ -22,6 +23,7 @@
             --primary-accent-dark: #004C99; --text-primary: #212529; --text-secondary: #495057;
             --text-muted: #6C757D; --border-color: #DEE2E6; --star-yellow: #F59E0B;
             --btn-green: #28a745; --btn-green-hover: #218838; --btn-red: #dc3545; --btn-red-hover: #c82333;
+            --toast-success: #28a745; --toast-error: #dc3545; --toast-warning: #f7b731; --toast-info: #0066CC;
         }
         
         * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
@@ -141,9 +143,29 @@
         .merge-item.selected { background-color: var(--primary-accent); }
         .merge-item.selected label { color: #FFFFFF; font-weight: 500; }
         .merge-instructions { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; padding: 10px; background-color: var(--element-bg); border-radius: 6px; }
+        
+        /* Toast Notifications */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 400px; }
+        .toast { background-color: var(--container-bg); border-left: 4px solid; border-radius: 8px; padding: 16px 20px; box-shadow: 0 4px 12px rgba(0,0,0,.3); display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-out 2.7s; opacity: 0; animation-fill-mode: forwards; min-width: 300px; }
+        .toast.success { border-color: var(--toast-success); }
+        .toast.error { border-color: var(--toast-error); }
+        .toast.warning { border-color: var(--toast-warning); }
+        .toast.info { border-color: var(--toast-info); }
+        .toast-icon { font-size: 20px; flex-shrink: 0; }
+        .toast.success .toast-icon { color: var(--toast-success); }
+        .toast.error .toast-icon { color: var(--toast-error); }
+        .toast.warning .toast-icon { color: var(--toast-warning); }
+        .toast.info .toast-icon { color: var(--toast-info); }
+        .toast-content { flex-grow: 1; color: var(--text-primary); font-size: 14px; line-height: 1.4; }
+        .toast-close { color: var(--text-muted); cursor: pointer; font-size: 18px; flex-shrink: 0; transition: color .2s; }
+        .toast-close:hover { color: var(--text-primary); }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
     </style>
 </head>
 <body>
+<div id="toast-container"></div>
+
 <header class="app-header">
     <div class="header-left"><div class="logo">PS</div></div>
     <div class="header-center">
@@ -255,6 +277,44 @@
 
 <script>
 (async () => {
+    /*** Toast Notification System ***/
+    const Toast = {
+        container: null,
+        init() {
+            this.container = document.getElementById('toast-container');
+        },
+        show(message, type = 'info', duration = 3000) {
+            if (!this.container) this.init();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconMap = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-xmark',
+                warning: 'fa-triangle-exclamation',
+                info: 'fa-circle-info'
+            };
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${iconMap[type]} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <i class="fa-solid fa-xmark toast-close"></i>
+            `;
+            
+            const closeBtn = toast.querySelector('.toast-close');
+            closeBtn.onclick = () => this.remove(toast);
+            
+            this.container.appendChild(toast);
+            
+            setTimeout(() => this.remove(toast), duration);
+        },
+        remove(toast) {
+            toast.style.animation = 'fadeOut 0.3s ease-out forwards';
+            setTimeout(() => toast.remove(), 300);
+        }
+    };
+
     /*** Theme Management ***/
     const themeToggle = document.getElementById("themeToggle");
     const themeIcon = themeToggle.querySelector("i");
@@ -379,7 +439,7 @@
     /*** Merge Functions ***/
     function openMergeCategoriesModal() {
         if (state.allData.length < 2) {
-            alert("Devi avere almeno 2 categorie per poterle unire.");
+            Toast.show("Devi avere almeno 2 categorie per poterle unire.", "warning");
             return;
         }
 
@@ -435,13 +495,13 @@
 
         const handleConfirm = async () => {
             if (selectedCategories.size < 2) {
-                alert("Devi selezionare almeno 2 categorie!");
+                Toast.show("Devi selezionare almeno 2 categorie!", "warning");
                 return;
             }
 
             const newName = nameInput.value.trim();
             if (!newName) {
-                alert("Il nome della categoria unificata è obbligatorio!");
+                Toast.show("Il nome della categoria unificata è obbligatorio!", "error");
                 return;
             }
 
@@ -469,7 +529,7 @@
             await updateStateAndSave(filteredData);
             state.activeCategoryId = newCategory.id;
             modal.classList.remove("show");
-            alert(`${selectedCategories.size} categorie unite con successo!`);
+            Toast.show(`${selectedCategories.size} categorie unite con successo!`, "success");
         };
 
         const handleCancel = () => {
@@ -493,7 +553,7 @@
         const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
         
         if (!activeCategory || !activeCategory.subcategories || activeCategory.subcategories.length < 2) {
-            alert("Seleziona una categoria con almeno 2 sottocategorie per poterle unire.");
+            Toast.show("Seleziona una categoria con almeno 2 sottocategorie per poterle unire.", "warning");
             return;
         }
 
@@ -549,13 +609,13 @@
 
         const handleConfirm = async () => {
             if (selectedSubcategories.size < 2) {
-                alert("Devi selezionare almeno 2 sottocategorie!");
+                Toast.show("Devi selezionare almeno 2 sottocategorie!", "warning");
                 return;
             }
 
             const newName = nameInput.value.trim();
             if (!newName) {
-                alert("Il nome della sottocategoria unificata è obbligatorio!");
+                Toast.show("Il nome della sottocategoria unificata è obbligatorio!", "error");
                 return;
             }
 
@@ -588,7 +648,7 @@
 
             await updateStateAndSave(newData);
             modal.classList.remove("show");
-            alert(`${selectedSubcategories.size} sottocategorie unite con successo!`);
+            Toast.show(`${selectedSubcategories.size} sottocategorie unite con successo!`, "success");
         };
 
         const handleCancel = () => {
@@ -920,7 +980,10 @@
         createLinkBtn.onclick = (e) => {
             e.preventDefault();
             const selection = window.getSelection();
-            if (selection.rangeCount === 0 || selection.toString().trim() === "") { alert("Prima seleziona il testo da trasformare in link."); return; }
+            if (selection.rangeCount === 0 || selection.toString().trim() === "") { 
+                Toast.show("Prima seleziona il testo da trasformare in link.", "warning");
+                return; 
+            }
             savedSelectionRange = selection.getRangeAt(0).cloneRange();
             linkModalOverlay.classList.add("show");
             linkUrlInput.value = "https://";
@@ -991,9 +1054,12 @@
         decreaseFontBtn.onclick = (e) => { e.preventDefault(); changeFontSize("decrease"); };
         colorPicker.addEventListener("input", (e) => document.execCommand("foreColor", false, e.target.value));
         copyBtn.onclick = () => {
-            if (!descriptionContainer.innerText) return alert("Nessuna descrizione da copiare.");
+            if (!descriptionContainer.innerText) {
+                Toast.show("Nessuna descrizione da copiare.", "warning");
+                return;
+            }
             navigator.clipboard.writeText(descriptionContainer.innerText)
-                .then(() => alert("Descrizione copiata!"))
+                .then(() => Toast.show("Descrizione copiata!", "success"))
                 .catch(err => console.error("Errore copia:", err));
         };
         
@@ -1252,7 +1318,7 @@
                 e.preventDefault();
                 const selection = window.getSelection();
                 if (selection.rangeCount === 0 || selection.toString().trim() === "") {
-                    alert("Prima seleziona il testo da trasformare in link.");
+                    Toast.show("Prima seleziona il testo da trasformare in link.", "warning");
                     return;
                 }
                 savedSelectionRange = selection.getRangeAt(0).cloneRange();
@@ -1339,7 +1405,7 @@
             const description = descriptionEditor.innerHTML === "Inserisci qui la descrizione del prompt..." ? "" : descriptionEditor.innerHTML;
             
             if (!title) {
-                alert("Il titolo è obbligatorio!");
+                Toast.show("Il titolo è obbligatorio!", "error");
                 return;
             }
             
@@ -1426,16 +1492,19 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     await updateStateAndSave(Array.isArray(data) ? data : []);
-                    alert("Backup importato!");
+                    Toast.show("Backup importato con successo!", "success");
                 } catch {
-                    alert("File di backup non valido.");
+                    Toast.show("File di backup non valido.", "error");
                 }
             };
             reader.readAsText(file);
         });
 
         btnBackup?.addEventListener("click", () => {
-            if (state.allData.length === 0) { alert("Nessun dato da esportare."); return; }
+            if (state.allData.length === 0) { 
+                Toast.show("Nessun dato da esportare.", "warning");
+                return; 
+            }
             const dataStr = JSON.stringify(state.allData, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const a = document.createElement("a");
@@ -1443,6 +1512,7 @@
             a.download = `prompts_backup_${new Date().toISOString().slice(0,10)}.json`;
             a.click();
             URL.revokeObjectURL(a.href);
+            Toast.show("Backup scaricato con successo!", "success");
         });
 
         btnMergeCategories?.addEventListener("click", openMergeCategoriesModal);
@@ -1463,7 +1533,7 @@
         state.allData = await Database.load();
         const savedRecents = localStorage.getItem("promptManagerRecents");
         if (savedRecents) {
-            state.recents = JSON.parse(savedRecents);
+        state.recents = JSON.parse(savedRecents);
         }
         state.activeCategoryId = 'favorites';
         setupEventListeners();

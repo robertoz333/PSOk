@@ -161,6 +161,18 @@
         .toast-close:hover { color: var(--text-primary); }
         @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        
+        /* Inline Confirmation */
+        .confirm-inline { background: linear-gradient(135deg, rgba(220, 53, 69, 0.15), rgba(220, 53, 69, 0.05)); border: 2px solid var(--btn-red); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 12px; animation: confirmSlideIn 0.3s ease-out; }
+        .confirm-inline-message { color: var(--text-primary); font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+        .confirm-inline-message i { color: var(--btn-red); font-size: 18px; }
+        .confirm-inline-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .confirm-inline-btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all .2s; }
+        .confirm-inline-btn.confirm { background-color: var(--btn-red); color: white; }
+        .confirm-inline-btn.confirm:hover { background-color: var(--btn-red-hover); transform: translateY(-1px); }
+        .confirm-inline-btn.cancel { background-color: var(--element-bg); color: var(--text-secondary); }
+        .confirm-inline-btn.cancel:hover { background-color: var(--element-bg-hover); }
+        @keyframes confirmSlideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -312,6 +324,44 @@
         remove(toast) {
             toast.style.animation = 'fadeOut 0.3s ease-out forwards';
             setTimeout(() => toast.remove(), 300);
+        }
+    };
+
+    /*** Inline Confirmation System ***/
+    const ConfirmInline = {
+        show(element, message, onConfirm) {
+            const originalContent = element.innerHTML;
+            
+            element.innerHTML = `
+                <div class="confirm-inline">
+                    <div class="confirm-inline-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>${message}</span>
+                    </div>
+                    <div class="confirm-inline-actions">
+                        <button class="confirm-inline-btn cancel">Annulla</button>
+                        <button class="confirm-inline-btn confirm">Conferma Eliminazione</button>
+                    </div>
+                </div>
+            `;
+            
+            const confirmBtn = element.querySelector('.confirm-inline-btn.confirm');
+            const cancelBtn = element.querySelector('.confirm-inline-btn.cancel');
+            
+            confirmBtn.onclick = async (e) => {
+                e.stopPropagation();
+                await onConfirm();
+            };
+            
+            cancelBtn.onclick = (e) => {
+                e.stopPropagation();
+                element.innerHTML = originalContent;
+                this.reattachEventListeners(element);
+            };
+        },
+        reattachEventListeners(element) {
+            const event = new CustomEvent('confirm-cancelled');
+            element.dispatchEvent(event);
         }
     };
 
@@ -822,8 +872,24 @@
                 </div>
             </div>
             <div id="subcat-list"></div>`;
+        
         document.getElementById("add-subcat-btn").onclick = () => addSubcategory(category.id);
-        document.getElementById("delete-cat-btn").onclick = () => deleteCategory(category.id);
+        
+        const deleteCatBtn = document.getElementById("delete-cat-btn");
+        deleteCatBtn.onclick = (e) => {
+            e.stopPropagation();
+            ConfirmInline.show(
+                deleteCatBtn.parentElement,
+                `Eliminare la categoria "${category.name}" e tutto il suo contenuto?`,
+                async () => {
+                    const newData = state.allData.filter(c => c.id !== category.id);
+                    if (state.activeCategoryId === category.id) state.activeCategoryId = 'favorites';
+                    await updateStateAndSave(newData);
+                    Toast.show("Categoria eliminata con successo", "success");
+                }
+            );
+        };
+        
         const listContainer = document.getElementById("subcat-list");
         if (!category.subcategories || category.subcategories.length === 0) {
             listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Questa categoria non ha sottocategorie.</p></div>';
@@ -832,6 +898,7 @@
         category.subcategories.forEach(subcat => {
             const item = document.createElement("div");
             item.className = "item-container";
+            item.dataset.subcategoryId = subcat.id;
 
             const nameSpan = document.createElement("span");
             nameSpan.className = "item-name";
@@ -849,13 +916,54 @@
             const deleteIcon = document.createElement("i");
             deleteIcon.className = "fa-solid fa-trash-can delete-icon";
             deleteIcon.title = "Elimina sottocategoria";
-            deleteIcon.onclick = e => { e.stopPropagation(); deleteSubcategory(subcat.id, category.id); };
+            deleteIcon.onclick = (e) => {
+                e.stopPropagation();
+                ConfirmInline.show(
+                    item,
+                    `Eliminare la sottocategoria "${subcat.name}" e tutti i suoi prompt?`,
+                    async () => {
+                        const newData = JSON.parse(JSON.stringify(state.allData));
+                        const cat = newData.find(c => c.id === category.id);
+                        if (cat) {
+                            cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcat.id);
+                            await updateStateAndSave(newData);
+                            Toast.show("Sottocategoria eliminata con successo", "success");
+                        }
+                    }
+                );
+            };
+            
+            item.addEventListener('confirm-cancelled', () => {
+                nameSpan.onclick = () => displayPromptTitles(subcat, category);
+                const newEditIcon = editIcon.cloneNode(true);
+                newEditIcon.onclick = e => { e.stopPropagation(); editSubcategory(subcat.id, category.id); };
+                const newDeleteIcon = deleteIcon.cloneNode(true);
+                newDeleteIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    ConfirmInline.show(
+                        item,
+                        `Eliminare la sottocategoria "${subcat.name}" e tutti i suoi prompt?`,
+                        async () => {
+                            const newData = JSON.parse(JSON.stringify(state.allData));
+                            const cat = newData.find(c => c.id === category.id);
+                            if (cat) {
+                                cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcat.id);
+                                await updateStateAndSave(newData);
+                                Toast.show("Sottocategoria eliminata con successo", "success");
+                            }
+                        }
+                    );
+                };
+                actionsDiv.innerHTML = '';
+                actionsDiv.append(newEditIcon, newDeleteIcon);
+            });
             
             actionsDiv.append(editIcon, deleteIcon);
             item.append(nameSpan, actionsDiv);
             listContainer.appendChild(item);
         });
     }
+    
     function displayPromptTitles(subcategory, parentCategory) {
         displayArea.innerHTML = `
             <div class="display-header">
@@ -875,6 +983,8 @@
         subcategory.prompts.forEach(prompt => {
             const item = document.createElement("div");
             item.className = "item-container";
+            item.dataset.promptId = prompt.id;
+            
             const nameSpan = document.createElement("span");
             nameSpan.className = "item-name";
             nameSpan.textContent = prompt.title;
@@ -886,7 +996,51 @@
             const deleteIcon = document.createElement("i");
             deleteIcon.className = "fa-solid fa-trash-can delete-icon";
             deleteIcon.title = "Elimina prompt";
-            deleteIcon.onclick = e => { e.stopPropagation(); deletePrompt(prompt.id, subcategory.id, parentCategory.id); };
+            deleteIcon.onclick = (e) => {
+                e.stopPropagation();
+                ConfirmInline.show(
+                    item,
+                    `Eliminare il prompt "${prompt.title}"?`,
+                    async () => {
+                        const newData = JSON.parse(JSON.stringify(state.allData));
+                        const subcat = newData.find(c => c.id === parentCategory.id)?.subcategories.find(s => s.id === subcategory.id);
+                        if (subcat) {
+                            const index = subcat.prompts.findIndex(p => p.id === prompt.id);
+                            if (index > -1) {
+                                subcat.prompts.splice(index, 1);
+                                await updateStateAndSave(newData);
+                                Toast.show("Prompt eliminato con successo", "success");
+                            }
+                        }
+                    }
+                );
+            };
+            
+            item.addEventListener('confirm-cancelled', () => {
+                nameSpan.onclick = () => displayPromptDetail(prompt, subcategory, parentCategory);
+                const newDeleteIcon = deleteIcon.cloneNode(true);
+                newDeleteIcon.onclick = (e) => {
+                    e.stopPropagation();
+                    ConfirmInline.show(
+                        item,
+                        `Eliminare il prompt "${prompt.title}"?`,
+                        async () => {
+                            const newData = JSON.parse(JSON.stringify(state.allData));
+                            const subcat = newData.find(c => c.id === parentCategory.id)?.subcategories.find(s => s.id === subcategory.id);
+                            if (subcat) {
+                                const index = subcat.prompts.findIndex(p => p.id === prompt.id);
+                                if (index > -1) {
+                                    subcat.prompts.splice(index, 1);
+                                    await updateStateAndSave(newData);
+                                    Toast.show("Prompt eliminato con successo", "success");
+                                }
+                            }
+                        }
+                    );
+                };
+                actionsDiv.innerHTML = '';
+                actionsDiv.append(newDeleteIcon);
+            });
             
             actionsDiv.append(deleteIcon);
             item.append(nameSpan, actionsDiv);
@@ -1081,7 +1235,27 @@
         };
 
         if (showDeleteIcon) {
-            document.getElementById("delete-prompt-detail-btn").onclick = () => deletePrompt(prompt.id, parentSub.id, parentCat.id);
+            const deletePromptBtn = document.getElementById("delete-prompt-detail-btn");
+            deletePromptBtn.onclick = () => {
+                const promptActionsToolbar = document.getElementById("prompt-actions");
+                ConfirmInline.show(
+                    promptActionsToolbar,
+                    `Eliminare il prompt "${prompt.title}"?`,
+                    async () => {
+                        const newData = JSON.parse(JSON.stringify(state.allData));
+                        const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
+                        if (subcat) {
+                            const index = subcat.prompts.findIndex(p => p.id === prompt.id);
+                            if (index > -1) {
+                                subcat.prompts.splice(index, 1);
+                                await updateStateAndSave(newData);
+                                state.activeCategoryId = parentCat.id;
+                                Toast.show("Prompt eliminato con successo", "success");
+                            }
+                        }
+                    }
+                );
+            };
         }
 
         editBtn.onclick = () => { descriptionContainer.contentEditable = true; formattingToolbar.classList.add("show"); saveChangesBtn.classList.add("show"); descriptionContainer.focus(); };
@@ -1372,7 +1546,8 @@
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(savedSelectionRange);
-                const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
+                const imgTag = `<img
+                src="${imgSrc}" alt="Immagine caricata">`;
                 document.execCommand("insertHTML", false, imgTag);
             }
             document.getElementById("image-modal-overlay").classList.remove("show");
@@ -1421,6 +1596,7 @@
                 });
                 subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
                 await updateStateAndSave(newData);
+                Toast.show("Prompt creato con successo!", "success");
             }
             
             modal.classList.remove("show");
@@ -1443,39 +1619,6 @@
                 handleCancel();
             }
         };
-    }
-    
-    async function deleteCategory(categoryId) {
-        if (confirm("Sei sicuro di voler eliminare questa categoria e TUTTO il suo contenuto?")) {
-            const newData = state.allData.filter(c => c.id !== categoryId);
-            if (state.activeCategoryId === categoryId) state.activeCategoryId = 'favorites';
-            await updateStateAndSave(newData);
-        }
-    }
-    async function deleteSubcategory(subcategoryId, parentCategoryId) {
-        if (confirm("Sei sicuro di voler eliminare questa sottocategoria e tutti i prompt al suo interno?")) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const cat = newData.find(c => c.id === parentCategoryId);
-            if (cat) {
-                cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcategoryId);
-                await updateStateAndSave(newData);
-            }
-        }
-    }
-    async function deletePrompt(promptId, subcategoryId, categoryId) {
-        if (confirm("Sei sicuro di voler eliminare questo prompt?")) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
-            if (subcat) {
-                const index = subcat.prompts.findIndex(p => p.id === promptId);
-                if (index > -1) {
-                    subcat.prompts.splice(index, 1);
-                    await updateStateAndSave(newData);
-                    state.activeCategoryId = categoryId;
-                    renderUI();
-                }
-            }
-        }
     }
 
     /*** Eventi UI ***/
@@ -1533,7 +1676,7 @@
         state.allData = await Database.load();
         const savedRecents = localStorage.getItem("promptManagerRecents");
         if (savedRecents) {
-        state.recents = JSON.parse(savedRecents);
+            state.recents = JSON.parse(savedRecents);
         }
         state.activeCategoryId = 'favorites';
         setupEventListeners();

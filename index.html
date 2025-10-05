@@ -112,6 +112,31 @@
         .search-result-path { display: block; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
         .search-result-title { font-weight: 500; }
         mark { background-color: var(--star-yellow); color: var(--background-dark); padding: 1px 3px; border-radius: 3px; }
+        
+        /* Grid View Styles */
+        .view-toggle { display: flex; gap: 5px; background-color: var(--element-bg); border-radius: 8px; padding: 4px; }
+        .view-toggle-btn { background: transparent; border: none; color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+        .view-toggle-btn:hover { color: var(--text-primary); }
+        .view-toggle-btn.active { background-color: var(--primary-accent); color: #FFFFFF; }
+        .view-toggle-btn i { font-size: 16px; }
+        
+        #prompt-list.grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 10px 0; }
+        #prompt-list.list-view { display: block; }
+        
+        .prompt-card { background-color: var(--element-bg); border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; position: relative; overflow: hidden; height: 200px; display: flex; flex-direction: column; }
+        .prompt-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); border-color: var(--primary-accent); }
+        .prompt-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .prompt-card-title { font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 0; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; flex: 1; }
+        .prompt-card-actions { display: flex; gap: 8px; opacity: 0; transition: opacity 0.2s; }
+        .prompt-card:hover .prompt-card-actions { opacity: 1; }
+        .prompt-card-action-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; transition: all 0.2s; font-size: 16px; }
+        .prompt-card-action-btn:hover { color: var(--text-primary); transform: scale(1.1); }
+        .prompt-card-action-btn.favorite { color: var(--star-yellow); opacity: 1; }
+        .prompt-card-action-btn.delete:hover { color: var(--btn-red); }
+        .prompt-card-preview { color: var(--text-muted); font-size: 14px; line-height: 1.6; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; flex: 1; margin-bottom: 12px; }
+        .prompt-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); }
+        .prompt-card-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .prompt-card-badge { background-color: var(--primary-accent); color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
         #link-modal-overlay, #image-modal-overlay, #new-prompt-modal-overlay, #merge-modal-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; z-index: 2000; }
         #link-modal-overlay.show, #image-modal-overlay.show, #new-prompt-modal-overlay.show, #merge-modal-overlay.show { display: flex; }
         #link-modal-content, #image-modal-content { background-color: var(--container-bg); padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,.5); width: 90%; max-width: 450px; }
@@ -480,7 +505,8 @@
         activeCategoryId: null, 
         recents: [],
         isSearchActive: false,
-        lastSearchTerm: ''
+        lastSearchTerm: '',
+        viewMode: 'list' // 'list' or 'grid'
     };
     let savedSelectionRange = null;
 
@@ -1084,21 +1110,154 @@
     }
     
     function displayPromptTitles(subcategory, parentCategory) {
+        const viewMode = state.viewMode || 'list';
+        
         displayArea.innerHTML = `
             <div class="display-header">
                 <h3>Prompt in: ${subcategory.name}</h3>
                 <div class="header-buttons">
+                    <div class="view-toggle" id="view-toggle">
+                        <button class="view-toggle-btn ${viewMode === 'list' ? 'active' : ''}" data-view="list" title="Vista lista">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
+                        <button class="view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}" data-view="grid" title="Vista griglia">
+                            <i class="fa-solid fa-grid"></i>
+                        </button>
+                    </div>
                     <button class="add-button" id="add-prompt-btn"><i class="fa-solid fa-plus"></i> Aggiungi Prompt</button>
                 </div>
             </div>
-            <div id="prompt-list"></div>`;
+            <div id="prompt-list" class="${viewMode}-view"></div>`;
+        
         document.getElementById("add-prompt-btn").onclick = () => addPrompt(subcategory.id, parentCategory.id);
+        
+        // View toggle handlers
+        document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+            btn.onclick = () => {
+                const newView = btn.dataset.view;
+                state.viewMode = newView;
+                localStorage.setItem('promptManagerViewMode', newView);
+                displayPromptTitles(subcategory, parentCategory);
+            };
+        });
+        
         const listContainer = document.getElementById("prompt-list");
         if (!subcategory.prompts || subcategory.prompts.length === 0) {
             listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt in questa sottocategoria.</p></div>';
             return;
         }
+        
         subcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
+        
+        if (viewMode === 'grid') {
+            renderGridView(subcategory, parentCategory, listContainer);
+        } else {
+            renderListView(subcategory, parentCategory, listContainer);
+        }
+    }
+    
+    function renderGridView(subcategory, parentCategory, container) {
+        subcategory.prompts.forEach(prompt => {
+            const card = document.createElement("div");
+            card.className = "prompt-card";
+            
+            // Estrai testo pulito dalla descrizione
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = prompt.description || "Nessuna descrizione disponibile.";
+            const previewText = (tempDiv.textContent || tempDiv.innerText || "").trim();
+            
+            const isFavorite = prompt.favorite;
+            
+            card.innerHTML = `
+                <div class="prompt-card-header">
+                    <h3 class="prompt-card-title">${prompt.title}</h3>
+                    <div class="prompt-card-actions">
+                        <button class="prompt-card-action-btn favorite ${isFavorite ? 'favorite' : ''}" data-prompt-id="${prompt.id}" title="${isFavorite ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'}">
+                            <i class="fa-${isFavorite ? 'solid' : 'regular'} fa-star"></i>
+                        </button>
+                        <button class="prompt-card-action-btn delete" data-prompt-id="${prompt.id}" title="Elimina prompt">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="prompt-card-preview">${previewText}</div>
+                <div class="prompt-card-footer">
+                    <div class="prompt-card-meta">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span>Prompt</span>
+                    </div>
+                    ${isFavorite ? '<span class="prompt-card-badge"><i class="fa-solid fa-star"></i> Preferito</span>' : ''}
+                </div>
+            `;
+            
+            // Click sulla card per aprire il dettaglio
+            card.onclick = (e) => {
+                // Ignora click sui bottoni azione
+                if (e.target.closest('.prompt-card-action-btn')) return;
+                displayPromptDetail(prompt, subcategory, parentCategory);
+            };
+            
+            container.appendChild(card);
+        });
+        
+        // Gestione bottoni preferiti
+        container.querySelectorAll('.prompt-card-action-btn.favorite').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.stopPropagation();
+                const promptId = btn.dataset.promptId;
+                const prompt = subcategory.prompts.find(p => p.id === promptId);
+                
+                Loader.show(prompt.favorite ? 'Rimozione dai preferiti...' : 'Aggiunta ai preferiti...');
+                try {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const promptToUpdate = newData.find(c => c.id === parentCategory.id)
+                        ?.subcategories.find(s => s.id === subcategory.id)
+                        ?.prompts.find(p => p.id === promptId);
+                    
+                    if (promptToUpdate) {
+                        promptToUpdate.favorite = !promptToUpdate.favorite;
+                        await updateStateAndSave(newData);
+                    }
+                } finally {
+                    Loader.hide();
+                }
+            };
+        });
+        
+        // Gestione bottoni eliminazione
+        container.querySelectorAll('.prompt-card-action-btn.delete').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const promptId = btn.dataset.promptId;
+                const prompt = subcategory.prompts.find(p => p.id === promptId);
+                const card = btn.closest('.prompt-card');
+                
+                ConfirmInline.show(
+                    card,
+                    `Eliminare il prompt "${prompt.title}"?`,
+                    async () => {
+                        Loader.show('Eliminazione prompt...');
+                        try {
+                            const newData = JSON.parse(JSON.stringify(state.allData));
+                            const subcat = newData.find(c => c.id === parentCategory.id)?.subcategories.find(s => s.id === subcategory.id);
+                            if (subcat) {
+                                const index = subcat.prompts.findIndex(p => p.id === promptId);
+                                if (index > -1) {
+                                    subcat.prompts.splice(index, 1);
+                                    await updateStateAndSave(newData);
+                                    Toast.show("Prompt eliminato con successo", "success");
+                                }
+                            }
+                        } finally {
+                            Loader.hide();
+                        }
+                    }
+                );
+            };
+        });
+    }
+    
+    function renderListView(subcategory, parentCategory, container) {
         subcategory.prompts.forEach(prompt => {
             const item = document.createElement("div");
             item.className = "item-container";
@@ -1173,7 +1332,7 @@
             
             actionsDiv.append(deleteIcon);
             item.append(nameSpan, actionsDiv);
-            listContainer.appendChild(item);
+            container.appendChild(item);
         });
     }
 
@@ -1467,7 +1626,8 @@
     function performSearch(rawTerm) {
         const term = normalizeStr(rawTerm);
         const results = [];
-        const seen = new Set();
+        const seenPrompts = new Set();
+        const seenSubcategories = new Set();
         const tempDiv = document.createElement("div");
 
         if (!term) { 
@@ -1485,11 +1645,34 @@
         state.allData.forEach(cat => {
             const catMatch = normalizeStr(cat.name).includes(term);
 
+            // Aggiungi la categoria come risultato se matcha
+            if (catMatch) {
+                results.push({
+                    type: 'category',
+                    category: cat,
+                    score: 10,
+                    matchType: 'Categoria'
+                });
+            }
+
             cat.subcategories?.forEach(sub => {
                 const subMatch = normalizeStr(sub.name).includes(term);
 
+                // Aggiungi la sottocategoria come risultato se matcha
+                if (subMatch && !seenSubcategories.has(sub.id)) {
+                    results.push({
+                        type: 'subcategory',
+                        subcategory: sub,
+                        category: cat,
+                        score: 8,
+                        matchType: 'Sottocategoria'
+                    });
+                    seenSubcategories.add(sub.id);
+                }
+
+                // Cerca nei prompt
                 sub.prompts?.forEach(p => {
-                    if (seen.has(p.id)) return;
+                    if (seenPrompts.has(p.id)) return;
 
                     tempDiv.innerHTML = p.description || "";
                     const descText = normalizeStr(tempDiv.textContent || "");
@@ -1498,12 +1681,14 @@
 
                     if (catMatch || subMatch || titleMatch || descMatch) {
                         results.push({
+                            type: 'prompt',
                             prompt: p,
                             subcategory: sub,
                             category: cat,
-                            score: (titleMatch ? 3 : 0) + (subMatch ? 2 : 0) + (catMatch ? 1 : 0) + (descMatch ? 0.5 : 0)
+                            score: (titleMatch ? 3 : 0) + (subMatch ? 2 : 0) + (catMatch ? 1 : 0) + (descMatch ? 0.5 : 0),
+                            matchType: 'Prompt'
                         });
-                        seen.add(p.id);
+                        seenPrompts.add(p.id);
                     }
                 });
             });
@@ -1523,12 +1708,34 @@
         const hi = (text) => text.replace(new RegExp(safe, "gi"), m => `<mark>${m}</mark>`);
 
         let html = `<div class="display-header"><h3>${results.length} risultati trovati per "<strong>${rawTerm}</strong>"</h3></div><div id="search-results-list">`;
+        
         results.forEach((res, idx) => {
+            let icon = '';
+            let title = '';
+            let subtitle = '';
+            
+            if (res.type === 'category') {
+                icon = '<i class="fa-solid fa-folder" style="color: var(--primary-accent); margin-right: 8px;"></i>';
+                title = hi(res.category.name);
+                subtitle = `Categoria • ${res.category.subcategories?.length || 0} sottocategorie`;
+            } else if (res.type === 'subcategory') {
+                icon = '<i class="fa-solid fa-folder-open" style="color: var(--star-yellow); margin-right: 8px;"></i>';
+                title = hi(res.subcategory.name);
+                subtitle = `Sottocategoria in: ${hi(res.category.name)} • ${res.subcategory.prompts?.length || 0} prompt`;
+            } else if (res.type === 'prompt') {
+                icon = '<i class="fa-solid fa-file-lines" style="color: var(--text-muted); margin-right: 8px;"></i>';
+                title = hi(res.prompt.title);
+                subtitle = `Prompt in: ${hi(res.category.name)} > ${hi(res.subcategory.name)}`;
+            }
+            
             html += `
                 <div class="item-container search-result-item" data-idx="${idx}">
                     <div class="item-name">
-                        <span class="search-result-title">${hi(res.prompt.title)}</span>
-                        <span class="search-result-path">In: ${hi(res.category.name)} > ${hi(res.subcategory.name)}</span>
+                        <div style="display: flex; align-items: center;">
+                            ${icon}
+                            <span class="search-result-title">${title}</span>
+                        </div>
+                        <span class="search-result-path">${subtitle}</span>
                     </div>
                 </div>`;
         });
@@ -1538,7 +1745,29 @@
         document.querySelectorAll(".search-result-item").forEach(el => {
             el.onclick = () => {
                 const r = results[parseInt(el.dataset.idx, 10)];
-                displayPromptDetail(r.prompt, r.subcategory, r.category, { origin: 'search' });
+                
+                if (r.type === 'category') {
+                    // Mostra le sottocategorie della categoria
+                    searchInput.value = '';
+                    selectionPanel.style.display = "block";
+                    state.activeCategoryId = r.category.id;
+                    state.isSearchActive = false;
+                    state.lastSearchTerm = '';
+                    updateSearchIcon();
+                    renderUI();
+                } else if (r.type === 'subcategory') {
+                    // Mostra i prompt della sottocategoria
+                    searchInput.value = '';
+                    selectionPanel.style.display = "block";
+                    state.activeCategoryId = r.category.id;
+                    state.isSearchActive = false;
+                    state.lastSearchTerm = '';
+                    updateSearchIcon();
+                    displayPromptTitles(r.subcategory, r.category);
+                } else if (r.type === 'prompt') {
+                    // Mostra il dettaglio del prompt
+                    displayPromptDetail(r.prompt, r.subcategory, r.category, { origin: 'search' });
+                }
             };
         });
     }
@@ -1894,6 +2123,13 @@
         if (savedRecents) {
             state.recents = JSON.parse(savedRecents);
         }
+        
+        // Carica preferenza visualizzazione
+        const savedViewMode = localStorage.getItem("promptManagerViewMode");
+        if (savedViewMode) {
+            state.viewMode = savedViewMode;
+        }
+        
         state.activeCategoryId = 'favorites';
         setupEventListeners();
         renderUI();

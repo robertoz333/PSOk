@@ -173,10 +173,24 @@
         .confirm-inline-btn.cancel { background-color: var(--element-bg); color: var(--text-secondary); }
         .confirm-inline-btn.cancel:hover { background-color: var(--element-bg-hover); }
         @keyframes confirmSlideIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        /* Loading Overlay */
+        #loading-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px); }
+        #loading-overlay.show { display: flex; }
+        .loading-spinner { text-align: center; }
+        .loading-spinner-icon { font-size: 48px; color: var(--primary-accent); animation: spin 1s linear infinite; }
+        .loading-text { color: var(--text-primary); font-size: 18px; margin-top: 20px; font-weight: 500; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 <div id="toast-container"></div>
+<div id="loading-overlay">
+    <div class="loading-spinner">
+        <i class="fa-solid fa-spinner loading-spinner-icon"></i>
+        <div class="loading-text">Caricamento in corso...</div>
+    </div>
+</div>
 
 <header class="app-header">
     <div class="header-left"><div class="logo">PS</div></div>
@@ -289,6 +303,25 @@
 
 <script>
 (async () => {
+    /*** Loading System ***/
+    const Loader = {
+        overlay: null,
+        text: null,
+        init() {
+            this.overlay = document.getElementById('loading-overlay');
+            this.text = this.overlay?.querySelector('.loading-text');
+        },
+        show(message = 'Caricamento in corso...') {
+            if (!this.overlay) this.init();
+            if (this.text) this.text.textContent = message;
+            this.overlay?.classList.add('show');
+        },
+        hide() {
+            if (!this.overlay) this.init();
+            this.overlay?.classList.remove('show');
+        }
+    };
+
     /*** Toast Notification System ***/
     const Toast = {
         container: null,
@@ -461,28 +494,43 @@
         if (btnRipristina) btnRipristina.disabled = state.redoStack.length === 0;
     }
     async function updateStateAndSave(newData, options = { saveHistory: true }) {
-        if (options.saveHistory) {
-            state.redoStack = [];
-            state.history.push(JSON.parse(JSON.stringify(state.allData)));
-            if (state.history.length > 30) state.history.shift();
+        Loader.show('Salvataggio in corso...');
+        try {
+            if (options.saveHistory) {
+                state.redoStack = [];
+                state.history.push(JSON.parse(JSON.stringify(state.allData)));
+                if (state.history.length > 30) state.history.shift();
+            }
+            state.allData = newData;
+            await Database.save(state.allData);
+            updateUndoRedoButtons();
+            const term = normalizeStr(searchInput?.value || "");
+            if (term) performSearch(term);
+            else renderUI();
+        } finally {
+            Loader.hide();
         }
-        state.allData = newData;
-        await Database.save(state.allData);
-        updateUndoRedoButtons();
-        const term = normalizeStr(searchInput?.value || "");
-        if (term) performSearch(term);
-        else renderUI();
     }
     async function performUndo() {
         if (state.history.length > 0) {
-            state.redoStack.push(JSON.parse(JSON.stringify(state.allData)));
-            await updateStateAndSave(state.history.pop(), { saveHistory: false });
+            Loader.show('Annullamento in corso...');
+            try {
+                state.redoStack.push(JSON.parse(JSON.stringify(state.allData)));
+                await updateStateAndSave(state.history.pop(), { saveHistory: false });
+            } finally {
+                Loader.hide();
+            }
         }
     }
     async function performRedo() {
         if (state.redoStack.length > 0) {
-            state.history.push(JSON.parse(JSON.stringify(state.allData)));
-            await updateStateAndSave(state.redoStack.pop(), { saveHistory: false });
+            Loader.show('Ripristino in corso...');
+            try {
+                state.history.push(JSON.parse(JSON.stringify(state.allData)));
+                await updateStateAndSave(state.redoStack.pop(), { saveHistory: false });
+            } finally {
+                Loader.hide();
+            }
         }
     }
 
@@ -555,31 +603,36 @@
                 return;
             }
 
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const mergedSubcategories = [];
-            const categoriesToMerge = Array.from(selectedCategories);
+            Loader.show('Unione categorie in corso...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const mergedSubcategories = [];
+                const categoriesToMerge = Array.from(selectedCategories);
 
-            categoriesToMerge.forEach(catId => {
-                const cat = newData.find(c => c.id === catId);
-                if (cat && cat.subcategories) {
-                    mergedSubcategories.push(...cat.subcategories);
-                }
-            });
+                categoriesToMerge.forEach(catId => {
+                    const cat = newData.find(c => c.id === catId);
+                    if (cat && cat.subcategories) {
+                        mergedSubcategories.push(...cat.subcategories);
+                    }
+                });
 
-            const newCategory = {
-                id: `_${Math.random().toString(36).slice(2, 11)}`,
-                name: newName,
-                subcategories: mergedSubcategories
-            };
+                const newCategory = {
+                    id: `_${Math.random().toString(36).slice(2, 11)}`,
+                    name: newName,
+                    subcategories: mergedSubcategories
+                };
 
-            const filteredData = newData.filter(c => !categoriesToMerge.includes(c.id));
-            filteredData.push(newCategory);
-            filteredData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                const filteredData = newData.filter(c => !categoriesToMerge.includes(c.id));
+                filteredData.push(newCategory);
+                filteredData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
 
-            await updateStateAndSave(filteredData);
-            state.activeCategoryId = newCategory.id;
-            modal.classList.remove("show");
-            Toast.show(`${selectedCategories.size} categorie unite con successo!`, "success");
+                await updateStateAndSave(filteredData);
+                state.activeCategoryId = newCategory.id;
+                modal.classList.remove("show");
+                Toast.show(`${selectedCategories.size} categorie unite con successo!`, "success");
+            } finally {
+                Loader.hide();
+            }
         };
 
         const handleCancel = () => {
@@ -669,36 +722,41 @@
                 return;
             }
 
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const category = newData.find(c => c.id === state.activeCategoryId);
-            
-            if (!category) return;
+            Loader.show('Unione sottocategorie in corso...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const category = newData.find(c => c.id === state.activeCategoryId);
+                
+                if (!category) return;
 
-            const mergedPrompts = [];
-            const subcategoriesToMerge = Array.from(selectedSubcategories);
+                const mergedPrompts = [];
+                const subcategoriesToMerge = Array.from(selectedSubcategories);
 
-            subcategoriesToMerge.forEach(subId => {
-                const sub = category.subcategories.find(s => s.id === subId);
-                if (sub && sub.prompts) {
-                    mergedPrompts.push(...sub.prompts);
-                }
-            });
+                subcategoriesToMerge.forEach(subId => {
+                    const sub = category.subcategories.find(s => s.id === subId);
+                    if (sub && sub.prompts) {
+                        mergedPrompts.push(...sub.prompts);
+                    }
+                });
 
-            const newSubcategory = {
-                id: `_${Math.random().toString(36).slice(2, 11)}`,
-                name: newName,
-                prompts: mergedPrompts
-            };
+                const newSubcategory = {
+                    id: `_${Math.random().toString(36).slice(2, 11)}`,
+                    name: newName,
+                    prompts: mergedPrompts
+                };
 
-            newSubcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
+                newSubcategory.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
 
-            category.subcategories = category.subcategories.filter(s => !subcategoriesToMerge.includes(s.id));
-            category.subcategories.push(newSubcategory);
-            category.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                category.subcategories = category.subcategories.filter(s => !subcategoriesToMerge.includes(s.id));
+                category.subcategories.push(newSubcategory);
+                category.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
 
-            await updateStateAndSave(newData);
-            modal.classList.remove("show");
-            Toast.show(`${selectedSubcategories.size} sottocategorie unite con successo!`, "success");
+                await updateStateAndSave(newData);
+                modal.classList.remove("show");
+                Toast.show(`${selectedSubcategories.size} sottocategorie unite con successo!`, "success");
+            } finally {
+                Loader.hide();
+            }
         };
 
         const handleCancel = () => {
@@ -817,15 +875,20 @@
             unfavoriteIcon.onclick = async (e) => {
                 e.stopPropagation();
                 
-                const newData = JSON.parse(JSON.stringify(state.allData));
-                const promptToUpdate = newData
-                    .find(c => c.id === item.category.id)?.subcategories
-                    .find(s => s.id === item.subcategory.id)?.prompts
-                    .find(p => p.id === item.prompt.id);
+                Loader.show('Rimozione dai preferiti...');
+                try {
+                    const newData = JSON.parse(JSON.stringify(state.allData));
+                    const promptToUpdate = newData
+                        .find(c => c.id === item.category.id)?.subcategories
+                        .find(s => s.id === item.subcategory.id)?.prompts
+                        .find(p => p.id === item.prompt.id);
 
-                if (promptToUpdate) {
-                    promptToUpdate.favorite = false;
-                    await updateStateAndSave(newData);
+                    if (promptToUpdate) {
+                        promptToUpdate.favorite = false;
+                        await updateStateAndSave(newData);
+                    }
+                } finally {
+                    Loader.hide();
                 }
             };
             
@@ -882,10 +945,15 @@
                 deleteCatBtn.parentElement,
                 `Eliminare la categoria "${category.name}" e tutto il suo contenuto?`,
                 async () => {
-                    const newData = state.allData.filter(c => c.id !== category.id);
-                    if (state.activeCategoryId === category.id) state.activeCategoryId = 'favorites';
-                    await updateStateAndSave(newData);
-                    Toast.show("Categoria eliminata con successo", "success");
+                    Loader.show('Eliminazione categoria...');
+                    try {
+                        const newData = state.allData.filter(c => c.id !== category.id);
+                        if (state.activeCategoryId === category.id) state.activeCategoryId = 'favorites';
+                        await updateStateAndSave(newData);
+                        Toast.show("Categoria eliminata con successo", "success");
+                    } finally {
+                        Loader.hide();
+                    }
                 }
             );
         };
@@ -922,12 +990,17 @@
                     item,
                     `Eliminare la sottocategoria "${subcat.name}" e tutti i suoi prompt?`,
                     async () => {
-                        const newData = JSON.parse(JSON.stringify(state.allData));
-                        const cat = newData.find(c => c.id === category.id);
-                        if (cat) {
-                            cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcat.id);
-                            await updateStateAndSave(newData);
-                            Toast.show("Sottocategoria eliminata con successo", "success");
+                        Loader.show('Eliminazione sottocategoria...');
+                        try {
+                            const newData = JSON.parse(JSON.stringify(state.allData));
+                            const cat = newData.find(c => c.id === category.id);
+                            if (cat) {
+                                cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcat.id);
+                                await updateStateAndSave(newData);
+                                Toast.show("Sottocategoria eliminata con successo", "success");
+                            }
+                        } finally {
+                            Loader.hide();
                         }
                     }
                 );
@@ -944,12 +1017,17 @@
                         item,
                         `Eliminare la sottocategoria "${subcat.name}" e tutti i suoi prompt?`,
                         async () => {
-                            const newData = JSON.parse(JSON.stringify(state.allData));
-                            const cat = newData.find(c => c.id === category.id);
-                            if (cat) {
-                                cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcat.id);
-                                await updateStateAndSave(newData);
-                                Toast.show("Sottocategoria eliminata con successo", "success");
+                            Loader.show('Eliminazione sottocategoria...');
+                            try {
+                                const newData = JSON.parse(JSON.stringify(state.allData));
+                                const cat = newData.find(c => c.id === category.id);
+                                if (cat) {
+                                    cat.subcategories = cat.subcategories.filter(sc => sc.id !== subcat.id);
+                                    await updateStateAndSave(newData);
+                                    Toast.show("Sottocategoria eliminata con successo", "success");
+                                }
+                            } finally {
+                                Loader.hide();
                             }
                         }
                     );
@@ -1002,15 +1080,20 @@
                     item,
                     `Eliminare il prompt "${prompt.title}"?`,
                     async () => {
-                        const newData = JSON.parse(JSON.stringify(state.allData));
-                        const subcat = newData.find(c => c.id === parentCategory.id)?.subcategories.find(s => s.id === subcategory.id);
-                        if (subcat) {
-                            const index = subcat.prompts.findIndex(p => p.id === prompt.id);
-                            if (index > -1) {
-                                subcat.prompts.splice(index, 1);
-                                await updateStateAndSave(newData);
-                                Toast.show("Prompt eliminato con successo", "success");
+                        Loader.show('Eliminazione prompt...');
+                        try {
+                            const newData = JSON.parse(JSON.stringify(state.allData));
+                            const subcat = newData.find(c => c.id === parentCategory.id)?.subcategories.find(s => s.id === subcategory.id);
+                            if (subcat) {
+                                const index = subcat.prompts.findIndex(p => p.id === prompt.id);
+                                if (index > -1) {
+                                    subcat.prompts.splice(index, 1);
+                                    await updateStateAndSave(newData);
+                                    Toast.show("Prompt eliminato con successo", "success");
+                                }
                             }
+                        } finally {
+                            Loader.hide();
                         }
                     }
                 );
@@ -1025,15 +1108,20 @@
                         item,
                         `Eliminare il prompt "${prompt.title}"?`,
                         async () => {
-                            const newData = JSON.parse(JSON.stringify(state.allData));
-                            const subcat = newData.find(c => c.id === parentCategory.id)?.subcategories.find(s => s.id === subcategory.id);
-                            if (subcat) {
-                                const index = subcat.prompts.findIndex(p => p.id === prompt.id);
-                                if (index > -1) {
-                                    subcat.prompts.splice(index, 1);
-                                    await updateStateAndSave(newData);
-                                    Toast.show("Prompt eliminato con successo", "success");
+                            Loader.show('Eliminazione prompt...');
+                            try {
+                                const newData = JSON.parse(JSON.stringify(state.allData));
+                                const subcat = newData.find(c => c.id === parentCategory.id)?.subcategories.find(s => s.id === subcategory.id);
+                                if (subcat) {
+                                    const index = subcat.prompts.findIndex(p => p.id === prompt.id);
+                                    if (index > -1) {
+                                        subcat.prompts.splice(index, 1);
+                                        await updateStateAndSave(newData);
+                                        Toast.show("Prompt eliminato con successo", "success");
+                                    }
                                 }
+                            } finally {
+                                Loader.hide();
                             }
                         }
                     );
@@ -1242,16 +1330,21 @@
                     promptActionsToolbar,
                     `Eliminare il prompt "${prompt.title}"?`,
                     async () => {
-                        const newData = JSON.parse(JSON.stringify(state.allData));
-                        const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
-                        if (subcat) {
-                            const index = subcat.prompts.findIndex(p => p.id === prompt.id);
-                            if (index > -1) {
-                                subcat.prompts.splice(index, 1);
-                                await updateStateAndSave(newData);
-                                state.activeCategoryId = parentCat.id;
-                                Toast.show("Prompt eliminato con successo", "success");
+                        Loader.show('Eliminazione prompt...');
+                        try {
+                            const newData = JSON.parse(JSON.stringify(state.allData));
+                            const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
+                            if (subcat) {
+                                const index = subcat.prompts.findIndex(p => p.id === prompt.id);
+                                if (index > -1) {
+                                    subcat.prompts.splice(index, 1);
+                                    await updateStateAndSave(newData);
+                                    state.activeCategoryId = parentCat.id;
+                                    Toast.show("Prompt eliminato con successo", "success");
+                                }
                             }
+                        } finally {
+                            Loader.hide();
                         }
                     }
                 );
@@ -1263,27 +1356,37 @@
             btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };
         });
         saveChangesBtn.onclick = async () => {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const promptToUpdate = newData.find(c => c.id === parentCat.id)
-                ?.subcategories.find(s => s.id === parentSub.id)
-                ?.prompts.find(p => p.id === prompt.id);
-            if (promptToUpdate) {
-                promptToUpdate.description = descriptionContainer.innerHTML;
-                await updateStateAndSave(newData);
-                displayPromptDetail(promptToUpdate, parentSub, parentCat, { origin });
+            Loader.show('Salvataggio modifiche...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const promptToUpdate = newData.find(c => c.id === parentCat.id)
+                    ?.subcategories.find(s => s.id === parentSub.id)
+                    ?.prompts.find(p => p.id === prompt.id);
+                if (promptToUpdate) {
+                    promptToUpdate.description = descriptionContainer.innerHTML;
+                    await updateStateAndSave(newData);
+                    displayPromptDetail(promptToUpdate, parentSub, parentCat, { origin });
+                }
+            } finally {
+                Loader.hide();
             }
         };
         starBtn.onclick = async () => {
             const isFavorite = starBtn.classList.contains("fa-solid");
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const promptToUpdate = newData.find(c => c.id === parentCat.id)
-                ?.subcategories.find(s => s.id === parentSub.id)
-                ?.prompts.find(p => p.id === prompt.id);
-            if (promptToUpdate) {
-                promptToUpdate.favorite = !isFavorite;
-                await updateStateAndSave(newData);
-                starBtn.classList.toggle("fa-solid", !isFavorite);
-                starBtn.classList.toggle("fa-regular", isFavorite);
+            Loader.show(isFavorite ? 'Rimozione dai preferiti...' : 'Aggiunta ai preferiti...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const promptToUpdate = newData.find(c => c.id === parentCat.id)
+                    ?.subcategories.find(s => s.id === parentSub.id)
+                    ?.prompts.find(p => p.id === prompt.id);
+                if (promptToUpdate) {
+                    promptToUpdate.favorite = !isFavorite;
+                    await updateStateAndSave(newData);
+                    starBtn.classList.toggle("fa-solid", !isFavorite);
+                    starBtn.classList.toggle("fa-regular", isFavorite);
+                }
+            } finally {
+                Loader.hide();
             }
         };
 
@@ -1302,14 +1405,19 @@
                 titleH1.innerText = prompt.title;
                 return;
             }
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
-            const promptToUpdate = subcat?.prompts.find(p => p.id === prompt.id);
-            if (promptToUpdate) {
-                promptToUpdate.title = newTitle;
-                subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
-                await updateStateAndSave(newData);
-                displayPromptDetail(promptToUpdate, parentSub, parentCat, { origin });
+            Loader.show('Salvataggio titolo...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
+                const promptToUpdate = subcat?.prompts.find(p => p.id === prompt.id);
+                if (promptToUpdate) {
+                    promptToUpdate.title = newTitle;
+                    subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
+                    await updateStateAndSave(newData);
+                    displayPromptDetail(promptToUpdate, parentSub, parentCat, { origin });
+                }
+            } finally {
+                Loader.hide();
             }
         };
     }
@@ -1394,9 +1502,15 @@
     async function addCategory() {
         const name = prompt("Nome nuova categoria:");
         if (name && name.trim()) {
-            const newData = [...state.allData, { id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), subcategories: [] }];
-            newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
+            Loader.show('Creazione categoria...');
+            try {
+                const newData = [...state.allData, { id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), subcategories: [] }];
+                newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                await updateStateAndSave(newData);
+                Toast.show("Categoria creata con successo", "success");
+            } finally {
+                Loader.hide();
+            }
         }
     }
     async function editCategory(categoryId) {
@@ -1404,22 +1518,34 @@
         if (!category) return;
         const newName = prompt("Nuovo nome per la categoria:", category.name);
         if (newName && newName.trim() && newName.trim() !== category.name) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const catToUpdate = newData.find(c => c.id === categoryId);
-            catToUpdate.name = newName.trim();
-            newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
+            Loader.show('Aggiornamento categoria...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const catToUpdate = newData.find(c => c.id === categoryId);
+                catToUpdate.name = newName.trim();
+                newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                await updateStateAndSave(newData);
+                Toast.show("Categoria aggiornata con successo", "success");
+            } finally {
+                Loader.hide();
+            }
         }
     }
     async function addSubcategory(categoryId) {
         const name = prompt("Nome della nuova sottocategoria:");
         if (name && name.trim()) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const cat = newData.find(c => c.id === categoryId);
-            if (cat) {
-                cat.subcategories.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), prompts: [] });
-                cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-                await updateStateAndSave(newData);
+            Loader.show('Creazione sottocategoria...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const cat = newData.find(c => c.id === categoryId);
+                if (cat) {
+                    cat.subcategories.push({ id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), prompts: [] });
+                    cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                    await updateStateAndSave(newData);
+                    Toast.show("Sottocategoria creata con successo", "success");
+                }
+            } finally {
+                Loader.hide();
             }
         }
     }
@@ -1429,12 +1555,18 @@
         if (!subcategory) return;
         const newName = prompt("Nuovo nome per la sottocategoria:", subcategory.name);
         if (newName && newName.trim() && newName.trim() !== subcategory.name) {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const cat = newData.find(c => c.id === parentCategoryId);
-            const subcatToUpdate = cat.subcategories.find(s => s.id === subcategoryId);
-            subcatToUpdate.name = newName.trim();
-            cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
-            await updateStateAndSave(newData);
+            Loader.show('Aggiornamento sottocategoria...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const cat = newData.find(c => c.id === parentCategoryId);
+                const subcatToUpdate = cat.subcategories.find(s => s.id === subcategoryId);
+                subcatToUpdate.name = newName.trim();
+                cat.subcategories.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                await updateStateAndSave(newData);
+                Toast.show("Sottocategoria aggiornata con successo", "success");
+            } finally {
+                Loader.hide();
+            }
         }
     }
     
@@ -1546,8 +1678,7 @@
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(savedSelectionRange);
-                const imgTag = `<img
-                src="${imgSrc}" alt="Immagine caricata">`;
+                const imgTag = `<img src="${imgSrc}" alt="Immagine caricata">`;
                 document.execCommand("insertHTML", false, imgTag);
             }
             document.getElementById("image-modal-overlay").classList.remove("show");
@@ -1584,22 +1715,27 @@
                 return;
             }
             
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
-            
-            if (subcat) {
-                subcat.prompts.push({
-                    id: `_${Math.random().toString(36).slice(2, 11)}`,
-                    title: title,
-                    description: description,
-                    favorite: false
-                });
-                subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
-                await updateStateAndSave(newData);
-                Toast.show("Prompt creato con successo!", "success");
+            Loader.show('Creazione prompt...');
+            try {
+                const newData = JSON.parse(JSON.stringify(state.allData));
+                const subcat = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId);
+                
+                if (subcat) {
+                    subcat.prompts.push({
+                        id: `_${Math.random().toString(36).slice(2, 11)}`,
+                        title: title,
+                        description: description,
+                        favorite: false
+                    });
+                    subcat.prompts.sort((a, b) => a.title.localeCompare(b.title, "it", { sensitivity: "base" }));
+                    await updateStateAndSave(newData);
+                    Toast.show("Prompt creato con successo!", "success");
+                }
+                
+                modal.classList.remove("show");
+            } finally {
+                Loader.hide();
             }
-            
-            modal.classList.remove("show");
         };
         
         const handleCancel = () => {
@@ -1630,6 +1766,8 @@
         backupInput?.addEventListener("change", async (event) => {
             const file = event.target.files[0];
             if (!file) return;
+            
+            Loader.show('Importazione backup...');
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
@@ -1638,6 +1776,8 @@
                     Toast.show("Backup importato con successo!", "success");
                 } catch {
                     Toast.show("File di backup non valido.", "error");
+                } finally {
+                    Loader.hide();
                 }
             };
             reader.readAsText(file);
@@ -1648,14 +1788,19 @@
                 Toast.show("Nessun dato da esportare.", "warning");
                 return; 
             }
-            const dataStr = JSON.stringify(state.allData, null, 2);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `prompts_backup_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-            URL.revokeObjectURL(a.href);
-            Toast.show("Backup scaricato con successo!", "success");
+            Loader.show('Creazione backup...');
+            try {
+                const dataStr = JSON.stringify(state.allData, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = `prompts_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+                Toast.show("Backup scaricato con successo!", "success");
+            } finally {
+                Loader.hide();
+            }
         });
 
         btnMergeCategories?.addEventListener("click", openMergeCategoriesModal);
@@ -1672,8 +1817,12 @@
 
     /*** Bootstrap ***/
     try {
+        Loader.show('Inizializzazione database...');
         await Database.init();
+        
+        Loader.show('Caricamento dati...');
         state.allData = await Database.load();
+        
         const savedRecents = localStorage.getItem("promptManagerRecents");
         if (savedRecents) {
             state.recents = JSON.parse(savedRecents);
@@ -1681,6 +1830,7 @@
         state.activeCategoryId = 'favorites';
         setupEventListeners();
         renderUI();
+        Loader.hide();
 
         window.addEventListener('beforeunload', () => {
             localStorage.setItem("promptManagerRecents", JSON.stringify(state.recents));
@@ -1689,6 +1839,7 @@
     } catch (error) {
         console.error("Inizializzazione fallita:", error);
         displayArea.innerHTML = '<div class="initial-message"><p>Errore critico: impossibile avviare l\'app.</p></div>';
+        Loader.hide();
     }
 })();
 </script>

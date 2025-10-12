@@ -1,3 +1,10 @@
+Certamente, per risolvere il problema del testo incollato che mantiene il colore originale, è necessario intercettare l'evento di "incolla" e inserire solo il testo semplice, senza la formattazione originale. In questo modo, il testo erediterà automaticamente il colore corretto definito dal tema (bianco su sfondo scuro e nero su sfondo chiaro).
+
+Ho aggiunto una piccola funzione JavaScript e l'ho collegata ai due box di testo principali (quello per la creazione di un nuovo prompt e quello per la modifica di un prompt esistente).
+
+Ecco il codice completo con le modifiche necessarie:
+
+```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -459,6 +466,22 @@
     const normalizeStr = (s = "") =>
         s.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     const escapeRegExp = (s = "") => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    /**
+     * Gestisce l'evento "incolla" per rimuovere la formattazione e inserire solo testo semplice.
+     * Questo assicura che il colore del testo incollato corrisponda al tema dell'applicazione.
+     * @param {ClipboardEvent} event L'evento "incolla".
+     */
+    function handlePaste(event) {
+        // Previene l'azione predefinita di "incolla" del browser (che manterrebbe la formattazione).
+        event.preventDefault();
+        
+        // Ottiene i dati incollati dalla clipboard come testo semplice.
+        const text = (event.clipboardData || window.clipboardData).getData('text/plain');
+        
+        // Inserisce il testo semplice nella posizione corrente del cursore.
+        document.execCommand('insertText', false, text);
+    }
 
     /*** DB ***/
     const Database = {
@@ -1393,6 +1416,9 @@
         const backBtn = document.getElementById("back-to-list");
         const editBtn = document.getElementById("edit-prompt-btn");
         const descriptionContainer = document.getElementById("detail-description");
+        // Aggiungo l'event listener per l'incolla
+        descriptionContainer.addEventListener('paste', handlePaste);
+
         const formattingToolbar = document.getElementById("formatting-toolbar");
         const saveChangesBtn = document.getElementById("btnSaveChanges");
         const copyBtn = document.querySelector("#prompt-actions .fa-copy");
@@ -1857,6 +1883,9 @@
         const modal = document.getElementById("new-prompt-modal-overlay");
         const titleInput = document.getElementById("new-prompt-title-input");
         const descriptionEditor = document.getElementById("new-prompt-description");
+        // Aggiungo l'event listener per l'incolla
+        descriptionEditor.addEventListener('paste', handlePaste);
+
         const confirmBtn = document.getElementById("new-prompt-modal-confirm");
         const cancelBtn = document.getElementById("new-prompt-modal-cancel");
         const toolbar = document.getElementById("new-prompt-formatting-toolbar");
@@ -2149,3 +2178,4 @@
 </script>
 </body>
 </html>
+```

@@ -55,18 +55,6 @@
         .toolbar-btn:disabled { background-color: #555 !important; cursor: not-allowed; opacity: .5; transform: none; }
         .btn-green { background-color: var(--btn-green); } .btn-yellow { background-color: #f7b731; color: #333; } .btn-blue { background-color: #007bff; } .btn-dark-blue { background-color: #0d47a1; } .btn-red { background-color: var(--btn-red); } .btn-purple { background-color: #9b59b6; } .btn-orange { background-color: #e67e22; }
         .content-container { max-width: 1200px; margin: 0 auto; }
-        .selection-container { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; box-shadow: 0 4px 12px rgba(0,0,0,.2); margin-bottom: 30px; }
-        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .panel-header h2 { color: var(--text-primary); margin: 0; }
-        .add-button-inline { background-color: var(--btn-green); border: none; color: #FFFFFF; border-radius: 5px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all .2s; }
-        .add-button-inline:hover { background-color: var(--btn-green-hover); }
-        #category-buttons-container { display: flex; flex-wrap: wrap; gap: 12px; }
-        .category-pill { display: flex; align-items: center; gap: 8px; background-color: var(--element-bg); color: var(--text-secondary); border: 2px solid transparent; border-radius: 20px; padding: 8px 20px; font-size: 16px; cursor: pointer; transition: all .3s; }
-        .category-pill:hover { background-color: var(--element-bg-hover); }
-        .category-pill.active { background-color: var(--primary-accent); color: #FFFFFF; font-weight: 500; }
-        .category-pill .edit-icon { font-size: 12px; color: var(--text-muted); visibility: hidden; opacity: 0; transition: all .2s; }
-        .category-pill:hover .edit-icon { visibility: visible; opacity: 1; }
-        .category-pill .edit-icon:hover { color: var(--text-primary); }
         #display-area { background-color: var(--container-bg); border-radius: 16px; padding: 25px 30px; min-height: 200px; }
         .display-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--element-bg); padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
         .display-header h3 { margin: 0; font-size: 18px; color: var(--text-secondary); border: none; padding: 0; flex-grow: 1; }
@@ -243,6 +231,7 @@
         </button>
         <button class="tool-button" id="toolBtn"><i class="fa-solid fa-screwdriver-wrench"></i><span>Tool</span></button>
         <div class="toolbar-dropdown-menu" id="toolMenu">
+            <button class="toolbar-btn btn-green" id="btnAddCategory"><i class="fa-solid fa-plus"></i><span>Aggiungi Categoria</span></button>
             <button class="toolbar-btn btn-yellow" id="btnAnnulla"><i class="fa-solid fa-arrow-rotate-left"></i><span>Annulla</span></button>
             <button class="toolbar-btn btn-yellow" id="btnRipristina"><i class="fa-solid fa-arrow-rotate-right"></i><span>Ripristina</span></button>
             <button class="toolbar-btn btn-purple" id="btnMergeCategories"><i class="fa-solid fa-layer-group"></i><span>Unisci Categorie</span></button>
@@ -256,13 +245,6 @@
 <input type="file" id="backupInput" style="display:none" accept=".json,.txt" />
 
 <main class="content-container">
-    <div class="selection-container" id="selection-panel" style="display:none">
-        <div class="panel-header">
-            <h2>Categorie</h2>
-            <button class="add-button-inline" id="add-category-inline-btn"><i class="fa-solid fa-plus"></i> Aggiungi categoria</button>
-        </div>
-        <div id="category-buttons-container"></div>
-    </div>
     <div id="display-area"><div class="initial-message"><p>Caricamento dati...</p></div></div>
 </main>
 
@@ -539,14 +521,13 @@
     const toolMenu = document.getElementById("toolMenu");
     const importBtn = document.getElementById("btnImporta");
     const backupInput = document.getElementById("backupInput");
-    const selectionPanel = document.getElementById("selection-panel");
-    const categoryButtonsContainer = document.getElementById("category-buttons-container");
     const displayArea = document.getElementById("display-area");
     const btnAnnulla = document.getElementById("btnAnnulla");
     const btnRipristina = document.getElementById("btnRipristina");
     const btnBackup = document.getElementById("btnBackup");
     const btnMergeCategories = document.getElementById("btnMergeCategories");
     const btnMergeSubcategories = document.getElementById("btnMergeSubcategories");
+    const btnAddCategory = document.getElementById("btnAddCategory");
     const searchInput = document.getElementById("search-input");
     const searchIcon = document.getElementById("search-icon");
     const searchBar = document.getElementById("search-bar");
@@ -870,26 +851,21 @@
 
     /*** Render ***/
     function renderUI() {
-        selectionPanel.style.display = "block";
-        renderCategories();
-        renderCategoryDropdown(); // Popola e aggiorna il menu a tendina
+        renderCategoryDropdown();
 
-        if (state.activeCategoryId === 'favorites') {
-            displayFavorites();
-        } else if (state.activeCategoryId === 'recents') {
-            displayRecents();
-        } else {
+        if (state.activeCategoryId) {
             const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
             if (activeCategory) {
                 displaySubcategoryList(activeCategory);
+            }
+        } else {
+            if (state.allData.length > 0) {
+                 displayArea.innerHTML = '<div class="initial-message"><p>Seleziona una categoria dal menu in alto per iniziare.</p></div>';
             } else {
-                if (state.allData && state.allData.length > 0) {
-                    displayArea.innerHTML = '<div class="initial-message"><p>Seleziona una categoria.</p></div>';
-                } else {
-                    displayArea.innerHTML = '<div class="initial-message"><p>Nessuna categoria definita. Aggiungi una categoria o importa un file di backup.</p></div>';
-                }
+                 displayArea.innerHTML = '<div class="initial-message"><p>Nessuna categoria definita. Aggiungi una categoria dal menu "Tool" o importa un file di backup.</p></div>';
             }
         }
+        
         updateUndoRedoButtons();
     }
 
@@ -897,158 +873,28 @@
         if (!categoryDropdown) return;
 
         const activeId = state.activeCategoryId;
-        categoryDropdown.innerHTML = ""; 
+        categoryDropdown.innerHTML = "";
+        
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = "Seleziona una categoria...";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        categoryDropdown.appendChild(defaultOption);
 
-        const favOption = document.createElement('option');
-        favOption.value = 'favorites';
-        favOption.textContent = 'Preferiti';
-        categoryDropdown.appendChild(favOption);
-
-        const recentsOption = document.createElement('option');
-        recentsOption.value = 'recents';
-        recentsOption.textContent = 'Recenti';
-        categoryDropdown.appendChild(recentsOption);
-
-        if (state.allData.length > 0) {
-            const separator = document.createElement('option');
-            separator.disabled = true;
-            separator.textContent = '──────────';
-            categoryDropdown.appendChild(separator);
-
-            state.allData.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.id;
-                option.textContent = category.name;
-                categoryDropdown.appendChild(option);
-            });
+        if (state.allData.length === 0) {
+            defaultOption.textContent = "Nessuna categoria";
+            return;
         }
-
-        categoryDropdown.value = activeId;
-    }
-
-    function renderCategories() {
-        categoryButtonsContainer.innerHTML = "";
-
-        const createPill = (text, id, isStandard = false) => {
-            const button = document.createElement("button");
-            button.className = "category-pill";
-            if (id === state.activeCategoryId) button.classList.add("active");
-            
-            const textSpan = document.createElement('span');
-            textSpan.textContent = text;
-            button.appendChild(textSpan);
-
-            button.onclick = (e) => {
-                if (e.target.tagName === 'I') return;
-                state.activeCategoryId = id;
-                renderUI();
-            };
-
-            if (!isStandard) {
-                const editIcon = document.createElement('i');
-                editIcon.className = 'fa-solid fa-pencil edit-icon';
-                editIcon.title = 'Modifica nome categoria';
-                editIcon.onclick = (e) => {
-                    e.stopPropagation();
-                    editCategory(id);
-                };
-                button.appendChild(editIcon);
-            }
-            return button;
-        };
-
-        categoryButtonsContainer.appendChild(createPill("Preferiti", "favorites", true));
-        categoryButtonsContainer.appendChild(createPill("Recenti", "recents", true));
 
         state.allData.forEach(category => {
-            categoryButtonsContainer.appendChild(createPill(category.name, category.id));
-        });
-    }
-
-    function displayFavorites() {
-        const favoritePrompts = [];
-        state.allData.forEach(cat => {
-            cat.subcategories?.forEach(sub => {
-                sub.prompts?.forEach(p => {
-                    if (p.favorite) {
-                        favoritePrompts.push({ prompt: p, subcategory: sub, category: cat });
-                    }
-                });
-            });
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categoryDropdown.appendChild(option);
         });
 
-        displayArea.innerHTML = `
-            <div class="display-header"><h3>Preferiti</h3></div>
-            <div id="prompt-list"></div>`;
-        const listContainer = document.getElementById("prompt-list");
-        if (favoritePrompts.length === 0) {
-            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt aggiunto ai preferiti.</p></div>';
-            return;
-        }
-
-        favoritePrompts.forEach(item => {
-            const el = document.createElement("div");
-            el.className = "item-container";
-
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "item-name";
-            nameSpan.innerHTML = `<span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span><span class="search-result-title">${item.prompt.title}</span>`;
-            nameSpan.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, { origin: 'favorites' });
-
-            const unfavoriteIcon = document.createElement("i");
-            unfavoriteIcon.className = "fa-solid fa-star unfavorite-icon";
-            unfavoriteIcon.title = "Rimuovi dai preferiti";
-            unfavoriteIcon.onclick = async (e) => {
-                e.stopPropagation();
-                
-                Loader.show('Rimozione dai preferiti...');
-                try {
-                    const newData = JSON.parse(JSON.stringify(state.allData));
-                    const promptToUpdate = newData
-                        .find(c => c.id === item.category.id)?.subcategories
-                        .find(s => s.id === item.subcategory.id)?.prompts
-                        .find(p => p.id === item.prompt.id);
-
-                    if (promptToUpdate) {
-                        promptToUpdate.favorite = false;
-                        await updateStateAndSave(newData);
-                    }
-                } finally {
-                    Loader.hide();
-                }
-            };
-            
-            el.append(nameSpan, unfavoriteIcon);
-            listContainer.appendChild(el);
-        });
-    }
-
-    function displayRecents() {
-        const recentPrompts = [];
-        const catMap = new Map(state.allData.map(c => [c.id, c]));
-
-        state.recents.forEach(r => {
-            const category = catMap.get(r.catId);
-            const subcategory = category?.subcategories.find(s => s.id === r.subId);
-            const prompt = subcategory?.prompts.find(p => p.id === r.promptId);
-            if (prompt) recentPrompts.push({ prompt, subcategory, category });
-        });
-
-        displayArea.innerHTML = `
-            <div class="display-header"><h3>Recenti</h3></div>
-            <div id="prompt-list"></div>`;
-        const listContainer = document.getElementById("prompt-list");
-        if (recentPrompts.length === 0) {
-            listContainer.innerHTML = '<div class="initial-message" style="padding:20px 0;"><p>Nessun prompt visualizzato di recente.</p></div>';
-            return;
-        }
-        recentPrompts.forEach(item => {
-            const el = document.createElement("div");
-            el.className = "item-container";
-            el.innerHTML = `<span class="item-name"><span class="search-result-title">${item.prompt.title}</span><span class="search-result-path">In: ${item.category.name} > ${item.subcategory.name}</span></span>`;
-            el.onclick = () => displayPromptDetail(item.prompt, item.subcategory, item.category, { origin: 'recents' });
-            listContainer.appendChild(el);
-        });
+        categoryDropdown.value = activeId || "";
     }
 
     function displaySubcategoryList(category) {
@@ -1074,7 +920,9 @@
                     Loader.show('Eliminazione categoria...');
                     try {
                         const newData = state.allData.filter(c => c.id !== category.id);
-                        if (state.activeCategoryId === category.id) state.activeCategoryId = 'favorites';
+                        if (state.activeCategoryId === category.id) {
+                            state.activeCategoryId = null;
+                        }
                         await updateStateAndSave(newData);
                         Toast.show("Categoria eliminata con successo", "success");
                     } finally {
@@ -1407,12 +1255,7 @@
         
         let backText = "Torna alla categoria";
         if (origin === 'search') backText = "Torna ai risultati";
-        if (origin === 'favorites') backText = "Torna ai preferiti";
-        if (origin === 'recents') backText = "Torna ai recenti";
 
-        const showDeleteIcon = origin !== 'favorites' && origin !== 'recents';
-
-        selectionPanel.style.display = "none";
         displayArea.innerHTML = `
             <div class="prompt-detail-view">
                 <div class="prompt-header">
@@ -1421,7 +1264,7 @@
                         <i class="fa-solid fa-pencil" id="edit-prompt-btn" title="Modifica Descrizione"></i>
                         <i class="fa-solid fa-copy" title="Copia Descrizione"></i>
                         <i class="${prompt.favorite ? "fa-solid" : "fa-regular"} fa-star" title="Preferito"></i>
-                        ${showDeleteIcon ? `<i class="fa-solid fa-trash-can" id="delete-prompt-detail-btn" title="Elimina"></i>` : ''}
+                        <i class="fa-solid fa-trash-can" id="delete-prompt-detail-btn" title="Elimina"></i>
                     </div>
                 </div>
                 <div class="prompt-title-section">
@@ -1571,48 +1414,39 @@
             e.preventDefault();
             if (origin === 'search') {
                 performSearch(state.lastSearchTerm);
-            } else if (origin === 'favorites') {
-                state.activeCategoryId = 'favorites';
-                renderUI();
-            } else if (origin === 'recents') {
-                state.activeCategoryId = 'recents';
-                renderUI();
             } else {
-                selectionPanel.style.display = "block";
                 state.activeCategoryId = parentCat.id;
                 renderUI();
             }
         };
 
-        if (showDeleteIcon) {
-            const deletePromptBtn = document.getElementById("delete-prompt-detail-btn");
-            deletePromptBtn.onclick = () => {
-                const promptActionsToolbar = document.getElementById("prompt-actions");
-                ConfirmInline.show(
-                    promptActionsToolbar,
-                    `Eliminare il prompt "${prompt.title}"?`,
-                    async () => {
-                        Loader.show('Eliminazione prompt...');
-                        try {
-                            const newData = JSON.parse(JSON.stringify(state.allData));
-                            const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
-                            if (subcat) {
-                                const index = subcat.prompts.findIndex(p => p.id === prompt.id);
-                                if (index > -1) {
-                                    subcat.prompts.splice(index, 1);
-                                    await updateStateAndSave(newData);
-                                    state.activeCategoryId = parentCat.id;
-                                    Toast.show("Prompt eliminato con successo", "success");
-                                }
+        const deletePromptBtn = document.getElementById("delete-prompt-detail-btn");
+        deletePromptBtn.onclick = () => {
+            const promptActionsToolbar = document.getElementById("prompt-actions");
+            ConfirmInline.show(
+                promptActionsToolbar,
+                `Eliminare il prompt "${prompt.title}"?`,
+                async () => {
+                    Loader.show('Eliminazione prompt...');
+                    try {
+                        const newData = JSON.parse(JSON.stringify(state.allData));
+                        const subcat = newData.find(c => c.id === parentCat.id)?.subcategories.find(s => s.id === parentSub.id);
+                        if (subcat) {
+                            const index = subcat.prompts.findIndex(p => p.id === prompt.id);
+                            if (index > -1) {
+                                subcat.prompts.splice(index, 1);
+                                await updateStateAndSave(newData);
+                                state.activeCategoryId = parentCat.id;
+                                Toast.show("Prompt eliminato con successo", "success");
                             }
-                        } finally {
-                            Loader.hide();
                         }
+                    } finally {
+                        Loader.hide();
                     }
-                );
-            };
-        }
-
+                }
+            );
+        };
+        
         editBtn.onclick = () => { descriptionContainer.contentEditable = true; formattingToolbar.classList.add("show"); saveChangesBtn.classList.add("show"); descriptionContainer.focus(); };
         formattingToolbar.querySelectorAll("button[data-command]").forEach(btn => {
             btn.onclick = (e) => { e.preventDefault(); document.execCommand(btn.dataset.command, false, null); descriptionContainer.focus(); };
@@ -1761,7 +1595,6 @@
     }
 
     function displaySearchResults(results, rawTerm) {
-        selectionPanel.style.display = "none";
         if (!results.length) {
             displayArea.innerHTML = `<div class="initial-message"><p>Nessun risultato per "<strong>${rawTerm}</strong>"</p></div>`;
             return;
@@ -1811,7 +1644,6 @@
                 if (r.type === 'category') {
                     // Mostra le sottocategorie della categoria
                     searchInput.value = '';
-                    selectionPanel.style.display = "block";
                     state.activeCategoryId = r.category.id;
                     state.isSearchActive = false;
                     state.lastSearchTerm = '';
@@ -1820,7 +1652,6 @@
                 } else if (r.type === 'subcategory') {
                     // Mostra i prompt della sottocategoria
                     searchInput.value = '';
-                    selectionPanel.style.display = "block";
                     state.activeCategoryId = r.category.id;
                     state.isSearchActive = false;
                     state.lastSearchTerm = '';
@@ -1849,8 +1680,10 @@
         if (name && name.trim()) {
             Loader.show('Creazione categoria...');
             try {
-                const newData = [...state.allData, { id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), subcategories: [] }];
+                const newCategory = { id: `_${Math.random().toString(36).slice(2, 11)}`, name: name.trim(), subcategories: [] };
+                const newData = [...state.allData, newCategory];
                 newData.sort((a, b) => a.name.localeCompare(b.name, "it", { sensitivity: "base" }));
+                state.activeCategoryId = newCategory.id;
                 await updateStateAndSave(newData);
                 Toast.show("Categoria creata con successo", "success");
             } finally {
@@ -2154,7 +1987,7 @@
         btnMergeCategories?.addEventListener("click", openMergeCategoriesModal);
         btnMergeSubcategories?.addEventListener("click", openMergeSubcategoriesModal);
 
-        document.getElementById("add-category-inline-btn")?.addEventListener("click", addCategory);
+        btnAddCategory?.addEventListener("click", addCategory);
         btnAnnulla?.addEventListener("click", performUndo);
         btnRipristina?.addEventListener("click", performRedo);
 
@@ -2203,7 +2036,7 @@
             state.viewMode = savedViewMode;
         }
         
-        state.activeCategoryId = 'favorites';
+        state.activeCategoryId = null; // Imposta la categoria attiva a null all'avvio
         setupEventListeners();
         renderUI();
         updateSearchIcon();
@@ -2221,4 +2054,5 @@
 })();
 </script>
 </body>
-</html>```
+</html>
+```

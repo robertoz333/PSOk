@@ -1,10 +1,3 @@
-Certamente, per risolvere il problema del testo incollato che mantiene il colore originale, è necessario intercettare l'evento di "incolla" e inserire solo il testo semplice, senza la formattazione originale. In questo modo, il testo erediterà automaticamente il colore corretto definito dal tema (bianco su sfondo scuro e nero su sfondo chiaro).
-
-Ho aggiunto una piccola funzione JavaScript e l'ho collegata ai due box di testo principali (quello per la creazione di un nuovo prompt e quello per la modifica di un prompt esistente).
-
-Ecco il codice completo con le modifiche necessarie:
-
-```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -46,6 +39,10 @@ Ecco il codice completo con le modifiche necessarie:
         .search-bar i.clear-search { color: var(--btn-red); }
         .search-bar i.clear-search:hover { color: var(--btn-red-hover); }
         .search-bar input { background: transparent; border: none; outline: none; color: var(--text-primary); padding: 12px 10px; font-size: 16px; width: 280px; }
+        .category-dropdown-container { display: flex; align-items: center; background-color: var(--element-bg); border-radius: 12px; padding: 0 15px; position: relative; }
+        .category-dropdown-container i { color: var(--text-muted); margin-right: 10px; }
+        #category-dropdown { background: transparent; border: none; outline: none; color: var(--text-primary); padding: 12px 0; font-size: 16px; width: 220px; appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; }
+        #category-dropdown option { background-color: var(--container-bg); color: var(--text-primary); }
         .tool-button { background-color: #7A69E9; color: #FFFFFF; border: none; border-radius: 12px; padding: 10px 20px; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background-color .3s; }
         .tool-button:hover { background-color: #6957d1; }
         .theme-toggle { background-color: var(--element-bg); color: var(--text-primary); border: none; border-radius: 12px; padding: 10px 16px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color .3s; }
@@ -233,7 +230,11 @@ Ecco il codice completo con le modifiche necessarie:
     <div class="header-center">
         <div class="search-bar" id="search-bar">
             <i class="fa-solid fa-magnifying-glass" id="search-icon"></i>
-            <input type="text" id="search-input" placeholder="Cerca per titolo, categoria o sottocategoria…">
+            <input type="text" id="search-input" placeholder="Cerca prompt…">
+        </div>
+        <div class="category-dropdown-container">
+            <i class="fa-solid fa-list"></i>
+            <select id="category-dropdown" title="Seleziona una categoria"></select>
         </div>
     </div>
     <div class="header-right">
@@ -549,6 +550,7 @@ Ecco il codice completo con le modifiche necessarie:
     const searchInput = document.getElementById("search-input");
     const searchIcon = document.getElementById("search-icon");
     const searchBar = document.getElementById("search-bar");
+    const categoryDropdown = document.getElementById("category-dropdown");
 
     /*** Search Icon State Management ***/
     function updateSearchIcon() {
@@ -870,6 +872,7 @@ Ecco il codice completo con le modifiche necessarie:
     function renderUI() {
         selectionPanel.style.display = "block";
         renderCategories();
+        renderCategoryDropdown(); // Popola e aggiorna il menu a tendina
 
         if (state.activeCategoryId === 'favorites') {
             displayFavorites();
@@ -888,6 +891,39 @@ Ecco il codice completo con le modifiche necessarie:
             }
         }
         updateUndoRedoButtons();
+    }
+
+    function renderCategoryDropdown() {
+        if (!categoryDropdown) return;
+
+        const activeId = state.activeCategoryId;
+        categoryDropdown.innerHTML = ""; 
+
+        const favOption = document.createElement('option');
+        favOption.value = 'favorites';
+        favOption.textContent = 'Preferiti';
+        categoryDropdown.appendChild(favOption);
+
+        const recentsOption = document.createElement('option');
+        recentsOption.value = 'recents';
+        recentsOption.textContent = 'Recenti';
+        categoryDropdown.appendChild(recentsOption);
+
+        if (state.allData.length > 0) {
+            const separator = document.createElement('option');
+            separator.disabled = true;
+            separator.textContent = '──────────';
+            categoryDropdown.appendChild(separator);
+
+            state.allData.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categoryDropdown.appendChild(option);
+            });
+        }
+
+        categoryDropdown.value = activeId;
     }
 
     function renderCategories() {
@@ -2138,6 +2174,14 @@ Ecco il codice completo con le modifiche necessarie:
                 handleSearchInput();
             }
         });
+
+        categoryDropdown?.addEventListener('change', () => {
+            const selectedId = categoryDropdown.value;
+            if (selectedId) {
+                state.activeCategoryId = selectedId;
+                renderUI();
+            }
+        });
     };
 
     /*** Bootstrap ***/
@@ -2177,5 +2221,4 @@ Ecco il codice completo con le modifiche necessarie:
 })();
 </script>
 </body>
-</html>
-```
+</html>```

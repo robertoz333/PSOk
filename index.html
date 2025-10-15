@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prompt Manager v14 - Fix Completo</title>
+    <title>Prompt Manager v14 - Fix Completo + Incolla</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <style>
         :root {
@@ -231,7 +231,44 @@
     const Loader = { el: document.getElementById('loading-overlay'), show() { this.el.style.display = 'flex'; }, hide() { this.el.style.display = 'none'; } };
     const Toast = { container: document.getElementById('toast-container'), show(message, type = 'info', duration = 3000) { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.container.appendChild(t); setTimeout(() => t.remove(), duration); } };
     const Database = { DB_NAME: "PromptManagerDB_v14_Fixed", STORE_NAME: "promptsData", db: null, async init() { return new Promise((resolve, reject) => { const r=indexedDB.open(this.DB_NAME, 1); r.onerror=reject; r.onsuccess=e=>{this.db=e.target.result;resolve();}; r.onupgradeneeded=e=>e.target.result.createObjectStore(this.STORE_NAME, {keyPath:"id"}); }); }, async save(data) { return new Promise((resolve, reject) => { const tx=this.db.transaction([this.STORE_NAME],"readwrite"); tx.objectStore(this.STORE_NAME).put({id:"main",data}); tx.oncomplete=resolve; tx.onerror=reject; }); }, async load() { return new Promise((resolve, reject) => { const r=this.db.transaction([this.STORE_NAME]).objectStore(this.STORE_NAME).get("main"); r.onsuccess=e=>resolve(e.target.result?e.target.result.data:[]); r.onerror=reject; }); } };
-    function handlePaste(event) { event.preventDefault(); const text = event.clipboardData.getData('text/plain'); document.execCommand('insertText', false, text); }
+    
+    // FIX: Funzione handlePaste migliorata per gestire correttamente l'incolla
+    function handlePaste(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Ottieni il testo dagli appunti
+        let text = '';
+        if (event.clipboardData && event.clipboardData.getData) {
+            text = event.clipboardData.getData('text/plain');
+        } else if (window.clipboardData && window.clipboardData.getData) {
+            // Fallback per IE
+            text = window.clipboardData.getData('Text');
+        }
+        
+        // Inserisci il testo nella posizione del cursore
+        if (text) {
+            // Prova prima con execCommand (più compatibile)
+            if (document.queryCommandSupported('insertText')) {
+                document.execCommand('insertText', false, text);
+            } else {
+                // Fallback manuale se execCommand non è supportato
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    range.deleteContents();
+                    const textNode = document.createTextNode(text);
+                    range.insertNode(textNode);
+                    range.setStartAfter(textNode);
+                    range.setEndAfter(textNode);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            }
+        }
+        
+        return false;
+    }
     
     // --- STATE ---
     let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'columns', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null };
@@ -415,7 +452,6 @@
         if (!activeSub) { col.innerHTML = '<div class="initial-message">Seleziona una sottocategoria</div>'; return; }
         col.innerHTML = `<div class="column-header"><h3>${activeSub.name}</h3><button class="add-button" id="add-prompt-btn" title="Aggiungi Prompt"><i class="fa-solid fa-plus"></i> Prompt</button></div><div class="column-content"></div>`;
         
-        // FIX: Binding corretto del pulsante
         const addPromptBtn = document.getElementById('add-prompt-btn');
         if (addPromptBtn) {
             addPromptBtn.onclick = (e) => {
@@ -633,8 +669,10 @@
              await updateStateAndSave(newData, { newActiveIds, saveHistory: false });
         };
         
-        // 5. Gestione Drag and Drop & Incolla
-        descriptionContainer.addEventListener('paste', handlePaste);
+        // 5. FIX: Gestione Paste migliorata
+        descriptionContainer.addEventListener('paste', handlePaste, false);
+        
+        // 6. Gestione Drag and Drop
         descriptionContainer.addEventListener('dragover', e => { 
             if (descriptionContainer.contentEditable === 'true') {
                 e.preventDefault(); 
@@ -653,10 +691,6 @@
                 }
             }
         });
-        
-        // 6. FIX: I link ora si aprono normalmente in una nuova scheda
-        // Rimosso l'event listener che copiava l'URL negli appunti
-        // I link con target="_blank" si apriranno automaticamente
     }
     
     function trackRecentPrompt(promptId, subId, catId) {
@@ -857,7 +891,7 @@
                             id: `sub_1`, 
                             name: 'Testi e Storie', 
                             prompts: [ 
-                                {id: `p_1`, title: 'Prompt di Benvenuto', description: 'Benvenuto! Clicca l\'icona a forma di matita per modificare questo prompt. <strong>Clicca sul link arancione qui sotto per aprirlo in una nuova scheda:</strong> <a href="https://www.google.it/search?q=Prompt+Engineering" target="_blank">Link di Esempio Google</a>', favorite: true},
+                                {id: `p_1`, title: 'Prompt di Benvenuto', description: 'Benvenuto! Clicca l\'icona a forma di matita per modificare questo prompt. <strong>Clicca sul link arancione qui sotto per aprirlo in una nuova scheda:</strong> <a href="https://www.google.it/search?q=Prompt+Engineering" target="_blank">Link di Esempio Google</a><br><br>Prova a incollare del testo con <strong>Ctrl+V</strong> o <strong>Cmd+V</strong>!', favorite: true},
                                 {id: `p_2`, title: 'Genera Articolo SEO', description: 'Scrivi un articolo di 1500 parole sul tema X, con 3 titoli e bullet points.', favorite: false} 
                             ]
                         },

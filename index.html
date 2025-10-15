@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prompt Manager v14 - Fix Completo + Incolla</title>
+    <title>Prompt Manager v15 - Sistema Tagging</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <style>
         :root {
@@ -57,6 +57,79 @@
         .item-path { font-size: 12px; color: var(--text-muted); }
         .item-container.active .item-path { color: #ddd; }
         
+        /* STILI TAG */
+        .tag-badge { 
+            display: inline-block; 
+            padding: 3px 8px; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            margin: 2px 4px 2px 0; 
+            color: white;
+            white-space: nowrap;
+        }
+        .tags-container { 
+            display: flex; 
+            flex-wrap: wrap; 
+            margin-top: 6px; 
+            gap: 4px;
+        }
+        .tag-input-section {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--element-bg);
+        }
+        .tag-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .tag-input-wrapper input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--container-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .tag-input-wrapper button {
+            padding: 10px 20px;
+            background-color: var(--primary-accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tag-input-wrapper button:hover {
+            background-color: var(--primary-accent-dark);
+        }
+        .current-tags {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .tag-badge-removable {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+        }
+        .tag-badge-removable i {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        .tag-badge-removable:hover {
+            opacity: 0.8;
+        }
+        
         #col-detail, #col-special-detail { padding: 0; }
         .prompt-detail-view { height: 100%; display: flex; flex-direction: column; }
         .prompt-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); flex-shrink: 0;}
@@ -93,13 +166,11 @@
         #loading-overlay { position: fixed; inset: 0; background-color: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 10000; }
         .loading-spinner i { font-size: 48px; color: var(--primary-accent); animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        /* Stili Drag & Drop */
         .prompt-description-container[contenteditable="true"].drag-over {
             outline: 3px dashed var(--star-yellow);
             background-color: rgba(255, 193, 7, 0.1);
         }
 
-        /* Stile specifico per i link: li rendiamo arancioni accesi e cliccabili */
         .prompt-description-container a {
             color: #FFA500;
             text-decoration: underline;
@@ -110,7 +181,6 @@
             text-decoration: underline;
         }
 
-        /* --- STILI MODAL URL --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.7);
@@ -183,7 +253,6 @@
 <div id="toast-container"></div>
 <div id="loading-overlay"><div class="loading-spinner"><i class="fa-solid fa-spinner"></i></div></div>
 
-<!-- MODAL PER INSERIMENTO URL -->
 <div class="modal-overlay" id="linkModal">
     <div class="modal-content">
         <h4>Inserisci l'URL del Link</h4>
@@ -194,7 +263,6 @@
         </div>
     </div>
 </div>
-<!-- FINE MODAL -->
 
 <header class="app-header">
     <div class="header-left"><div class="logo">PS</div></div>
@@ -230,29 +298,33 @@
     // --- SYSTEMS ---
     const Loader = { el: document.getElementById('loading-overlay'), show() { this.el.style.display = 'flex'; }, hide() { this.el.style.display = 'none'; } };
     const Toast = { container: document.getElementById('toast-container'), show(message, type = 'info', duration = 3000) { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.container.appendChild(t); setTimeout(() => t.remove(), duration); } };
-    const Database = { DB_NAME: "PromptManagerDB_v14_Fixed", STORE_NAME: "promptsData", db: null, async init() { return new Promise((resolve, reject) => { const r=indexedDB.open(this.DB_NAME, 1); r.onerror=reject; r.onsuccess=e=>{this.db=e.target.result;resolve();}; r.onupgradeneeded=e=>e.target.result.createObjectStore(this.STORE_NAME, {keyPath:"id"}); }); }, async save(data) { return new Promise((resolve, reject) => { const tx=this.db.transaction([this.STORE_NAME],"readwrite"); tx.objectStore(this.STORE_NAME).put({id:"main",data}); tx.oncomplete=resolve; tx.onerror=reject; }); }, async load() { return new Promise((resolve, reject) => { const r=this.db.transaction([this.STORE_NAME]).objectStore(this.STORE_NAME).get("main"); r.onsuccess=e=>resolve(e.target.result?e.target.result.data:[]); r.onerror=reject; }); } };
+    const Database = { DB_NAME: "PromptManagerDB_v15_Tags", STORE_NAME: "promptsData", db: null, async init() { return new Promise((resolve, reject) => { const r=indexedDB.open(this.DB_NAME, 1); r.onerror=reject; r.onsuccess=e=>{this.db=e.target.result;resolve();}; r.onupgradeneeded=e=>e.target.result.createObjectStore(this.STORE_NAME, {keyPath:"id"}); }); }, async save(data) { return new Promise((resolve, reject) => { const tx=this.db.transaction([this.STORE_NAME],"readwrite"); tx.objectStore(this.STORE_NAME).put({id:"main",data}); tx.oncomplete=resolve; tx.onerror=reject; }); }, async load() { return new Promise((resolve, reject) => { const r=this.db.transaction([this.STORE_NAME]).objectStore(this.STORE_NAME).get("main"); r.onsuccess=e=>resolve(e.target.result?e.target.result.data:[]); r.onerror=reject; }); } };
     
-    // FIX: Funzione handlePaste migliorata per gestire correttamente l'incolla
+    // UTILITY: Genera colore per tag
+    function getTagColor(tagName) {
+        let hash = 0;
+        for (let i = 0; i < tagName.length; i++) {
+            hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = hash % 360;
+        return `hsl(${hue}, 65%, 50%)`;
+    }
+    
     function handlePaste(event) {
         event.preventDefault();
         event.stopPropagation();
         
-        // Ottieni il testo dagli appunti
         let text = '';
         if (event.clipboardData && event.clipboardData.getData) {
             text = event.clipboardData.getData('text/plain');
         } else if (window.clipboardData && window.clipboardData.getData) {
-            // Fallback per IE
             text = window.clipboardData.getData('Text');
         }
         
-        // Inserisci il testo nella posizione del cursore
         if (text) {
-            // Prova prima con execCommand (più compatibile)
             if (document.queryCommandSupported('insertText')) {
                 document.execCommand('insertText', false, text);
             } else {
-                // Fallback manuale se execCommand non è supportato
                 const selection = window.getSelection();
                 if (selection.rangeCount > 0) {
                     const range = selection.getRangeAt(0);
@@ -271,7 +343,7 @@
     }
     
     // --- STATE ---
-    let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'columns', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null };
+    let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'columns', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null, activeTag: null };
     let savedRange = null;
     
     // --- DOM ELEMENTS ---
@@ -279,7 +351,6 @@
     const categoryDropdown = document.getElementById("category-dropdown");
     const imageInput = document.getElementById('imageInput');
 
-    // Elementi del Modal Link
     const linkModal = document.getElementById('linkModal');
     const linkUrlInput = document.getElementById('linkUrlInput');
     const linkModalConfirm = document.getElementById('linkModalConfirm');
@@ -387,6 +458,11 @@
                 mainArea.innerHTML = `<div id="col-special-list" class="column"></div> <div id="col-special-detail" class="column"></div>`; 
                 renderSpecialView('recents'); 
                 break;
+            case 'tags':
+                mainArea.className = 'view-mode-two-column';
+                mainArea.innerHTML = `<div id="col-special-list" class="column"></div> <div id="col-special-detail" class="column"></div>`;
+                renderTagsView();
+                break;
             default: 
                 mainArea.className = 'view-mode-three-column'; 
                 renderColumnsView(); 
@@ -408,14 +484,13 @@
         
         categoryDropdown.appendChild(createOption('favorites', '⭐ Preferiti'));
         categoryDropdown.appendChild(createOption('recents', '🕒 Recenti'));
+        categoryDropdown.appendChild(createOption('tags', '🏷️ Tag'));
         if (state.allData.length > 0) {
             const separator = createOption('separator', '──────────'); separator.disabled = true; categoryDropdown.appendChild(separator);
             state.allData.sort((a,b)=>a.name.localeCompare(b.name)).forEach(category => categoryDropdown.appendChild(createOption(category.id, category.name)));
         }
         
-        categoryDropdown.value = (state.currentView === 'favorites' || state.currentView === 'recents') ? state.currentView : state.activeCategoryId || '';
-
-        if (state.currentView !== 'columns' && ['favorites', 'recents'].includes(state.currentView)) {
+        if (state.currentView !== 'columns' && ['favorites', 'recents', 'tags'].includes(state.currentView)) {
              categoryDropdown.value = state.currentView;
         } else if (state.activeCategoryId) {
             categoryDropdown.value = state.activeCategoryId;
@@ -466,7 +541,17 @@
         activeSub.prompts.sort((a,b)=>a.title.localeCompare(b.title)).forEach(p => { 
             const item = document.createElement("div"); 
             item.className = `item-container ${p.id===state.activePromptId?'active':''}`; 
-            item.innerHTML = `<div class="item-name">${p.title}</div>`; 
+            
+            let tagsHtml = '';
+            if (p.tags && p.tags.length > 0) {
+                tagsHtml = '<div class="tags-container">';
+                p.tags.forEach(tag => {
+                    tagsHtml += `<span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span>`;
+                });
+                tagsHtml += '</div>';
+            }
+            
+            item.innerHTML = `<div class="item-name">${p.title}</div>${tagsHtml}`; 
             item.onclick = () => { 
                 state.activePromptId = p.id; 
                 trackRecentPrompt(p.id, activeSub.id, state.activeCategoryId); 
@@ -477,7 +562,7 @@
     }
 
     function renderDetailColumn() {
-        const colId = (state.currentView === 'favorites' || state.currentView === 'recents') ? 'col-special-detail' : 'col-detail';
+        const colId = (state.currentView === 'favorites' || state.currentView === 'recents' || state.currentView === 'tags') ? 'col-special-detail' : 'col-detail';
         const col = document.getElementById(colId);
         if (!col) return;
         
@@ -486,6 +571,9 @@
         const promptItem = sub?.prompts.find(p => p.id === state.activePromptId);
 
         if (!promptItem) { col.innerHTML = '<div class="initial-message">Seleziona un prompt</div>'; return; }
+        
+        // Inizializza tags se non esiste
+        if (!promptItem.tags) promptItem.tags = [];
         
         col.innerHTML = `
             <div class="prompt-detail-view">
@@ -498,6 +586,13 @@
                     </div>
                 </div>
                 <div class="prompt-title-section"><h1>${promptItem.title}</h1></div>
+                <div class="tag-input-section">
+                    <div class="tag-input-wrapper">
+                        <input type="text" id="tag-input" placeholder="Aggiungi un tag (es: SEO, Marketing, AI)">
+                        <button id="add-tag-btn"><i class="fa-solid fa-plus"></i> Aggiungi</button>
+                    </div>
+                    <div class="current-tags" id="current-tags-container"></div>
+                </div>
                 <div id="formatting-toolbar">
                     <button data-command="bold" title="Grassetto (B)"><i class="fa-solid fa-bold"></i></button>
                     <button data-command="italic" title="Corsivo (I)"><i class="fa-solid fa-italic"></i></button>
@@ -515,6 +610,150 @@
                 <div class="prompt-description-container" contenteditable="false" id="detail-description">${promptItem.description || ""}</div>
             </div>`;
         attachDetailViewListeners(promptItem, sub, cat);
+        renderCurrentTags(promptItem);
+    }
+    
+    function renderCurrentTags(promptItem) {
+        const container = document.getElementById('current-tags-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        if (promptItem.tags && promptItem.tags.length > 0) {
+            promptItem.tags.forEach(tag => {
+                const tagEl = document.createElement('span');
+                tagEl.className = 'tag-badge-removable';
+                tagEl.style.backgroundColor = getTagColor(tag);
+                tagEl.innerHTML = `${tag} <i class="fa-solid fa-xmark"></i>`;
+                tagEl.onclick = () => removeTag(promptItem, tag);
+                container.appendChild(tagEl);
+            });
+        }
+    }
+    
+    async function addTag(promptItem, tagName) {
+        if (!tagName || tagName.trim().length === 0) {
+            Toast.show("Inserisci un nome per il tag.", 'error');
+            return;
+        }
+        
+        const cleanTag = tagName.trim().toLowerCase();
+        
+        if (!promptItem.tags) promptItem.tags = [];
+        
+        if (promptItem.tags.includes(cleanTag)) {
+            Toast.show("Tag già presente!", 'info');
+            return;
+        }
+        
+        const newData = JSON.parse(JSON.stringify(state.allData));
+        const cat = newData.find(c => c.id === state.activeCategoryId);
+        const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
+        const prompt = sub?.prompts.find(p => p.id === promptItem.id);
+        
+        if (prompt) {
+            if (!prompt.tags) prompt.tags = [];
+            prompt.tags.push(cleanTag);
+            await updateStateAndSave(newData, { saveHistory: false });
+            Toast.show(`Tag "${cleanTag}" aggiunto!`, 'success', 1500);
+        }
+    }
+    
+    async function removeTag(promptItem, tagName) {
+        const newData = JSON.parse(JSON.stringify(state.allData));
+        const cat = newData.find(c => c.id === state.activeCategoryId);
+        const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
+        const prompt = sub?.prompts.find(p => p.id === promptItem.id);
+        
+        if (prompt && prompt.tags) {
+            prompt.tags = prompt.tags.filter(t => t !== tagName);
+            await updateStateAndSave(newData, { saveHistory: false });
+            Toast.show(`Tag "${tagName}" rimosso!`, 'info', 1500);
+        }
+    }
+    
+    function renderTagsView() {
+        const colList = document.getElementById('col-special-list');
+        colList.innerHTML = `<div class="column-header"><h3>🏷️ Filtra per Tag</h3></div><div class="column-content"></div>`;
+        
+        // Raccogli tutti i tag unici
+        const allTags = new Set();
+        state.allData.forEach(cat => {
+            cat.subcategories?.forEach(sub => {
+                sub.prompts?.forEach(p => {
+                    if (p.tags) {
+                        p.tags.forEach(tag => allTags.add(tag));
+                    }
+                });
+            });
+        });
+        
+        const listContainer = colList.querySelector('.column-content');
+        
+        if (allTags.size === 0) {
+            listContainer.innerHTML = '<div class="initial-message">Nessun tag disponibile</div>';
+            document.getElementById('col-special-detail').innerHTML = '<div class="initial-message">Aggiungi tag ai tuoi prompt</div>';
+            return;
+        }
+        
+        const sortedTags = Array.from(allTags).sort();
+        
+        // Se non c'è un tag attivo, seleziona il primo
+        if (!state.activeTag || !allTags.has(state.activeTag)) {
+            state.activeTag = sortedTags[0];
+        }
+        
+        sortedTags.forEach(tag => {
+            const item = document.createElement('div');
+            item.className = `item-container ${tag === state.activeTag ? 'active' : ''}`;
+            item.innerHTML = `<span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span>`;
+            item.onclick = () => {
+                state.activeTag = tag;
+                renderTagsView();
+            };
+            listContainer.appendChild(item);
+        });
+        
+        renderPromptsForTag(state.activeTag);
+    }
+    
+    function renderPromptsForTag(tagName) {
+        const colDetail = document.getElementById('col-special-detail');
+        colDetail.innerHTML = `<div class="column-header"><h3>Prompt con tag: <span class="tag-badge" style="background-color: ${getTagColor(tagName)}">${tagName}</span></h3></div><div class="column-content"></div>`;
+        
+        const items = [];
+        state.allData.forEach(cat => {
+            cat.subcategories?.forEach(sub => {
+                sub.prompts?.forEach(p => {
+                    if (p.tags && p.tags.includes(tagName)) {
+                        items.push({ ...p, catName: cat.name, subName: sub.name, catId: cat.id, subId: sub.id });
+                    }
+                });
+            });
+        });
+        
+        items.sort((a, b) => a.title.localeCompare(b.title));
+        
+        const listContainer = colDetail.querySelector('.column-content');
+        
+        if (items.length === 0) {
+            listContainer.innerHTML = '<div class="initial-message">Nessun prompt con questo tag</div>';
+            return;
+        }
+        
+        items.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'item-container';
+            item.innerHTML = `<div class="item-name">${p.title}</div><div class="item-path">${p.catName} > ${p.subName}</div>`;
+            item.onclick = () => {
+                state.activeCategoryId = p.catId;
+                state.activeSubcategoryId = p.subId;
+                state.activePromptId = p.id;
+                state.currentView = 'tags';
+                trackRecentPrompt(p.id, p.subId, p.catId);
+                renderUI();
+            };
+            listContainer.appendChild(item);
+        });
     }
     
     function renderSpecialView(type) {
@@ -558,7 +797,17 @@
         items.forEach(p => {
             const item = document.createElement("div");
             item.className = `item-container ${p.id === state.activePromptId ? 'active' : ''}`;
-            item.innerHTML = `<div class="item-name">${p.title}</div><div class="item-path">${p.catName} > ${p.subName}</div>`;
+            
+            let tagsHtml = '';
+            if (p.tags && p.tags.length > 0) {
+                tagsHtml = '<div class="tags-container">';
+                p.tags.forEach(tag => {
+                    tagsHtml += `<span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span>`;
+                });
+                tagsHtml += '</div>';
+            }
+            
+            item.innerHTML = `<div class="item-name">${p.title}</div><div class="item-path">${p.catName} > ${p.subName}</div>${tagsHtml}`;
             item.onclick = () => {
                 state.activeCategoryId = p.catId; 
                 state.activeSubcategoryId = p.subId; 
@@ -573,14 +822,32 @@
     }
     
     function attachDetailViewListeners(promptItem, sub, cat) {
-        const colId = (state.currentView === 'favorites' || state.currentView === 'recents') ? 'col-special-detail' : 'col-detail';
+        const colId = (state.currentView === 'favorites' || state.currentView === 'recents' || state.currentView === 'tags') ? 'col-special-detail' : 'col-detail';
         const col = document.getElementById(colId);
         if (!col) return;
 
         const descriptionContainer = col.querySelector("#detail-description");
         if (!descriptionContainer) return;
 
-        // 1. Abilita/Disabilita Modifica
+        // Tag management
+        const tagInput = document.getElementById('tag-input');
+        const addTagBtn = document.getElementById('add-tag-btn');
+        
+        if (tagInput && addTagBtn) {
+            addTagBtn.onclick = () => {
+                addTag(promptItem, tagInput.value);
+                tagInput.value = '';
+            };
+            
+            tagInput.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag(promptItem, tagInput.value);
+                    tagInput.value = '';
+                }
+            };
+        }
+
         col.querySelector("#edit-prompt-btn").onclick = () => {
             const isEditing = descriptionContainer.contentEditable === 'true';
             descriptionContainer.contentEditable = isEditing ? 'false' : 'true';
@@ -595,7 +862,6 @@
             }
         };
 
-        // 2. SALVATAGGIO
         col.querySelector("#btnSaveChanges").onclick = async () => {
             const newData = JSON.parse(JSON.stringify(state.allData));
             const promptToUpdate = newData.find(c=>c.id===cat.id)?.subcategories.find(s=>s.id===sub.id)?.prompts.find(p_item=>p_item.id===promptItem.id);
@@ -611,7 +877,6 @@
             Toast.show("Prompt salvato!", 'success');
         };
 
-        // 3. Formattazione
         col.querySelectorAll("#formatting-toolbar button[data-command]").forEach(btn => {
             btn.onclick = e => { 
                 e.preventDefault(); 
@@ -645,7 +910,6 @@
             descriptionContainer.focus();
         };
 
-        // 4. Copia, Preferiti, Elimina
         col.querySelector("#copy-prompt-btn").onclick = () => {
             const textToCopy = descriptionContainer.innerText;
             const tempElement = document.createElement('textarea');
@@ -669,10 +933,8 @@
              await updateStateAndSave(newData, { newActiveIds, saveHistory: false });
         };
         
-        // 5. FIX: Gestione Paste migliorata
         descriptionContainer.addEventListener('paste', handlePaste, false);
         
-        // 6. Gestione Drag and Drop
         descriptionContainer.addEventListener('dragover', e => { 
             if (descriptionContainer.contentEditable === 'true') {
                 e.preventDefault(); 
@@ -741,7 +1003,7 @@
             return;
         }
         
-        const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "Aggiungi una descrizione...", favorite: false }; 
+        const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "Aggiungi una descrizione...", favorite: false, tags: [] }; 
         sub.prompts.push(newPrompt); 
         await updateStateAndSave(newData, { newActiveIds: { activePromptId: newPrompt.id } }); 
         Toast.show(`Prompt "${newPrompt.title}" aggiunto!`, 'success');
@@ -758,7 +1020,7 @@
         state.recents = state.recents.filter(r => r.promptId !== promptId);
         const newActivePromptId = sub.prompts[promptIndex]?.id || sub.prompts[promptIndex-1]?.id || sub.prompts[0]?.id || null; 
         let newActiveIds = { activePromptId: newActivePromptId };
-        if (!newActivePromptId && (state.currentView === 'favorites' || state.currentView === 'recents')) { newActiveIds = { activePromptId: null, activeSubcategoryId: null, activeCategoryId: null }; }
+        if (!newActivePromptId && (state.currentView === 'favorites' || state.currentView === 'recents' || state.currentView === 'tags')) { newActiveIds = { activePromptId: null, activeSubcategoryId: null, activeCategoryId: null }; }
         await updateStateAndSave(newData, { newActiveIds }); 
         Toast.show("Prompt eliminato!", 'info');
     }
@@ -824,7 +1086,7 @@
         
         categoryDropdown.addEventListener('change', () => {
             const selection = categoryDropdown.value;
-            if (selection === 'favorites' || selection === 'recents') {
+            if (selection === 'favorites' || selection === 'recents' || selection === 'tags') {
                 state.currentView = selection;
                 state.activePromptId = null; state.activeSubcategoryId = null; state.activeCategoryId = null;
             } else if (selection === 'separator' || !selection) {
@@ -891,15 +1153,15 @@
                             id: `sub_1`, 
                             name: 'Testi e Storie', 
                             prompts: [ 
-                                {id: `p_1`, title: 'Prompt di Benvenuto', description: 'Benvenuto! Clicca l\'icona a forma di matita per modificare questo prompt. <strong>Clicca sul link arancione qui sotto per aprirlo in una nuova scheda:</strong> <a href="https://www.google.it/search?q=Prompt+Engineering" target="_blank">Link di Esempio Google</a><br><br>Prova a incollare del testo con <strong>Ctrl+V</strong> o <strong>Cmd+V</strong>!', favorite: true},
-                                {id: `p_2`, title: 'Genera Articolo SEO', description: 'Scrivi un articolo di 1500 parole sul tema X, con 3 titoli e bullet points.', favorite: false} 
+                                {id: `p_1`, title: 'Prompt di Benvenuto', description: 'Benvenuto! Clicca l\'icona a forma di matita per modificare questo prompt. <strong>Aggiungi tag per organizzare meglio i tuoi prompt!</strong><br><br>Prova a incollare del testo con <strong>Ctrl+V</strong> o <strong>Cmd+V</strong>!', favorite: true, tags: ['tutorial', 'benvenuto']},
+                                {id: `p_2`, title: 'Genera Articolo SEO', description: 'Scrivi un articolo di 1500 parole sul tema X, con 3 titoli e bullet points.', favorite: false, tags: ['seo', 'marketing', 'contenuti']} 
                             ]
                         },
                          {
                             id: `sub_2`, 
                             name: 'Immagini e DALL-E', 
                             prompts: [ 
-                                {id: `p_3`, title: 'Stile Cinematografico', description: 'Crea una scena in stile cinematografico 4K, dettagliato, con luce drammatica.', favorite: true} 
+                                {id: `p_3`, title: 'Stile Cinematografico', description: 'Crea una scena in stile cinematografico 4K, dettagliato, con luce drammatica.', favorite: true, tags: ['immagini', 'dall-e', 'cinematografico']} 
                             ]
                         }
                     ]

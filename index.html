@@ -363,7 +363,7 @@
     }
     
     // --- STATE ---
-    let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'columns', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null, activeTag: null };
+    let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'columns', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null, activeTag: null, startEditingNewPrompt: false };
     let savedRange = null;
     let itemToRename = null;
     
@@ -719,6 +719,18 @@
             </div>`;
         attachDetailViewListeners(promptItem, sub, cat);
         renderCurrentTags(promptItem);
+
+        // Auto-abilita la modalità di modifica per i nuovi prompt
+        if (state.startEditingNewPrompt) {
+            const descriptionContainer = document.getElementById('detail-description');
+            if (descriptionContainer) {
+                descriptionContainer.contentEditable = 'true';
+                document.getElementById('formatting-toolbar')?.classList.add('show');
+                document.getElementById('btnSaveChanges')?.classList.add('show');
+                descriptionContainer.focus();
+            }
+            state.startEditingNewPrompt = false; // Resetta il flag
+        }
     }
     
     function renderCurrentTags(promptItem) {
@@ -1101,8 +1113,11 @@
         const sub = cat.subcategories.find(s => s.id === subcategoryId);
         if (!sub) { Toast.show("Errore: sottocategoria non trovata.", 'error'); return; }
         
-        const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "Aggiungi una descrizione...", favorite: false, tags: [] }; 
+        const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "", favorite: false, tags: [] }; 
         sub.prompts.push(newPrompt); 
+        
+        state.startEditingNewPrompt = true; // Flag per attivare l'editor al render
+        
         await updateStateAndSave(newData, { newActiveIds: { activePromptId: newPrompt.id } }); 
         Toast.show(`Prompt "${newPrompt.title}" aggiunto!`, 'success');
     }

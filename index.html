@@ -45,7 +45,10 @@
 
         .column { background-color: var(--container-bg); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
         .column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--element-bg); padding-bottom: 10px; flex-shrink: 0; }
+        .column-header-title { display: flex; align-items: center; gap: 10px; overflow: hidden; }
         .column-header h3 { margin: 0; font-size: 18px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .column-header-title .rename-icon { color: var(--text-muted); cursor: pointer; font-size: 15px; }
+        .column-header-title .rename-icon:hover { color: var(--primary-accent); }
         .column-content { overflow-y: auto; padding-right: 10px; margin-right: -10px; }
         .column-content::-webkit-scrollbar { width: 8px; }
         .column-content::-webkit-scrollbar-thumb { background-color: var(--element-bg); border-radius: 20px; }
@@ -138,6 +141,9 @@
         .prompt-actions-toolbar .fa-star.fa-solid { color: var(--star-yellow); }
         .prompt-title-section { display: flex; align-items: center; gap: 15px; padding: 15px 20px; }
         .prompt-title-section h1 { margin: 0; font-size: 24px; color: var(--text-primary); }
+        .prompt-title-section .rename-icon { color: var(--text-muted); cursor: pointer; font-size: 20px; }
+        .prompt-title-section .rename-icon:hover { color: var(--primary-accent); }
+
         #formatting-toolbar { padding: 10px 20px; display: none; gap: 8px; align-items: center; flex-wrap: wrap; background-color: var(--element-bg); border-bottom: 1px solid var(--border-color); }
         #formatting-toolbar.show { display: flex; }
         #formatting-toolbar button { 
@@ -253,6 +259,7 @@
 <div id="toast-container"></div>
 <div id="loading-overlay"><div class="loading-spinner"><i class="fa-solid fa-spinner"></i></div></div>
 
+<!-- MODAL PER LINK -->
 <div class="modal-overlay" id="linkModal">
     <div class="modal-content">
         <h4>Inserisci l'URL del Link</h4>
@@ -263,6 +270,19 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL PER RINOMINARE -->
+<div class="modal-overlay" id="renameModal">
+    <div class="modal-content">
+        <h4 id="renameModalTitle">Rinomina Elemento</h4>
+        <input type="text" id="renameInput" placeholder="Inserisci il nuovo nome...">
+        <div class="modal-actions">
+            <button class="modal-btn cancel" id="renameModalCancel">Annulla</button>
+            <button class="modal-btn confirm" id="renameModalConfirm">Conferma</button>
+        </div>
+    </div>
+</div>
+
 
 <header class="app-header">
     <div class="header-left"><div class="logo">PS</div></div>
@@ -345,6 +365,7 @@
     // --- STATE ---
     let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'columns', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null, activeTag: null };
     let savedRange = null;
+    let itemToRename = null;
     
     // --- DOM ELEMENTS ---
     const mainArea = document.getElementById("main-content-area");
@@ -355,6 +376,13 @@
     const linkUrlInput = document.getElementById('linkUrlInput');
     const linkModalConfirm = document.getElementById('linkModalConfirm');
     const linkModalCancel = document.getElementById('linkModalCancel');
+    
+    // ELEMENTI DOM PER IL MODAL DI RINOMINA
+    const renameModal = document.getElementById('renameModal');
+    const renameModalTitle = document.getElementById('renameModalTitle');
+    const renameInput = document.getElementById('renameInput');
+    const renameModalConfirm = document.getElementById('renameModalConfirm');
+    const renameModalCancel = document.getElementById('renameModalCancel');
 
     // --- FUNZIONI MODAL LINK ---
     function showLinkModal() {
@@ -404,6 +432,60 @@
         } else {
              Toast.show("Errore: Nessun testo selezionato.", 'error');
              hideLinkModal();
+        }
+    }
+
+    // --- FUNZIONI PER RINOMINARE ---
+    function showRenameModal(type, id, currentName, extraIds = {}) {
+        itemToRename = { type, id, ...extraIds };
+        const titles = {
+            category: 'Rinomina Categoria',
+            subcategory: 'Rinomina Sottocategoria',
+            prompt: 'Rinomina Prompt'
+        };
+        renameModalTitle.textContent = titles[type] || 'Rinomina Elemento';
+        renameInput.value = currentName;
+        renameModal.style.display = 'flex';
+        setTimeout(() => renameInput.focus(), 50);
+    }
+
+    function hideRenameModal() {
+        renameModal.style.display = 'none';
+        itemToRename = null;
+    }
+
+    async function handleRenameConfirm() {
+        if (!itemToRename) return;
+        const newName = renameInput.value.trim();
+        if (!newName) {
+            Toast.show("Il nome non può essere vuoto.", 'error');
+            return;
+        }
+
+        const { type, id, categoryId } = itemToRename;
+        const newData = JSON.parse(JSON.stringify(state.allData));
+        let success = false;
+
+        if (type === 'category') {
+            const item = newData.find(c => c.id === id);
+            if (item) { item.name = newName; success = true; }
+        } else if (type === 'subcategory') {
+            const cat = newData.find(c => c.id === categoryId);
+            const item = cat?.subcategories.find(s => s.id === id);
+            if (item) { item.name = newName; success = true; }
+        } else if (type === 'prompt') {
+            const cat = newData.find(c => c.id === state.activeCategoryId);
+            const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
+            const item = sub?.prompts.find(p => p.id === id);
+            if (item) { item.title = newName; success = true; }
+        }
+
+        if (success) {
+            hideRenameModal();
+            await updateStateAndSave(newData);
+            Toast.show("Elemento rinominato con successo!", 'success');
+        } else {
+            Toast.show("Errore: elemento non trovato.", 'error');
         }
     }
 
@@ -503,8 +585,20 @@
         const col = document.getElementById('col-subcategories');
         const activeCategory = state.allData.find(c => c.id === state.activeCategoryId);
         if (!activeCategory) { col.innerHTML = '<div class="initial-message">Seleziona una categoria</div>'; return; }
-        col.innerHTML = `<div class="column-header"><h3>${activeCategory.name}</h3><button class="add-button" id="add-subcat-btn" title="Aggiungi Sottocategoria"><i class="fa-solid fa-plus"></i> Sottocategoria</button></div><div class="column-content"></div>`;
+        col.innerHTML = `
+            <div class="column-header">
+                <div class="column-header-title">
+                    <h3>${activeCategory.name}</h3>
+                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-cat-btn" title="Rinomina Categoria"></i>
+                </div>
+                <button class="add-button" id="add-subcat-btn" title="Aggiungi Sottocategoria">
+                    <i class="fa-solid fa-plus"></i> Sottocategoria
+                </button>
+            </div>
+            <div class="column-content"></div>`;
         document.getElementById('add-subcat-btn').onclick = () => addSubcategory(activeCategory.id);
+        document.getElementById('rename-cat-btn').onclick = () => showRenameModal('category', activeCategory.id, activeCategory.name);
+
         const listContainer = col.querySelector('.column-content');
         if (!activeCategory.subcategories?.length) { listContainer.innerHTML = '<div class="initial-message">Nessuna sottocategoria</div>'; return; }
         activeCategory.subcategories.sort((a,b)=>a.name.localeCompare(b.name)).forEach(sub => { 
@@ -523,10 +617,22 @@
 
     function renderPromptColumn() {
         const col = document.getElementById('col-prompts');
-        const activeSub = state.allData.find(c=>c.id===state.activeCategoryId)?.subcategories.find(s=>s.id===state.activeSubcategoryId);
+        const activeCategory = state.allData.find(c=>c.id===state.activeCategoryId);
+        const activeSub = activeCategory?.subcategories.find(s=>s.id===state.activeSubcategoryId);
         if (!activeSub) { col.innerHTML = '<div class="initial-message">Seleziona una sottocategoria</div>'; return; }
-        col.innerHTML = `<div class="column-header"><h3>${activeSub.name}</h3><button class="add-button" id="add-prompt-btn" title="Aggiungi Prompt"><i class="fa-solid fa-plus"></i> Prompt</button></div><div class="column-content"></div>`;
+        col.innerHTML = `
+            <div class="column-header">
+                 <div class="column-header-title">
+                    <h3>${activeSub.name}</h3>
+                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-subcat-btn" title="Rinomina Sottocategoria"></i>
+                </div>
+                <button class="add-button" id="add-prompt-btn" title="Aggiungi Prompt">
+                    <i class="fa-solid fa-plus"></i> Prompt
+                </button>
+            </div>
+            <div class="column-content"></div>`;
         
+        document.getElementById('rename-subcat-btn').onclick = () => showRenameModal('subcategory', activeSub.id, activeSub.name, { categoryId: activeCategory.id });
         const addPromptBtn = document.getElementById('add-prompt-btn');
         if (addPromptBtn) {
             addPromptBtn.onclick = (e) => {
@@ -572,20 +678,22 @@
 
         if (!promptItem) { col.innerHTML = '<div class="initial-message">Seleziona un prompt</div>'; return; }
         
-        // Inizializza tags se non esiste
         if (!promptItem.tags) promptItem.tags = [];
         
         col.innerHTML = `
             <div class="prompt-detail-view">
                 <div class="prompt-header"><h3>Dettagli Prompt</h3>
                     <div class="prompt-actions-toolbar">
-                        <i id="edit-prompt-btn" class="fa-solid fa-pencil" title="Modifica"></i>
+                        <i id="edit-prompt-btn" class="fa-solid fa-pencil" title="Modifica Testo"></i>
                         <i id="copy-prompt-btn" class="fa-solid fa-copy" title="Copia Testo"></i>
                         <i id="fav-prompt-btn" class="${promptItem.favorite ? "fa-solid" : "fa-regular"} fa-star" title="Preferito"></i>
                         <i id="delete-prompt-btn" class="fa-solid fa-trash-can" title="Elimina"></i>
                     </div>
                 </div>
-                <div class="prompt-title-section"><h1>${promptItem.title}</h1></div>
+                <div class="prompt-title-section">
+                    <h1>${promptItem.title}</h1>
+                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-prompt-btn" title="Rinomina Prompt"></i>
+                </div>
                 <div class="tag-input-section">
                     <div class="tag-input-wrapper">
                         <input type="text" id="tag-input" placeholder="Aggiungi un tag (es: SEO, Marketing, AI)">
@@ -604,7 +712,7 @@
                     <button data-command="unlink" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
                     <button data-command="insertImage" id="btn-insert-image" title="Aggiungi Immagine (Carica)"><i class="fa-regular fa-image"></i></button>
                     <button id="color-btn" title="Colore Testo"><i class="fa-solid fa-palette"></i></button>
-                    <input type="color" id="colorPicker" value="#FFFFFF">
+                    <input type="color" id="colorPicker" value="#FFFFFF" style="visibility: hidden; width: 0; height: 0; padding: 0; border: none;">
                     <button id="btnSaveChanges" class="add-button">Salva</button>
                 </div>
                 <div class="prompt-description-container" contenteditable="false" id="detail-description">${promptItem.description || ""}</div>
@@ -675,7 +783,6 @@
         const colList = document.getElementById('col-special-list');
         colList.innerHTML = `<div class="column-header"><h3>🏷️ Filtra per Tag</h3></div><div class="column-content"></div>`;
         
-        // Raccogli tutti i tag unici
         const allTags = new Set();
         state.allData.forEach(cat => {
             cat.subcategories?.forEach(sub => {
@@ -697,7 +804,6 @@
         
         const sortedTags = Array.from(allTags).sort();
         
-        // Se non c'è un tag attivo, seleziona il primo
         if (!state.activeTag || !allTags.has(state.activeTag)) {
             state.activeTag = sortedTags[0];
         }
@@ -828,8 +934,9 @@
 
         const descriptionContainer = col.querySelector("#detail-description");
         if (!descriptionContainer) return;
+        
+        document.getElementById('rename-prompt-btn').onclick = () => showRenameModal('prompt', promptItem.id, promptItem.title);
 
-        // Tag management
         const tagInput = document.getElementById('tag-input');
         const addTagBtn = document.getElementById('add-tag-btn');
         
@@ -918,8 +1025,8 @@
             document.body.appendChild(tempElement); tempElement.focus(); tempElement.select();
             try {
                 const successful = document.execCommand('copy');
-                Toast.show(successful ? "Copiato!" : "Errore nella copia (permessi mancanti).", successful ? 'success' : 'error');
-            } catch (err) { Toast.show("Errore nella copia (browser/permessi).", 'error'); } 
+                Toast.show(successful ? "Copiato!" : "Errore nella copia.", successful ? 'success' : 'error');
+            } catch (err) { Toast.show("Errore nella copia.", 'error'); } 
             finally { document.body.removeChild(tempElement); }
         };
         col.querySelector("#delete-prompt-btn").onclick = () => deletePrompt(promptItem.id, sub.id, cat.id);
@@ -977,10 +1084,7 @@
         if (!name?.trim()) { Toast.show("Operazione annullata.", 'info'); return; } 
         const newData = JSON.parse(JSON.stringify(state.allData)); 
         const cat = newData.find(c => c.id === categoryId); 
-        if (!cat) {
-            Toast.show("Errore: categoria non trovata.", 'error');
-            return;
-        }
+        if (!cat) { Toast.show("Errore: categoria non trovata.", 'error'); return; }
         const newSub = { id: `sub_${Date.now()}`, name: name.trim(), prompts: [] }; 
         cat.subcategories.push(newSub); 
         await updateStateAndSave(newData, { newActiveIds: { activeSubcategoryId: newSub.id, activePromptId: null } }); 
@@ -993,15 +1097,9 @@
         
         const newData = JSON.parse(JSON.stringify(state.allData)); 
         const cat = newData.find(c => c.id === categoryId);
-        if (!cat) {
-            Toast.show("Errore: categoria non trovata.", 'error');
-            return;
-        }
+        if (!cat) { Toast.show("Errore: categoria non trovata.", 'error'); return; }
         const sub = cat.subcategories.find(s => s.id === subcategoryId);
-        if (!sub) {
-            Toast.show("Errore: sottocategoria non trovata.", 'error');
-            return;
-        }
+        if (!sub) { Toast.show("Errore: sottocategoria non trovata.", 'error'); return; }
         
         const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "Aggiungi una descrizione...", favorite: false, tags: [] }; 
         sub.prompts.push(newPrompt); 
@@ -1119,19 +1217,17 @@
         document.getElementById('btnImporta').onclick = () => document.getElementById('backupInput').click();
         document.getElementById('backupInput').onchange = importData;
 
+        // Listeners per il modal del link
         linkModalCancel.onclick = hideLinkModal;
         linkModalConfirm.onclick = () => applyLink(linkUrlInput.value.trim());
-        linkModal.addEventListener('click', (e) => { 
-            if (e.target === linkModal) { 
-                hideLinkModal(); 
-            } 
-        });
-        linkUrlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                applyLink(linkUrlInput.value.trim());
-            }
-        });
+        linkModal.addEventListener('click', (e) => { if (e.target === linkModal) hideLinkModal(); });
+        linkUrlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); applyLink(linkUrlInput.value.trim()); }});
+
+        // Listeners per il modal di rinomina
+        renameModalCancel.onclick = hideRenameModal;
+        renameModalConfirm.onclick = handleRenameConfirm;
+        renameModal.addEventListener('click', (e) => { if (e.target === renameModal) hideRenameModal(); });
+        renameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleRenameConfirm(); } });
     }
 
     // --- INITIALIZATION ---

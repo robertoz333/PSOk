@@ -363,7 +363,7 @@
     }
     
     // --- STATE ---
-    let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'columns', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null, activeTag: null, startEditingNewPrompt: false };
+    let state = { allData: [], history: [], redoStack: [], recents: [], currentView: 'favorites', activeCategoryId: null, activeSubcategoryId: null, activePromptId: null, activeTag: null, startEditingNewPrompt: false };
     let savedRange = null;
     let itemToRename = null;
     
@@ -572,6 +572,7 @@
             state.allData.sort((a,b)=>a.name.localeCompare(b.name)).forEach(category => categoryDropdown.appendChild(createOption(category.id, category.name)));
         }
         
+        // Se siamo in una vista speciale, mostra il valore corrispondente
         if (state.currentView !== 'columns' && ['favorites', 'recents', 'tags'].includes(state.currentView)) {
              categoryDropdown.value = state.currentView;
         } else if (state.activeCategoryId) {
@@ -720,7 +721,6 @@
         attachDetailViewListeners(promptItem, sub, cat);
         renderCurrentTags(promptItem);
 
-        // Auto-abilita la modalità di modifica per i nuovi prompt
         if (state.startEditingNewPrompt) {
             const descriptionContainer = document.getElementById('detail-description');
             if (descriptionContainer) {
@@ -729,7 +729,7 @@
                 document.getElementById('btnSaveChanges')?.classList.add('show');
                 descriptionContainer.focus();
             }
-            state.startEditingNewPrompt = false; // Resetta il flag
+            state.startEditingNewPrompt = false;
         }
     }
     
@@ -884,7 +884,7 @@
             state.allData.forEach(cat => cat.subcategories?.forEach(sub => sub.prompts?.forEach(p => { 
                 if (p.favorite) items.push({ ...p, catName: cat.name, subName: sub.name, catId: cat.id, subId: sub.id }); 
             })));
-             items.sort((a,b)=>a.title.localeCompare(b.title));
+            items.sort((a,b)=>a.title.localeCompare(b.title));
         } else {
             state.recents.forEach(r => {
                 const cat = state.allData.find(c => c.id === r.catId);
@@ -905,6 +905,7 @@
             return; 
         }
 
+        // Se non c'è un attivo coerente con la lista attuale, scegli il primo
         const currentActiveItem = items.find(p => p.id === state.activePromptId);
         if (!currentActiveItem) {
             state.activePromptId = items[0].id;
@@ -1116,7 +1117,7 @@
         const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "", favorite: false, tags: [] }; 
         sub.prompts.push(newPrompt); 
         
-        state.startEditingNewPrompt = true; // Flag per attivare l'editor al render
+        state.startEditingNewPrompt = true; 
         
         await updateStateAndSave(newData, { newActiveIds: { activePromptId: newPrompt.id } }); 
         Toast.show(`Prompt "${newPrompt.title}" aggiunto!`, 'success');
@@ -1281,13 +1282,29 @@
             await Database.save(state.allData);
         }
         
-        const firstCategory = state.allData[0];
-        const firstSubcategory = firstCategory?.subcategories.sort((a,b)=>a.name.localeCompare(b.name))[0];
-        const firstPrompt = firstSubcategory?.prompts.sort((a,b)=>a.title.localeCompare(b.title))[0];
+        // Imposta la vista iniziale su Preferiti e seleziona il primo preferito
+        state.currentView = 'favorites';
+        categoryDropdown.value = 'favorites';
 
-        state.activeCategoryId = firstCategory?.id || null;
-        state.activeSubcategoryId = firstSubcategory?.id || null;
-        state.activePromptId = firstPrompt?.id || null;
+        // Trova il primo prompt preferito e impostalo attivo
+        let firstFav = null;
+        outer: for (const cat of state.allData) {
+            for (const sub of (cat.subcategories || [])) {
+                for (const p of (sub.prompts || [])) {
+                    if (p.favorite) { firstFav = { p, sub, cat }; break outer; }
+                }
+            }
+        }
+        if (firstFav) {
+            state.activeCategoryId = firstFav.cat.id;
+            state.activeSubcategoryId = firstFav.sub.id;
+            state.activePromptId = firstFav.p.id;
+        } else {
+            // Se non ci sono preferiti, lascia solo la vista Preferiti senza selezione
+            state.activeCategoryId = null;
+            state.activeSubcategoryId = null;
+            state.activePromptId = null;
+        }
         
         setupEventListeners();
         renderUI();

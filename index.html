@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prompt Manager v15 - Sistema Tagging</title>
+    <title>Prompt Manager v16 - Definitivo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <style>
         :root {
@@ -60,78 +60,38 @@
         .item-path { font-size: 12px; color: var(--text-muted); }
         .item-container.active .item-path { color: #ddd; }
         
-        /* STILI TAG */
         .tag-badge { 
-            display: inline-block; 
-            padding: 3px 8px; 
-            border-radius: 12px; 
-            font-size: 11px; 
-            font-weight: 600; 
-            margin: 2px 4px 2px 0; 
-            color: white;
-            white-space: nowrap;
+            display: inline-block; padding: 3px 8px; border-radius: 12px; 
+            font-size: 11px; font-weight: 600; margin: 2px 4px 2px 0; 
+            color: white; white-space: nowrap;
         }
         .tags-container { 
-            display: flex; 
-            flex-wrap: wrap; 
-            margin-top: 6px; 
-            gap: 4px;
+            display: flex; flex-wrap: wrap; margin-top: 6px; gap: 4px;
         }
         .tag-input-section {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 15px 20px; border-bottom: 1px solid var(--border-color);
             background-color: var(--element-bg);
         }
-        .tag-input-wrapper {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        .tag-input-wrapper { display: flex; gap: 10px; align-items: center; }
         .tag-input-wrapper input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--container-bg);
-            color: var(--text-primary);
-            font-size: 14px;
+            flex: 1; padding: 10px; border: 1px solid var(--border-color);
+            border-radius: 8px; background-color: var(--container-bg);
+            color: var(--text-primary); font-size: 14px;
         }
         .tag-input-wrapper button {
-            padding: 10px 20px;
-            background-color: var(--primary-accent);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
+            padding: 10px 20px; background-color: var(--primary-accent);
+            color: white; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: bold;
         }
-        .tag-input-wrapper button:hover {
-            background-color: var(--primary-accent-dark);
-        }
-        .current-tags {
-            margin-top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+        .tag-input-wrapper button:hover { background-color: var(--primary-accent-dark); }
+        .current-tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
         .tag-badge-removable {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 16px; font-size: 13px;
+            font-weight: 600; color: white; cursor: pointer;
         }
-        .tag-badge-removable i {
-            font-size: 10px;
-            opacity: 0.8;
-        }
-        .tag-badge-removable:hover {
-            opacity: 0.8;
-        }
+        .tag-badge-removable i { font-size: 10px; opacity: 0.8; }
+        .tag-badge-removable:hover { opacity: 0.8; }
         
         #col-detail, #col-special-detail { padding: 0; }
         .prompt-detail-view { height: 100%; display: flex; flex-direction: column; }
@@ -147,16 +107,9 @@
         #formatting-toolbar { padding: 10px 20px; display: none; gap: 8px; align-items: center; flex-wrap: wrap; background-color: var(--element-bg); border-bottom: 1px solid var(--border-color); }
         #formatting-toolbar.show { display: flex; }
         #formatting-toolbar button { 
-            background: var(--element-bg-hover); 
-            border: none; 
-            color: var(--text-primary); 
-            padding: 8px 12px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: var(--element-bg-hover); border: none; color: var(--text-primary); 
+            padding: 8px 12px; border-radius: 5px; cursor: pointer; 
+            font-size: 16px; display: flex; align-items: center; justify-content: center;
         }
         #formatting-toolbar button:hover { background: var(--primary-accent-dark); }
         #btnSaveChanges { background-color: var(--primary-accent); display: none; margin-left: auto; color: #FFFFFF; }
@@ -176,82 +129,39 @@
             outline: 3px dashed var(--star-yellow);
             background-color: rgba(255, 193, 7, 0.1);
         }
-
-        .prompt-description-container a {
-            color: #FFA500;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-        .prompt-description-container a:hover {
-            color: #FF8C00;
-            text-decoration: underline;
-        }
+        .prompt-description-container a { color: #FFA500; text-decoration: underline; cursor: pointer; }
+        .prompt-description-container a:hover { color: #FF8C00; text-decoration: underline; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center; align-items: center;
+            display: none; justify-content: center; align-items: center;
             z-index: 10001;
         }
-
         .modal-content {
-            background-color: var(--container-bg);
-            border-radius: 12px;
-            padding: 30px;
-            width: 90%;
-            max-width: 450px;
+            background-color: var(--container-bg); border-radius: 12px;
+            padding: 30px; width: 90%; max-width: 450px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-
         .modal-content h4 {
-            margin-top: 0;
-            color: var(--text-primary);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
+            margin-top: 0; color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
             font-size: 1.25rem;
         }
-
         .modal-content input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0 25px 0;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--element-bg);
-            color: var(--text-primary);
-            font-size: 16px;
-            outline: none;
+            width: 100%; padding: 12px; margin: 15px 0 25px 0;
+            border: 1px solid var(--border-color); border-radius: 8px;
+            background-color: var(--element-bg); color: var(--text-primary);
+            font-size: 16px; outline: none;
         }
-        
         .modal-content input[type="text"]:focus {
             border-color: var(--primary-accent);
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .modal-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .modal-btn.cancel {
-            background-color: var(--element-bg-hover);
-            color: var(--text-secondary);
-        }
-
-        .modal-btn.confirm {
-            background-color: var(--primary-accent);
-            color: white;
-        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .modal-btn.cancel { background-color: var(--element-bg-hover); color: var(--text-secondary); }
+        .modal-btn.confirm { background-color: var(--primary-accent); color: white; }
     </style>
 </head>
 <body>
@@ -259,7 +169,6 @@
 <div id="toast-container"></div>
 <div id="loading-overlay"><div class="loading-spinner"><i class="fa-solid fa-spinner"></i></div></div>
 
-<!-- MODAL PER LINK -->
 <div class="modal-overlay" id="linkModal">
     <div class="modal-content">
         <h4>Inserisci l'URL del Link</h4>
@@ -271,7 +180,6 @@
     </div>
 </div>
 
-<!-- MODAL PER RINOMINARE -->
 <div class="modal-overlay" id="renameModal">
     <div class="modal-content">
         <h4 id="renameModalTitle">Rinomina Elemento</h4>
@@ -282,7 +190,6 @@
         </div>
     </div>
 </div>
-
 
 <header class="app-header">
     <div class="header-left"><div class="logo">PS</div></div>
@@ -318,14 +225,19 @@
     // --- SYSTEMS ---
     const Loader = { el: document.getElementById('loading-overlay'), show() { this.el.style.display = 'flex'; }, hide() { this.el.style.display = 'none'; } };
     const Toast = { container: document.getElementById('toast-container'), show(message, type = 'info', duration = 3000) { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = message; this.container.appendChild(t); setTimeout(() => t.remove(), duration); } };
-    const Database = { DB_NAME: "PromptManagerDB_v15_Tags", STORE_NAME: "promptsData", db: null, async init() { return new Promise((resolve, reject) => { const r=indexedDB.open(this.DB_NAME, 1); r.onerror=reject; r.onsuccess=e=>{this.db=e.target.result;resolve();}; r.onupgradeneeded=e=>e.target.result.createObjectStore(this.STORE_NAME, {keyPath:"id"}); }); }, async save(data) { return new Promise((resolve, reject) => { const tx=this.db.transaction([this.STORE_NAME],"readwrite"); tx.objectStore(this.STORE_NAME).put({id:"main",data}); tx.oncomplete=resolve; tx.onerror=reject; }); }, async load() { return new Promise((resolve, reject) => { const r=this.db.transaction([this.STORE_NAME]).objectStore(this.STORE_NAME).get("main"); r.onsuccess=e=>resolve(e.target.result?e.target.result.data:[]); r.onerror=reject; }); } };
+    const Database = { DB_NAME: "PromptManagerDB_v16", STORE_NAME: "promptsData", db: null, async init() { return new Promise((resolve, reject) => { const r=indexedDB.open(this.DB_NAME, 1); r.onerror=reject; r.onsuccess=e=>{this.db=e.target.result;resolve();}; r.onupgradeneeded=e=>e.target.result.createObjectStore(this.STORE_NAME, {keyPath:"id"}); }); }, async save(data) { return new Promise((resolve, reject) => { const tx=this.db.transaction([this.STORE_NAME],"readwrite"); tx.objectStore(this.STORE_NAME).put({id:"main",data}); tx.oncomplete=resolve; tx.onerror=reject; }); }, async load() { return new Promise((resolve, reject) => { const r=this.db.transaction([this.STORE_NAME]).objectStore(this.STORE_NAME).get("main"); r.onsuccess=e=>resolve(e.target.result?e.target.result.data:[]); r.onerror=reject; }); } };
     
-    // UTILITY: Genera colore per tag
+    // --- UTILITIES ---
+    function updateColorPickerValue() {
+        const colorPicker = document.getElementById('colorPicker');
+        if (!colorPicker) return;
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        colorPicker.value = (currentTheme === 'dark') ? '#FFFFFF' : '#212529';
+    }
+
     function getTagColor(tagName) {
         let hash = 0;
-        for (let i = 0; i < tagName.length; i++) {
-            hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
-        }
+        for (let i = 0; i < tagName.length; i++) { hash = tagName.charCodeAt(i) + ((hash << 5) - hash); }
         const hue = hash % 360;
         return `hsl(${hue}, 65%, 50%)`;
     }
@@ -333,33 +245,8 @@
     function handlePaste(event) {
         event.preventDefault();
         event.stopPropagation();
-        
-        let text = '';
-        if (event.clipboardData && event.clipboardData.getData) {
-            text = event.clipboardData.getData('text/plain');
-        } else if (window.clipboardData && window.clipboardData.getData) {
-            text = window.clipboardData.getData('Text');
-        }
-        
-        if (text) {
-            if (document.queryCommandSupported('insertText')) {
-                document.execCommand('insertText', false, text);
-            } else {
-                const selection = window.getSelection();
-                if (selection.rangeCount > 0) {
-                    const range = selection.getRangeAt(0);
-                    range.deleteContents();
-                    const textNode = document.createTextNode(text);
-                    range.insertNode(textNode);
-                    range.setStartAfter(textNode);
-                    range.setEndAfter(textNode);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                }
-            }
-        }
-        
-        return false;
+        let text = (event.clipboardData || window.clipboardData)?.getData('text/plain') || '';
+        if (text) document.execCommand('insertText', false, text);
     }
     
     // --- STATE ---
@@ -371,145 +258,74 @@
     const mainArea = document.getElementById("main-content-area");
     const categoryDropdown = document.getElementById("category-dropdown");
     const imageInput = document.getElementById('imageInput');
-
     const linkModal = document.getElementById('linkModal');
     const linkUrlInput = document.getElementById('linkUrlInput');
-    const linkModalConfirm = document.getElementById('linkModalConfirm');
-    const linkModalCancel = document.getElementById('linkModalCancel');
-    
-    // ELEMENTI DOM PER IL MODAL DI RINOMINA
     const renameModal = document.getElementById('renameModal');
-    const renameModalTitle = document.getElementById('renameModalTitle');
     const renameInput = document.getElementById('renameInput');
-    const renameModalConfirm = document.getElementById('renameModalConfirm');
-    const renameModalCancel = document.getElementById('renameModalCancel');
 
-    // --- FUNZIONI MODAL LINK ---
+    // --- MODAL & UI FUNCTIONS ---
     function showLinkModal() {
         const selection = window.getSelection();
-        if (selection.rangeCount > 0 && selection.toString().length > 0) {
-            savedRange = selection.getRangeAt(0);
-        } else {
-             Toast.show("Seleziona il testo da trasformare in link.", 'error');
-             return false;
-        }
-
+        if (selection.rangeCount > 0 && selection.toString().length > 0) { savedRange = selection.getRangeAt(0); } 
+        else { Toast.show("Seleziona il testo da trasformare in link.", 'error'); return; }
         linkUrlInput.value = '';
         linkModal.style.display = 'flex';
         setTimeout(() => linkUrlInput.focus(), 50);
-        return true;
     }
 
-    function hideLinkModal() {
-        linkModal.style.display = 'none';
-        savedRange = null;
-    }
+    function hideLinkModal() { linkModal.style.display = 'none'; savedRange = null; }
     
     function applyLink(url) {
-        if (!url || url.trim().length < 5) {
-            Toast.show("URL non valido.", 'error');
-            return;
-        }
-        
+        if (!url || url.trim().length < 5) { Toast.show("URL non valido.", 'error'); return; }
         let finalUrl = url.trim();
-        if (!finalUrl.match(/^[a-zA-Z]+:\/\//)) {
-            finalUrl = 'https://' + finalUrl;
-        }
-
+        if (!finalUrl.match(/^[a-zA-Z]+:\/\//)) { finalUrl = 'https://' + finalUrl; }
         if (savedRange) {
             const selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(savedRange);
-
-            const selectedText = savedRange.toString();
-            const linkHtml = `<a href="${finalUrl}" target="_blank">${selectedText}</a>`;
-            document.execCommand('insertHTML', false, linkHtml);
-            
-            document.querySelector('.prompt-description-container[contenteditable="true"]').focus();
-
+            document.execCommand('insertHTML', false, `<a href="${finalUrl}" target="_blank">${savedRange.toString()}</a>`);
+            document.querySelector('.prompt-description-container[contenteditable="true"]')?.focus();
             hideLinkModal();
-            Toast.show("Link arancione creato con successo!", 'success', 2000);
-        } else {
-             Toast.show("Errore: Nessun testo selezionato.", 'error');
-             hideLinkModal();
         }
     }
 
-    // --- FUNZIONI PER RINOMINARE ---
     function showRenameModal(type, id, currentName, extraIds = {}) {
         itemToRename = { type, id, ...extraIds };
-        const titles = {
-            category: 'Rinomina Categoria',
-            subcategory: 'Rinomina Sottocategoria',
-            prompt: 'Rinomina Prompt'
-        };
-        renameModalTitle.textContent = titles[type] || 'Rinomina Elemento';
+        const titles = { category: 'Rinomina Categoria', subcategory: 'Rinomina Sottocategoria', prompt: 'Rinomina Prompt' };
+        renameModal.querySelector('h4').textContent = titles[type] || 'Rinomina Elemento';
         renameInput.value = currentName;
         renameModal.style.display = 'flex';
         setTimeout(() => renameInput.focus(), 50);
     }
 
-    function hideRenameModal() {
-        renameModal.style.display = 'none';
-        itemToRename = null;
-    }
+    function hideRenameModal() { renameModal.style.display = 'none'; itemToRename = null; }
 
     async function handleRenameConfirm() {
         if (!itemToRename) return;
         const newName = renameInput.value.trim();
-        if (!newName) {
-            Toast.show("Il nome non può essere vuoto.", 'error');
-            return;
-        }
-
+        if (!newName) { Toast.show("Il nome non può essere vuoto.", 'error'); return; }
         const { type, id, categoryId } = itemToRename;
         const newData = JSON.parse(JSON.stringify(state.allData));
-        let success = false;
-
-        if (type === 'category') {
-            const item = newData.find(c => c.id === id);
-            if (item) { item.name = newName; success = true; }
-        } else if (type === 'subcategory') {
-            const cat = newData.find(c => c.id === categoryId);
-            const item = cat?.subcategories.find(s => s.id === id);
-            if (item) { item.name = newName; success = true; }
-        } else if (type === 'prompt') {
-            const cat = newData.find(c => c.id === state.activeCategoryId);
-            const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
-            const item = sub?.prompts.find(p => p.id === id);
-            if (item) { item.title = newName; success = true; }
-        }
-
+        let success = false, item;
+        if (type === 'category' && (item = newData.find(c => c.id === id))) { item.name = newName; success = true; } 
+        else if (type === 'subcategory' && (item = newData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === id))) { item.name = newName; success = true; }
+        else if (type === 'prompt' && (item = newData.find(c => c.id === state.activeCategoryId)?.subcategories.find(s => s.id === state.activeSubcategoryId)?.prompts.find(p => p.id === id))) { item.title = newName; success = true; }
         if (success) {
             hideRenameModal();
             await updateStateAndSave(newData);
-            Toast.show("Elemento rinominato con successo!", 'success');
-        } else {
-            Toast.show("Errore: elemento non trovato.", 'error');
-        }
+            Toast.show("Elemento rinominato!", 'success');
+        } else { Toast.show("Errore: elemento non trovato.", 'error'); }
     }
 
-    // --- UTILS PER IMMAGINI ---
     function insertBase64Image(file) {
-        if (!file.type.startsWith('image/')) {
-            Toast.show("Il file non è un'immagine.", 'error');
-            return;
-        }
-        if (file.size > 2 * 1024 * 1024) {
-            Toast.show("Immagine troppo grande (Max 2MB).", 'error');
-            return;
-        }
-
+        if (!file.type.startsWith('image/')) { Toast.show("Il file non è un'immagine.", 'error'); return; }
+        if (file.size > 2 * 1024 * 1024) { Toast.show("Immagine troppo grande (Max 2MB).", 'error'); return; }
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = e => {
             const descriptionContainer = document.querySelector('.prompt-description-container[contenteditable="true"]');
             if (!descriptionContainer) return;
-            
-            const imgHtml = `<img src="${e.target.result}" style="max-width: 100%; height: auto; display: block; margin: 10px 0; border-radius: 8px;" alt="Immagine allegata al prompt">`;
-            
-            document.execCommand('insertHTML', false, imgHtml);
+            document.execCommand('insertHTML', false, `<img src="${e.target.result}" style="max-width: 100%;" alt="Immagine">`);
             descriptionContainer.focus();
-            Toast.show("Immagine inserita (Base64).", 'success', 2000);
         };
         reader.readAsDataURL(file);
     }
@@ -530,20 +346,11 @@
     function renderUI() {
         renderCategoryDropdown();
         switch(state.currentView) {
-            case 'favorites': 
+            case 'favorites': case 'recents': case 'tags':
                 mainArea.className = 'view-mode-two-column'; 
                 mainArea.innerHTML = `<div id="col-special-list" class="column"></div> <div id="col-special-detail" class="column"></div>`; 
-                renderSpecialView('favorites'); 
-                break;
-            case 'recents': 
-                mainArea.className = 'view-mode-two-column'; 
-                mainArea.innerHTML = `<div id="col-special-list" class="column"></div> <div id="col-special-detail" class="column"></div>`; 
-                renderSpecialView('recents'); 
-                break;
-            case 'tags':
-                mainArea.className = 'view-mode-two-column';
-                mainArea.innerHTML = `<div id="col-special-list" class="column"></div> <div id="col-special-detail" class="column"></div>`;
-                renderTagsView();
+                if (state.currentView === 'tags') renderTagsView();
+                else renderSpecialView(state.currentView);
                 break;
             default: 
                 mainArea.className = 'view-mode-three-column'; 
@@ -563,23 +370,12 @@
     function renderCategoryDropdown() {
         categoryDropdown.innerHTML = "";
         const createOption = (value, text) => { const opt = document.createElement('option'); opt.value = value; opt.textContent = text; return opt; };
-        
-        categoryDropdown.appendChild(createOption('favorites', '⭐ Preferiti'));
-        categoryDropdown.appendChild(createOption('recents', '🕒 Recenti'));
-        categoryDropdown.appendChild(createOption('tags', '🏷️ Tag'));
+        [['favorites', '⭐ Preferiti'], ['recents', '🕒 Recenti'], ['tags', '🏷️ Tag']].forEach(([val, txt]) => categoryDropdown.appendChild(createOption(val, txt)));
         if (state.allData.length > 0) {
             const separator = createOption('separator', '──────────'); separator.disabled = true; categoryDropdown.appendChild(separator);
             state.allData.sort((a,b)=>a.name.localeCompare(b.name)).forEach(category => categoryDropdown.appendChild(createOption(category.id, category.name)));
         }
-        
-        // Se siamo in una vista speciale, mostra il valore corrispondente
-        if (state.currentView !== 'columns' && ['favorites', 'recents', 'tags'].includes(state.currentView)) {
-             categoryDropdown.value = state.currentView;
-        } else if (state.activeCategoryId) {
-            categoryDropdown.value = state.activeCategoryId;
-        } else if (state.allData.length > 0) {
-            categoryDropdown.value = state.allData[0].id;
-        }
+        categoryDropdown.value = ['favorites', 'recents', 'tags'].includes(state.currentView) ? state.currentView : state.activeCategoryId || (state.allData[0]?.id || 'favorites');
     }
     
     function renderSubcategoryColumn() {
@@ -590,145 +386,100 @@
             <div class="column-header">
                 <div class="column-header-title">
                     <h3>${activeCategory.name}</h3>
-                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-cat-btn" title="Rinomina Categoria"></i>
+                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-cat-btn" title="Rinomina"></i>
                 </div>
-                <button class="add-button" id="add-subcat-btn" title="Aggiungi Sottocategoria">
-                    <i class="fa-solid fa-plus"></i> Sottocategoria
-                </button>
+                <button class="add-button" id="add-subcat-btn"><i class="fa-solid fa-plus"></i> Sottocategoria</button>
             </div>
             <div class="column-content"></div>`;
         document.getElementById('add-subcat-btn').onclick = () => addSubcategory(activeCategory.id);
         document.getElementById('rename-cat-btn').onclick = () => showRenameModal('category', activeCategory.id, activeCategory.name);
-
         const listContainer = col.querySelector('.column-content');
         if (!activeCategory.subcategories?.length) { listContainer.innerHTML = '<div class="initial-message">Nessuna sottocategoria</div>'; return; }
         activeCategory.subcategories.sort((a,b)=>a.name.localeCompare(b.name)).forEach(sub => { 
             const item = document.createElement("div"); 
             item.className = `item-container ${sub.id===state.activeSubcategoryId?'active':''}`; 
             item.innerHTML = `<span class="item-name">${sub.name}</span>`; 
-            item.onclick = () => { 
-                state.currentView = 'columns';
-                state.activeSubcategoryId = sub.id; 
-                state.activePromptId = sub.prompts?.sort((a,b)=>a.title.localeCompare(b.title))[0]?.id || null; 
-                renderUI(); 
-            }; 
+            item.onclick = () => { Object.assign(state, { currentView: 'columns', activeSubcategoryId: sub.id, activePromptId: sub.prompts?.sort((a,b)=>a.title.localeCompare(b.title))[0]?.id || null }); renderUI(); }; 
             listContainer.appendChild(item); 
         });
     }
 
     function renderPromptColumn() {
         const col = document.getElementById('col-prompts');
-        const activeCategory = state.allData.find(c=>c.id===state.activeCategoryId);
-        const activeSub = activeCategory?.subcategories.find(s=>s.id===state.activeSubcategoryId);
+        const activeSub = state.allData.find(c=>c.id===state.activeCategoryId)?.subcategories.find(s=>s.id===state.activeSubcategoryId);
         if (!activeSub) { col.innerHTML = '<div class="initial-message">Seleziona una sottocategoria</div>'; return; }
         col.innerHTML = `
             <div class="column-header">
                  <div class="column-header-title">
                     <h3>${activeSub.name}</h3>
-                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-subcat-btn" title="Rinomina Sottocategoria"></i>
+                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-subcat-btn" title="Rinomina"></i>
                 </div>
-                <button class="add-button" id="add-prompt-btn" title="Aggiungi Prompt">
-                    <i class="fa-solid fa-plus"></i> Prompt
-                </button>
+                <button class="add-button" id="add-prompt-btn"><i class="fa-solid fa-plus"></i> Prompt</button>
             </div>
             <div class="column-content"></div>`;
-        
-        document.getElementById('rename-subcat-btn').onclick = () => showRenameModal('subcategory', activeSub.id, activeSub.name, { categoryId: activeCategory.id });
-        const addPromptBtn = document.getElementById('add-prompt-btn');
-        if (addPromptBtn) {
-            addPromptBtn.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                addNewPrompt(activeSub.id, state.activeCategoryId);
-            };
-        }
-        
+        document.getElementById('rename-subcat-btn').onclick = () => showRenameModal('subcategory', activeSub.id, activeSub.name, { categoryId: state.activeCategoryId });
+        document.getElementById('add-prompt-btn').onclick = () => addNewPrompt(activeSub.id, state.activeCategoryId);
         const listContainer = col.querySelector('.column-content');
         if (!activeSub.prompts?.length) { listContainer.innerHTML = '<div class="initial-message">Nessun prompt</div>'; return; }
         activeSub.prompts.sort((a,b)=>a.title.localeCompare(b.title)).forEach(p => { 
             const item = document.createElement("div"); 
             item.className = `item-container ${p.id===state.activePromptId?'active':''}`; 
-            
-            let tagsHtml = '';
-            if (p.tags && p.tags.length > 0) {
-                tagsHtml = '<div class="tags-container">';
-                p.tags.forEach(tag => {
-                    tagsHtml += `<span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span>`;
-                });
-                tagsHtml += '</div>';
-            }
-            
-            item.innerHTML = `<div class="item-name">${p.title}</div>${tagsHtml}`; 
-            item.onclick = () => { 
-                state.activePromptId = p.id; 
-                trackRecentPrompt(p.id, activeSub.id, state.activeCategoryId); 
-                renderUI(); 
-            }; 
+            const tagsHtml = p.tags?.map(tag => `<span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span>`).join('') || '';
+            item.innerHTML = `<div class="item-name">${p.title}</div>${tagsHtml ? `<div class="tags-container">${tagsHtml}</div>` : ''}`; 
+            item.onclick = () => { state.activePromptId = p.id; trackRecentPrompt(p.id, activeSub.id, state.activeCategoryId); renderUI(); }; 
             listContainer.appendChild(item); 
         });
     }
 
     function renderDetailColumn() {
-        const colId = (state.currentView === 'favorites' || state.currentView === 'recents' || state.currentView === 'tags') ? 'col-special-detail' : 'col-detail';
+        const colId = ['favorites', 'recents', 'tags'].includes(state.currentView) ? 'col-special-detail' : 'col-detail';
         const col = document.getElementById(colId);
         if (!col) return;
-        
-        const cat = state.allData.find(c => c.id === state.activeCategoryId);
-        const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
-        const promptItem = sub?.prompts.find(p => p.id === state.activePromptId);
-
+        const promptItem = state.allData.find(c => c.id === state.activeCategoryId)?.subcategories.find(s => s.id === state.activeSubcategoryId)?.prompts.find(p => p.id === state.activePromptId);
         if (!promptItem) { col.innerHTML = '<div class="initial-message">Seleziona un prompt</div>'; return; }
-        
-        if (!promptItem.tags) promptItem.tags = [];
         
         col.innerHTML = `
             <div class="prompt-detail-view">
                 <div class="prompt-header"><h3>Dettagli Prompt</h3>
                     <div class="prompt-actions-toolbar">
-                        <i id="edit-prompt-btn" class="fa-solid fa-pencil" title="Modifica Testo"></i>
-                        <i id="copy-prompt-btn" class="fa-solid fa-copy" title="Copia Testo"></i>
+                        <i id="edit-prompt-btn" class="fa-solid fa-pencil" title="Modifica"></i>
+                        <i id="copy-prompt-btn" class="fa-solid fa-copy" title="Copia"></i>
                         <i id="fav-prompt-btn" class="${promptItem.favorite ? "fa-solid" : "fa-regular"} fa-star" title="Preferito"></i>
                         <i id="delete-prompt-btn" class="fa-solid fa-trash-can" title="Elimina"></i>
                     </div>
                 </div>
                 <div class="prompt-title-section">
                     <h1>${promptItem.title}</h1>
-                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-prompt-btn" title="Rinomina Prompt"></i>
+                    <i class="fa-solid fa-pen-to-square rename-icon" id="rename-prompt-btn" title="Rinomina"></i>
                 </div>
                 <div class="tag-input-section">
                     <div class="tag-input-wrapper">
-                        <input type="text" id="tag-input" placeholder="Aggiungi un tag (es: SEO, Marketing, AI)">
+                        <input type="text" id="tag-input" placeholder="Aggiungi un tag...">
                         <button id="add-tag-btn"><i class="fa-solid fa-plus"></i> Aggiungi</button>
                     </div>
                     <div class="current-tags" id="current-tags-container"></div>
                 </div>
                 <div id="formatting-toolbar">
-                    <button data-command="bold" title="Grassetto (B)"><i class="fa-solid fa-bold"></i></button>
-                    <button data-command="italic" title="Corsivo (I)"><i class="fa-solid fa-italic"></i></button>
-                    <button data-command="underline" title="Sottolineato (U)"><i class="fa-solid fa-underline"></i></button>
-                    <button data-command="insertUnorderedList" title="Lista puntata"><i class="fa-solid fa-list-ul"></i></button>
-                    <button data-command="fontSizeUp" title="Aumenta dimensione testo (+)"><i class="fa-solid fa-plus"></i></button>
-                    <button data-command="fontSizeDown" title="Diminuisci dimensione testo (-)"><i class="fa-solid fa-minus"></i></button>
-                    <button data-command="showLinkModal" id="btn-create-link" title="Aggiungi Link (@)"><i class="fa-solid fa-link"></i></button>
+                    <button data-command="bold" title="Grassetto"><i class="fa-solid fa-bold"></i></button>
+                    <button data-command="italic" title="Corsivo"><i class="fa-solid fa-italic"></i></button>
+                    <button data-command="underline" title="Sottolineato"><i class="fa-solid fa-underline"></i></button>
+                    <button data-command="insertUnorderedList" title="Lista"><i class="fa-solid fa-list-ul"></i></button>
+                    <button data-command="showLinkModal" title="Link"><i class="fa-solid fa-link"></i></button>
                     <button data-command="unlink" title="Rimuovi Link"><i class="fa-solid fa-link-slash"></i></button>
-                    <button data-command="insertImage" id="btn-insert-image" title="Aggiungi Immagine (Carica)"><i class="fa-regular fa-image"></i></button>
-                    <button id="color-btn" title="Colore Testo"><i class="fa-solid fa-palette"></i></button>
-                    <input type="color" id="colorPicker" value="#FFFFFF" style="visibility: hidden; width: 0; height: 0; padding: 0; border: none;">
+                    <button data-command="removeFormat" title="Rimuovi Formato"><i class="fa-solid fa-eraser"></i></button>
+                    <button data-command="insertImage" title="Immagine"><i class="fa-regular fa-image"></i></button>
+                    <button id="color-btn" title="Colore"><i class="fa-solid fa-palette"></i></button>
+                    <input type="color" id="colorPicker" style="visibility: hidden; width: 0; height: 0; padding: 0; border: none;">
                     <button id="btnSaveChanges" class="add-button">Salva</button>
                 </div>
                 <div class="prompt-description-container" contenteditable="false" id="detail-description">${promptItem.description || ""}</div>
             </div>`;
-        attachDetailViewListeners(promptItem, sub, cat);
+        
+        attachDetailViewListeners(promptItem);
         renderCurrentTags(promptItem);
 
         if (state.startEditingNewPrompt) {
-            const descriptionContainer = document.getElementById('detail-description');
-            if (descriptionContainer) {
-                descriptionContainer.contentEditable = 'true';
-                document.getElementById('formatting-toolbar')?.classList.add('show');
-                document.getElementById('btnSaveChanges')?.classList.add('show');
-                descriptionContainer.focus();
-            }
+            document.getElementById('edit-prompt-btn')?.click();
             state.startEditingNewPrompt = false;
         }
     }
@@ -736,406 +487,178 @@
     function renderCurrentTags(promptItem) {
         const container = document.getElementById('current-tags-container');
         if (!container) return;
-        
-        container.innerHTML = '';
-        if (promptItem.tags && promptItem.tags.length > 0) {
-            promptItem.tags.forEach(tag => {
-                const tagEl = document.createElement('span');
-                tagEl.className = 'tag-badge-removable';
-                tagEl.style.backgroundColor = getTagColor(tag);
-                tagEl.innerHTML = `${tag} <i class="fa-solid fa-xmark"></i>`;
-                tagEl.onclick = () => removeTag(promptItem, tag);
-                container.appendChild(tagEl);
-            });
-        }
+        container.innerHTML = (promptItem.tags || []).map(tag => 
+            `<span class="tag-badge-removable" style="background-color: ${getTagColor(tag)}" data-tag-name="${tag}">
+                ${tag} <i class="fa-solid fa-xmark"></i>
+            </span>`
+        ).join('');
+        container.querySelectorAll('.tag-badge-removable').forEach(el => 
+            el.onclick = () => removeTag(promptItem, el.dataset.tagName)
+        );
     }
     
     async function addTag(promptItem, tagName) {
-        if (!tagName || tagName.trim().length === 0) {
-            Toast.show("Inserisci un nome per il tag.", 'error');
-            return;
-        }
-        
-        const cleanTag = tagName.trim().toLowerCase();
-        
-        if (!promptItem.tags) promptItem.tags = [];
-        
-        if (promptItem.tags.includes(cleanTag)) {
-            Toast.show("Tag già presente!", 'info');
-            return;
-        }
-        
-        const newData = JSON.parse(JSON.stringify(state.allData));
-        const cat = newData.find(c => c.id === state.activeCategoryId);
-        const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
-        const prompt = sub?.prompts.find(p => p.id === promptItem.id);
-        
-        if (prompt) {
-            if (!prompt.tags) prompt.tags = [];
-            prompt.tags.push(cleanTag);
-            await updateStateAndSave(newData, { saveHistory: false });
-            Toast.show(`Tag "${cleanTag}" aggiunto!`, 'success', 1500);
-        }
+        const cleanTag = tagName?.trim().toLowerCase();
+        if (!cleanTag) { Toast.show("Inserisci un nome per il tag.", 'error'); return; }
+        const p = state.allData.find(c=>c.id===state.activeCategoryId)?.subcategories.find(s=>s.id===state.activeSubcategoryId)?.prompts.find(pr=>pr.id===promptItem.id);
+        if (!p) return;
+        if (!p.tags) p.tags = [];
+        if (p.tags.includes(cleanTag)) { Toast.show("Tag già presente.", 'info'); return; }
+        p.tags.push(cleanTag);
+        await updateStateAndSave(state.allData, { saveHistory: false });
     }
     
     async function removeTag(promptItem, tagName) {
-        const newData = JSON.parse(JSON.stringify(state.allData));
-        const cat = newData.find(c => c.id === state.activeCategoryId);
-        const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
-        const prompt = sub?.prompts.find(p => p.id === promptItem.id);
-        
-        if (prompt && prompt.tags) {
-            prompt.tags = prompt.tags.filter(t => t !== tagName);
-            await updateStateAndSave(newData, { saveHistory: false });
-            Toast.show(`Tag "${tagName}" rimosso!`, 'info', 1500);
-        }
+        const p = state.allData.find(c=>c.id===state.activeCategoryId)?.subcategories.find(s=>s.id===state.activeSubcategoryId)?.prompts.find(pr=>pr.id===promptItem.id);
+        if (p?.tags) { p.tags = p.tags.filter(t => t !== tagName); await updateStateAndSave(state.allData, { saveHistory: false }); }
     }
     
     function renderTagsView() {
         const colList = document.getElementById('col-special-list');
         colList.innerHTML = `<div class="column-header"><h3>🏷️ Filtra per Tag</h3></div><div class="column-content"></div>`;
-        
-        const allTags = new Set();
-        state.allData.forEach(cat => {
-            cat.subcategories?.forEach(sub => {
-                sub.prompts?.forEach(p => {
-                    if (p.tags) {
-                        p.tags.forEach(tag => allTags.add(tag));
-                    }
-                });
-            });
-        });
-        
+        const allTags = [...new Set(state.allData.flatMap(c => c.subcategories?.flatMap(s => s.prompts?.flatMap(p => p.tags || []) || []) || []))].sort();
         const listContainer = colList.querySelector('.column-content');
-        
-        if (allTags.size === 0) {
-            listContainer.innerHTML = '<div class="initial-message">Nessun tag disponibile</div>';
-            document.getElementById('col-special-detail').innerHTML = '<div class="initial-message">Aggiungi tag ai tuoi prompt</div>';
-            return;
-        }
-        
-        const sortedTags = Array.from(allTags).sort();
-        
-        if (!state.activeTag || !allTags.has(state.activeTag)) {
-            state.activeTag = sortedTags[0];
-        }
-        
-        sortedTags.forEach(tag => {
-            const item = document.createElement('div');
-            item.className = `item-container ${tag === state.activeTag ? 'active' : ''}`;
-            item.innerHTML = `<span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span>`;
-            item.onclick = () => {
-                state.activeTag = tag;
-                renderTagsView();
-            };
-            listContainer.appendChild(item);
-        });
-        
+        if (allTags.length === 0) { listContainer.innerHTML = '<div class="initial-message">Nessun tag</div>'; document.getElementById('col-special-detail').innerHTML = ''; return; }
+        if (!state.activeTag || !allTags.includes(state.activeTag)) { state.activeTag = allTags[0]; }
+        listContainer.innerHTML = allTags.map(tag => `<div class="item-container ${tag === state.activeTag ? 'active' : ''}" data-tag-name="${tag}"><span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span></div>`).join('');
+        listContainer.querySelectorAll('.item-container').forEach(el => el.onclick = () => { state.activeTag = el.dataset.tagName; renderTagsView(); });
         renderPromptsForTag(state.activeTag);
     }
     
     function renderPromptsForTag(tagName) {
         const colDetail = document.getElementById('col-special-detail');
-        colDetail.innerHTML = `<div class="column-header"><h3>Prompt con tag: <span class="tag-badge" style="background-color: ${getTagColor(tagName)}">${tagName}</span></h3></div><div class="column-content"></div>`;
-        
-        const items = [];
-        state.allData.forEach(cat => {
-            cat.subcategories?.forEach(sub => {
-                sub.prompts?.forEach(p => {
-                    if (p.tags && p.tags.includes(tagName)) {
-                        items.push({ ...p, catName: cat.name, subName: sub.name, catId: cat.id, subId: sub.id });
-                    }
-                });
-            });
-        });
-        
-        items.sort((a, b) => a.title.localeCompare(b.title));
-        
+        colDetail.innerHTML = `<div class="column-header"><h3>Prompt con: <span class="tag-badge" style="background-color:${getTagColor(tagName)}">${tagName}</span></h3></div><div class="column-content"></div>`;
+        const items = state.allData.flatMap(cat => cat.subcategories?.flatMap(sub => sub.prompts?.filter(p => p.tags?.includes(tagName)).map(p => ({...p, catName: cat.name, subName: sub.name, catId: cat.id, subId: sub.id})) || []) || []).sort((a,b)=>a.title.localeCompare(b.title));
         const listContainer = colDetail.querySelector('.column-content');
-        
-        if (items.length === 0) {
-            listContainer.innerHTML = '<div class="initial-message">Nessun prompt con questo tag</div>';
-            return;
-        }
-        
-        items.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'item-container';
-            item.innerHTML = `<div class="item-name">${p.title}</div><div class="item-path">${p.catName} > ${p.subName}</div>`;
-            item.onclick = () => {
-                state.activeCategoryId = p.catId;
-                state.activeSubcategoryId = p.subId;
-                state.activePromptId = p.id;
-                state.currentView = 'tags';
-                trackRecentPrompt(p.id, p.subId, p.catId);
-                renderUI();
-            };
-            listContainer.appendChild(item);
-        });
+        if (items.length === 0) { listContainer.innerHTML = '<div class="initial-message">Nessun prompt</div>'; return; }
+        listContainer.innerHTML = items.map(p => `<div class="item-container" data-cat-id="${p.catId}" data-sub-id="${p.subId}" data-prompt-id="${p.id}"><div class="item-name">${p.title}</div><div class="item-path">${p.catName} > ${p.subName}</div></div>`).join('');
+        listContainer.querySelectorAll('.item-container').forEach(el => el.onclick = () => { Object.assign(state, { currentView: 'tags', activeCategoryId: el.dataset.catId, activeSubcategoryId: el.dataset.subId, activePromptId: el.dataset.promptId }); trackRecentPrompt(state.activePromptId, state.activeSubcategoryId, state.activeCategoryId); renderUI(); });
     }
     
     function renderSpecialView(type) {
-        const titles = { favorites: "Preferiti", recents: "Recenti" };
+        const titles = { favorites: "⭐ Preferiti", recents: "🕒 Recenti" };
         const colList = document.getElementById('col-special-list');
         colList.innerHTML = `<div class="column-header"><h3>${titles[type]}</h3></div><div class="column-content"></div>`;
-        
         let items = [];
         if (type === 'favorites') {
-            state.allData.forEach(cat => cat.subcategories?.forEach(sub => sub.prompts?.forEach(p => { 
-                if (p.favorite) items.push({ ...p, catName: cat.name, subName: sub.name, catId: cat.id, subId: sub.id }); 
-            })));
-            items.sort((a,b)=>a.title.localeCompare(b.title));
+            items = state.allData.flatMap(cat => cat.subcategories?.flatMap(sub => sub.prompts?.filter(p => p.favorite).map(p => ({...p, catName: cat.name, subName: sub.name, catId: cat.id, subId: sub.id})) || []) || []).sort((a,b)=>a.title.localeCompare(b.title));
         } else {
-            state.recents.forEach(r => {
-                const cat = state.allData.find(c => c.id === r.catId);
-                const sub = cat?.subcategories.find(s => s.id === r.subId);
-                const p = sub?.prompts.find(p_item => p_item.id === r.promptId);
-                if (p) items.push({ ...p, catName: cat.name, subName: sub.name, catId: cat.id, subId: sub.id, accessTime: r.timestamp || 0 });
-            });
-            items.sort((a,b)=>b.accessTime - a.accessTime); 
+            items = state.recents.map(r => {
+                const p = state.allData.find(c=>c.id===r.catId)?.subcategories.find(s=>s.id===r.subId)?.prompts.find(pr=>pr.id===r.promptId);
+                return p ? {...p, catName: state.allData.find(c=>c.id===r.catId).name, subName: state.allData.find(c=>c.id===r.catId).subcategories.find(s=>s.id===r.subId).name, catId: r.catId, subId: r.subId} : null;
+            }).filter(Boolean);
         }
-        
         const listContainer = colList.querySelector('.column-content');
-        if (!items.length) { 
-            listContainer.innerHTML = `<div class="initial-message">Nessun elemento in ${titles[type]}</div>`; 
-            document.getElementById('col-special-detail').innerHTML = '<div class="initial-message">Nessun prompt da visualizzare</div>'; 
-            state.activePromptId = null;
-            state.activeSubcategoryId = null;
-            state.activeCategoryId = null;
-            return; 
-        }
-
-        // Se non c'è un attivo coerente con la lista attuale, scegli il primo
-        const currentActiveItem = items.find(p => p.id === state.activePromptId);
-        if (!currentActiveItem) {
-            state.activePromptId = items[0].id;
-            state.activeSubcategoryId = items[0].subId;
-            state.activeCategoryId = items[0].catId;
-        }
-
-        items.forEach(p => {
-            const item = document.createElement("div");
-            item.className = `item-container ${p.id === state.activePromptId ? 'active' : ''}`;
-            
-            let tagsHtml = '';
-            if (p.tags && p.tags.length > 0) {
-                tagsHtml = '<div class="tags-container">';
-                p.tags.forEach(tag => {
-                    tagsHtml += `<span class="tag-badge" style="background-color: ${getTagColor(tag)}">${tag}</span>`;
-                });
-                tagsHtml += '</div>';
-            }
-            
-            item.innerHTML = `<div class="item-name">${p.title}</div><div class="item-path">${p.catName} > ${p.subName}</div>${tagsHtml}`;
-            item.onclick = () => {
-                state.activeCategoryId = p.catId; 
-                state.activeSubcategoryId = p.subId; 
-                state.activePromptId = p.id;
-                trackRecentPrompt(p.id, p.subId, p.catId);
-                renderUI(); 
-            };
-            listContainer.appendChild(item);
-        });
-        
+        if (items.length === 0) { listContainer.innerHTML = `<div class="initial-message">Nessun elemento</div>`; document.getElementById('col-special-detail').innerHTML = ''; Object.assign(state, { activePromptId: null, activeSubcategoryId: null, activeCategoryId: null }); return; }
+        if (!items.find(p => p.id === state.activePromptId)) Object.assign(state, { activePromptId: items[0].id, activeSubcategoryId: items[0].subId, activeCategoryId: items[0].catId });
+        listContainer.innerHTML = items.map(p => `<div class="item-container ${p.id===state.activePromptId?'active':''}" data-cat-id="${p.catId}" data-sub-id="${p.subId}" data-prompt-id="${p.id}"><div class="item-name">${p.title}</div><div class="item-path">${p.catName} > ${p.subName}</div></div>`).join('');
+        listContainer.querySelectorAll('.item-container').forEach(el => el.onclick = () => { Object.assign(state, { activeCategoryId: el.dataset.catId, activeSubcategoryId: el.dataset.subId, activePromptId: el.dataset.promptId }); trackRecentPrompt(state.activePromptId, state.activeSubcategoryId, state.activeCategoryId); renderUI(); });
         renderDetailColumn();
     }
     
-    function attachDetailViewListeners(promptItem, sub, cat) {
-        const colId = (state.currentView === 'favorites' || state.currentView === 'recents' || state.currentView === 'tags') ? 'col-special-detail' : 'col-detail';
-        const col = document.getElementById(colId);
-        if (!col) return;
-
-        const descriptionContainer = col.querySelector("#detail-description");
-        if (!descriptionContainer) return;
+    function attachDetailViewListeners(promptItem) {
+        const descContainer = document.getElementById("detail-description");
+        const toolbar = document.getElementById("formatting-toolbar");
+        const saveBtn = document.getElementById("btnSaveChanges");
+        const tagInput = document.getElementById('tag-input');
         
         document.getElementById('rename-prompt-btn').onclick = () => showRenameModal('prompt', promptItem.id, promptItem.title);
+        document.getElementById('add-tag-btn').onclick = () => { addTag(promptItem, tagInput.value); tagInput.value = ''; };
+        tagInput.onkeypress = e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('add-tag-btn').click(); } };
 
-        const tagInput = document.getElementById('tag-input');
-        const addTagBtn = document.getElementById('add-tag-btn');
-        
-        if (tagInput && addTagBtn) {
-            addTagBtn.onclick = () => {
-                addTag(promptItem, tagInput.value);
-                tagInput.value = '';
-            };
-            
-            tagInput.onkeypress = (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTag(promptItem, tagInput.value);
-                    tagInput.value = '';
-                }
-            };
-        }
-
-        col.querySelector("#edit-prompt-btn").onclick = () => {
-            const isEditing = descriptionContainer.contentEditable === 'true';
-            descriptionContainer.contentEditable = isEditing ? 'false' : 'true';
-            descriptionContainer.setAttribute('contenteditable', isEditing ? 'false' : 'true');
-
-            col.querySelector("#formatting-toolbar").classList.toggle("show", !isEditing);
-            col.querySelector("#btnSaveChanges").classList.toggle("show", !isEditing);
-            if (!isEditing) {
-                 descriptionContainer.focus();
-            } else {
-                 Toast.show("Modifica annullata. Ricorda di cliccare Salva.", 'info');
-            }
+        document.getElementById("edit-prompt-btn").onclick = () => {
+            const isEditing = descContainer.contentEditable === 'true';
+            // *** SOLUZIONE DEFINITIVA ***
+            // Aggiorna il colore DEL SELETTORE nel momento esatto in cui si apre la toolbar.
+            if (!isEditing) { updateColorPickerValue(); }
+            descContainer.contentEditable = !isEditing;
+            toolbar.classList.toggle("show", !isEditing);
+            saveBtn.classList.toggle("show", !isEditing);
+            if (!isEditing) descContainer.focus();
         };
 
-        col.querySelector("#btnSaveChanges").onclick = async () => {
-            const newData = JSON.parse(JSON.stringify(state.allData));
-            const promptToUpdate = newData.find(c=>c.id===cat.id)?.subcategories.find(s=>s.id===sub.id)?.prompts.find(p_item=>p_item.id===promptItem.id);
-            if(promptToUpdate) {
-                promptToUpdate.description = descriptionContainer.innerHTML;
-            }
-            descriptionContainer.contentEditable = 'false'; 
-            descriptionContainer.setAttribute('contenteditable', 'false');
-            col.querySelector("#formatting-toolbar").classList.remove("show");
-            col.querySelector("#btnSaveChanges").classList.remove("show");
-
-            await updateStateAndSave(newData);
+        saveBtn.onclick = async () => {
+            const p = state.allData.find(c=>c.id===state.activeCategoryId)?.subcategories.find(s=>s.id===state.activeSubcategoryId)?.prompts.find(pr=>pr.id===promptItem.id);
+            if (p) p.description = descContainer.innerHTML;
+            descContainer.contentEditable = 'false'; 
+            toolbar.classList.remove("show");
+            saveBtn.classList.remove("show");
+            await updateStateAndSave(state.allData);
             Toast.show("Prompt salvato!", 'success');
         };
 
-        col.querySelectorAll("#formatting-toolbar button[data-command]").forEach(btn => {
+        toolbar.querySelectorAll("button[data-command]").forEach(btn => {
             btn.onclick = e => { 
                 e.preventDefault(); 
                 const command = btn.dataset.command;
-
-                if (command === 'showLinkModal') {
-                    showLinkModal();
-                } 
-                else if (command === 'fontSizeUp') {
-                    document.execCommand('fontSize', false, '7'); 
-                } 
-                else if (command === 'fontSizeDown') {
-                    document.execCommand('fontSize', false, '1');
-                }
-                else if (command === 'insertImage') {
-                    imageInput.click();
-                }
-                else {
-                    document.execCommand(command, false, null); 
-                }
-                if (command !== 'showLinkModal') {
-                    descriptionContainer.focus(); 
-                }
+                if (command === 'showLinkModal') showLinkModal();
+                else if (command === 'insertImage') imageInput.click();
+                else document.execCommand(command, false, null);
+                if (command !== 'showLinkModal') descContainer.focus();
             };
         });
         
-        const colorPicker = col.querySelector("#colorPicker");
-        col.querySelector("#color-btn").onclick = () => colorPicker.click();
-        colorPicker.onchange = () => {
-            document.execCommand('foreColor', false, colorPicker.value);
-            descriptionContainer.focus();
-        };
+        const colorPicker = document.getElementById("colorPicker");
+        document.getElementById("color-btn").onclick = () => colorPicker.click();
+        colorPicker.onchange = () => { document.execCommand('foreColor', false, colorPicker.value); descContainer.focus(); };
 
-        col.querySelector("#copy-prompt-btn").onclick = () => {
-            const textToCopy = descriptionContainer.innerText;
-            const tempElement = document.createElement('textarea');
-            tempElement.value = textToCopy;
-            tempElement.style.position = 'fixed'; tempElement.style.top = '0'; tempElement.style.left = '0'; tempElement.style.opacity = '0';
-            document.body.appendChild(tempElement); tempElement.focus(); tempElement.select();
-            try {
-                const successful = document.execCommand('copy');
-                Toast.show(successful ? "Copiato!" : "Errore nella copia.", successful ? 'success' : 'error');
-            } catch (err) { Toast.show("Errore nella copia.", 'error'); } 
-            finally { document.body.removeChild(tempElement); }
-        };
-        col.querySelector("#delete-prompt-btn").onclick = () => deletePrompt(promptItem.id, sub.id, cat.id);
-        col.querySelector("#fav-prompt-btn").onclick = async () => {
-             const newData = JSON.parse(JSON.stringify(state.allData));
-             const promptToUpdate = newData.find(c=>c.id===cat.id)?.subcategories.find(s=>s.id===sub.id)?.prompts.find(p_item=>p_item.id===promptItem.id);
-             let newActiveIds = {};
-             if(promptToUpdate) {
-                promptToUpdate.favorite = !promptToUpdate.favorite;
-             }
-             await updateStateAndSave(newData, { newActiveIds, saveHistory: false });
+        document.getElementById("copy-prompt-btn").onclick = () => navigator.clipboard.writeText(descContainer.innerText).then(() => Toast.show("Copiato!", 'success'), () => Toast.show("Errore.", 'error'));
+        document.getElementById("delete-prompt-btn").onclick = () => deletePrompt(promptItem.id);
+        document.getElementById("fav-prompt-btn").onclick = async () => {
+             const p = state.allData.find(c=>c.id===state.activeCategoryId)?.subcategories.find(s=>s.id===state.activeSubcategoryId)?.prompts.find(pr=>pr.id===promptItem.id);
+             if(p) p.favorite = !p.favorite;
+             await updateStateAndSave(state.allData, { saveHistory: false });
         };
         
-        descriptionContainer.addEventListener('paste', handlePaste, false);
-        
-        descriptionContainer.addEventListener('dragover', e => { 
-            if (descriptionContainer.contentEditable === 'true') {
-                e.preventDefault(); 
-                descriptionContainer.classList.add('drag-over'); 
-            }
-        });
-        descriptionContainer.addEventListener('dragleave', () => { 
-            descriptionContainer.classList.remove('drag-over'); 
-        });
-        descriptionContainer.addEventListener('drop', e => {
-            if (descriptionContainer.contentEditable === 'true') {
-                e.preventDefault();
-                descriptionContainer.classList.remove('drag-over');
-                if (e.dataTransfer.files.length > 0) {
-                    insertBase64Image(e.dataTransfer.files[0]);
-                }
-            }
-        });
+        descContainer.addEventListener('paste', handlePaste);
+        ['dragover', 'dragleave', 'drop'].forEach(eventName => descContainer.addEventListener(eventName, e => {
+            if (descContainer.contentEditable !== 'true') return;
+            e.preventDefault();
+            descContainer.classList.toggle('drag-over', eventName === 'dragover');
+            if (eventName === 'drop' && e.dataTransfer.files.length) insertBase64Image(e.dataTransfer.files[0]);
+        }));
     }
     
     function trackRecentPrompt(promptId, subId, catId) {
-        const timestamp = Date.now();
         state.recents = state.recents.filter(r => r.promptId !== promptId);
-        state.recents.unshift({ promptId, subId, catId, timestamp });
+        state.recents.unshift({ promptId, subId, catId });
         if (state.recents.length > 20) state.recents.pop();
     }
     
     // --- DATA MANIPULATION ---
     async function addCategory() { 
         const name = window.prompt("Nome nuova categoria:"); 
-        if (!name?.trim()) { Toast.show("Operazione annullata.", 'info'); return; } 
+        if (!name?.trim()) return;
         const newCategory = { id: `cat_${Date.now()}`, name: name.trim(), subcategories: [] }; 
-        const newData = [...state.allData, newCategory]; 
-        await updateStateAndSave(newData, { newActiveIds: { currentView: 'columns', activeCategoryId: newCategory.id, activeSubcategoryId: null, activePromptId: null } }); 
-        Toast.show(`Categoria "${newCategory.name}" aggiunta!`, 'success');
+        await updateStateAndSave([...state.allData, newCategory], { newActiveIds: { currentView: 'columns', activeCategoryId: newCategory.id, activeSubcategoryId: null, activePromptId: null } }); 
     }
     
     async function addSubcategory(categoryId) { 
         const name = window.prompt("Nome nuova sottocategoria:"); 
-        if (!name?.trim()) { Toast.show("Operazione annullata.", 'info'); return; } 
-        const newData = JSON.parse(JSON.stringify(state.allData)); 
-        const cat = newData.find(c => c.id === categoryId); 
-        if (!cat) { Toast.show("Errore: categoria non trovata.", 'error'); return; }
+        if (!name?.trim()) return;
+        const cat = state.allData.find(c => c.id === categoryId); if (!cat) return;
         const newSub = { id: `sub_${Date.now()}`, name: name.trim(), prompts: [] }; 
         cat.subcategories.push(newSub); 
-        await updateStateAndSave(newData, { newActiveIds: { activeSubcategoryId: newSub.id, activePromptId: null } }); 
-        Toast.show(`Sottocategoria "${newSub.name}" aggiunta!`, 'success');
+        await updateStateAndSave(state.allData, { newActiveIds: { activeSubcategoryId: newSub.id, activePromptId: null } }); 
     }
     
     async function addNewPrompt(subcategoryId, categoryId) { 
         const title = window.prompt("Titolo nuovo prompt:"); 
-        if (!title?.trim()) { Toast.show("Operazione annullata.", 'info'); return; } 
-        
-        const newData = JSON.parse(JSON.stringify(state.allData)); 
-        const cat = newData.find(c => c.id === categoryId);
-        if (!cat) { Toast.show("Errore: categoria non trovata.", 'error'); return; }
-        const sub = cat.subcategories.find(s => s.id === subcategoryId);
-        if (!sub) { Toast.show("Errore: sottocategoria non trovata.", 'error'); return; }
-        
+        if (!title?.trim()) return;
+        const sub = state.allData.find(c => c.id === categoryId)?.subcategories.find(s => s.id === subcategoryId); if (!sub) return;
         const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "", favorite: false, tags: [] }; 
         sub.prompts.push(newPrompt); 
-        
-        state.startEditingNewPrompt = true; 
-        
-        await updateStateAndSave(newData, { newActiveIds: { activePromptId: newPrompt.id } }); 
-        Toast.show(`Prompt "${newPrompt.title}" aggiunto!`, 'success');
+        await updateStateAndSave(state.allData, { newActiveIds: { activePromptId: newPrompt.id }, startEditingNewPrompt: true }); 
     }
     
-    async function deletePrompt(promptId, subId, catId) { 
+    async function deletePrompt(promptId) { 
         if (!window.confirm("Sei sicuro di voler eliminare questo prompt?")) return; 
-        const newData = JSON.parse(JSON.stringify(state.allData)); 
-        const sub = newData.find(c=>c.id===catId)?.subcategories.find(s=>s.id===subId); 
-        if (!sub) return;
-        const promptIndex = sub.prompts.findIndex(p_item => p_item.id === promptId); 
-        if (promptIndex === -1) return;
-        sub.prompts.splice(promptIndex, 1); 
+        const sub = state.allData.find(c=>c.id===state.activeCategoryId)?.subcategories.find(s=>s.id===state.activeSubcategoryId); if (!sub) return;
+        const pIndex = sub.prompts.findIndex(p => p.id === promptId); if (pIndex === -1) return;
+        sub.prompts.splice(pIndex, 1); 
         state.recents = state.recents.filter(r => r.promptId !== promptId);
-        const newActivePromptId = sub.prompts[promptIndex]?.id || sub.prompts[promptIndex-1]?.id || sub.prompts[0]?.id || null; 
-        let newActiveIds = { activePromptId: newActivePromptId };
-        if (!newActivePromptId && (state.currentView === 'favorites' || state.currentView === 'recents' || state.currentView === 'tags')) { newActiveIds = { activePromptId: null, activeSubcategoryId: null, activeCategoryId: null }; }
-        await updateStateAndSave(newData, { newActiveIds }); 
+        const newActivePromptId = sub.prompts[pIndex]?.id || sub.prompts[pIndex-1]?.id || null;
+        await updateStateAndSave(state.allData, { newActiveIds: { activePromptId: newActivePromptId } }); 
         Toast.show("Prompt eliminato!", 'info');
     }
 
@@ -1144,87 +667,60 @@
     async function performUndo() { 
         if (state.history.length === 0) return; 
         const lastState = state.history.pop(); 
-        state.redoStack.push(JSON.parse(JSON.stringify({ allData: state.allData, recents: state.recents, activeCategoryId: state.activeCategoryId, activeSubcategoryId: state.activeSubcategoryId, activePromptId: state.activePromptId, currentView: state.currentView }))); 
+        state.redoStack.push(JSON.parse(JSON.stringify({ ...state, history: [], redoStack: [] }))); 
         Object.assign(state, lastState); 
-        await Database.save(state.allData); 
-        localStorage.setItem('promptManagerRecents', JSON.stringify(state.recents)); 
-        renderUI(); 
-        Toast.show("Annullato!", 'info', 1500);
+        await Database.save(state.allData); localStorage.setItem('promptManagerRecents', JSON.stringify(state.recents)); renderUI(); 
     }
     async function performRedo() { 
         if (state.redoStack.length === 0) return; 
         const nextState = state.redoStack.pop(); 
-        state.history.push(JSON.parse(JSON.stringify({ allData: state.allData, recents: state.recents, activeCategoryId: state.activeCategoryId, activeSubcategoryId: state.activeSubcategoryId, activePromptId: state.activePromptId, currentView: state.currentView }))); 
+        state.history.push(JSON.parse(JSON.stringify({ ...state, history: [], redoStack: [] }))); 
         Object.assign(state, nextState); 
-        await Database.save(state.allData); 
-        localStorage.setItem('promptManagerRecents', JSON.stringify(state.recents)); 
-        renderUI(); 
-        Toast.show("Ripristinato!", 'info', 1500);
+        await Database.save(state.allData); localStorage.setItem('promptManagerRecents', JSON.stringify(state.recents)); renderUI(); 
     }
     function backupData() { 
         if(state.allData.length === 0) { Toast.show("Nessun dato da esportare.", "error"); return; } 
-        const dataStr = JSON.stringify(state.allData, null, 2); 
-        const blob = new Blob([dataStr], { type: "application/json" }); 
-        const url = URL.createObjectURL(blob); 
-        const a = document.createElement("a"); a.href = url; a.download = `prompts_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(url); 
-        Toast.show("Backup scaricato!", 'success'); 
+        const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(state.allData, null, 2)], { type: "application/json" })); a.download = `prompts_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); 
     }
-    function importData(event) {
-        const file = event.target.files[0]; if (!file) return;
+    function importData(e) {
+        const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
-        reader.onload = async e => {
+        reader.onload = async ev => {
             try {
-                const data = JSON.parse(e.target.result); 
-                if (!Array.isArray(data)) throw new Error("Invalid format");
-                const newCatId = data[0]?.id || null;
-                const newSubId = data[0]?.subcategories?.[0]?.id || null;
-                const newPromptId = data[0]?.subcategories?.[0]?.prompts?.[0]?.id || null;
-                await updateStateAndSave(data, { newActiveIds: { currentView: 'columns', activeCategoryId: newCatId, activeSubcategoryId: newSubId, activePromptId: newPromptId }, saveHistory: false });
-                state.history = []; state.redoStack = [];
-                Toast.show("Importazione riuscita!", 'success');
-            } catch (err) { Toast.show("File di backup non valido.", 'error'); }
+                const data = JSON.parse(ev.target.result); if (!Array.isArray(data)) throw new Error("Formato non valido");
+                const first = { cat: data[0]?.id, sub: data[0]?.subcategories?.[0]?.id, p: data[0]?.subcategories?.[0]?.prompts?.[0]?.id };
+                await updateStateAndSave(data, { newActiveIds: { currentView: 'columns', activeCategoryId: first.cat, activeSubcategoryId: first.sub, activePromptId: first.p }, saveHistory: false });
+                state.history = []; state.redoStack = []; Toast.show("Importazione riuscita!", 'success');
+            } catch (err) { Toast.show("File non valido.", 'error'); }
         };
-        reader.readAsText(file); event.target.value = '';
+        reader.readAsText(file); e.target.value = '';
     }
     
     // --- EVENT LISTENERS ---
     function setupEventListeners() {
         document.getElementById('themeToggle').addEventListener('click', () => { 
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light'; 
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'; 
             document.documentElement.setAttribute('data-theme', newTheme); 
             localStorage.setItem('theme', newTheme); 
-            document.getElementById('themeToggle').innerHTML = newTheme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
+            document.getElementById('themeToggle').innerHTML = `<i class="fa-solid fa-${newTheme === 'dark' ? 'moon' : 'sun'}"></i>`;
+            updateColorPickerValue(); // Aggiorna il selettore se la toolbar è già aperta
         });
-        document.getElementById('themeToggle').innerHTML = document.documentElement.getAttribute('data-theme') === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
         
         categoryDropdown.addEventListener('change', () => {
             const selection = categoryDropdown.value;
-            if (selection === 'favorites' || selection === 'recents' || selection === 'tags') {
-                state.currentView = selection;
-                state.activePromptId = null; state.activeSubcategoryId = null; state.activeCategoryId = null;
-            } else if (selection === 'separator' || !selection) {
-                return; 
+            if (['favorites', 'recents', 'tags'].includes(selection)) {
+                Object.assign(state, { currentView: selection, activePromptId: null, activeSubcategoryId: null, activeCategoryId: null });
             } else {
-                state.currentView = 'columns';
                 const newCat = state.allData.find(c => c.id === selection);
-                state.activeCategoryId = selection;
-                state.activeSubcategoryId = newCat?.subcategories.sort((a,b)=>a.name.localeCompare(b.name))[0]?.id || null;
                 const firstSub = newCat?.subcategories.sort((a,b)=>a.name.localeCompare(b.name))[0];
-                state.activePromptId = firstSub?.prompts?.sort((a,b)=>a.title.localeCompare(b.title))[0]?.id || null;
+                Object.assign(state, { currentView: 'columns', activeCategoryId: selection, activeSubcategoryId: firstSub?.id || null, activePromptId: firstSub?.prompts?.sort((a,b)=>a.title.localeCompare(b.title))[0]?.id || null });
             }
             renderUI();
         });
         
-        imageInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                insertBase64Image(e.target.files[0]);
-            }
-            e.target.value = ''; 
-        });
-
-        const toolBtn = document.getElementById('toolBtn'); const toolMenu = document.getElementById('toolMenu');
-        toolBtn.addEventListener('click', e => { e.stopPropagation(); toolMenu.classList.toggle('show'); });
+        imageInput.addEventListener('change', e => e.target.files.length && insertBase64Image(e.target.files[0]));
+        const toolMenu = document.getElementById('toolMenu');
+        document.getElementById('toolBtn').addEventListener('click', e => { e.stopPropagation(); toolMenu.classList.toggle('show'); });
         window.addEventListener('click', () => toolMenu.classList.remove('show'));
         document.getElementById('btnAddCategory').onclick = addCategory;
         document.getElementById('btnAnnulla').onclick = performUndo;
@@ -1233,78 +729,36 @@
         document.getElementById('btnImporta').onclick = () => document.getElementById('backupInput').click();
         document.getElementById('backupInput').onchange = importData;
 
-        // Listeners per il modal del link
-        linkModalCancel.onclick = hideLinkModal;
-        linkModalConfirm.onclick = () => applyLink(linkUrlInput.value.trim());
-        linkModal.addEventListener('click', (e) => { if (e.target === linkModal) hideLinkModal(); });
-        linkUrlInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); applyLink(linkUrlInput.value.trim()); }});
+        document.getElementById('linkModalCancel').onclick = hideLinkModal;
+        document.getElementById('linkModalConfirm').onclick = () => applyLink(linkUrlInput.value);
+        linkModal.onclick = e => { if (e.target === linkModal) hideLinkModal(); };
+        linkUrlInput.onkeypress = e => { if (e.key === 'Enter') { e.preventDefault(); applyLink(linkUrlInput.value); }};
 
-        // Listeners per il modal di rinomina
-        renameModalCancel.onclick = hideRenameModal;
-        renameModalConfirm.onclick = handleRenameConfirm;
-        renameModal.addEventListener('click', (e) => { if (e.target === renameModal) hideRenameModal(); });
-        renameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleRenameConfirm(); } });
+        document.getElementById('renameModalCancel').onclick = hideRenameModal;
+        document.getElementById('renameModalConfirm').onclick = handleRenameConfirm;
+        renameModal.onclick = e => { if (e.target === renameModal) hideRenameModal(); };
+        renameInput.onkeypress = e => { if (e.key === 'Enter') { e.preventDefault(); handleRenameConfirm(); } };
     }
 
     // --- INITIALIZATION ---
     async function initialize() {
         Loader.show();
-        document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeToggle').innerHTML = `<i class="fa-solid fa-${savedTheme === 'light' ? 'sun' : 'moon'}"></i>`;
+
         await Database.init();
         state.allData = await Database.load();
-        
         try { state.recents = JSON.parse(localStorage.getItem('promptManagerRecents')) || []; } catch (e) { state.recents = []; }
 
         if (state.allData.length === 0) {
-            state.allData = [ 
-                {
-                    id: `cat_1`, 
-                    name: 'AI Generative', 
-                    subcategories: [ 
-                        {
-                            id: `sub_1`, 
-                            name: 'Testi e Storie', 
-                            prompts: [ 
-                                {id: `p_1`, title: 'Prompt di Benvenuto', description: 'Benvenuto! Clicca l\'icona a forma di matita per modificare questo prompt. <strong>Aggiungi tag per organizzare meglio i tuoi prompt!</strong><br><br>Prova a incollare del testo con <strong>Ctrl+V</strong> o <strong>Cmd+V</strong>!', favorite: true, tags: ['tutorial', 'benvenuto']},
-                                {id: `p_2`, title: 'Genera Articolo SEO', description: 'Scrivi un articolo di 1500 parole sul tema X, con 3 titoli e bullet points.', favorite: false, tags: ['seo', 'marketing', 'contenuti']} 
-                            ]
-                        },
-                         {
-                            id: `sub_2`, 
-                            name: 'Immagini e DALL-E', 
-                            prompts: [ 
-                                {id: `p_3`, title: 'Stile Cinematografico', description: 'Crea una scena in stile cinematografico 4K, dettagliato, con luce drammatica.', favorite: true, tags: ['immagini', 'dall-e', 'cinematografico']} 
-                            ]
-                        }
-                    ]
-                } 
-            ];
+            state.allData = [{ id: `cat_1`, name: 'Esempi', subcategories: [{ id: `sub_1`, name: 'Generale', prompts: [{id: `p_1`, title: 'Prompt di Benvenuto', description: 'Benvenuto! Clicca la matita in alto a destra per modificare questo prompt.', favorite: true, tags: ['tutorial']}]}]}];
             await Database.save(state.allData);
         }
         
-        // Imposta la vista iniziale su Preferiti e seleziona il primo preferito
         state.currentView = 'favorites';
-        categoryDropdown.value = 'favorites';
-
-        // Trova il primo prompt preferito e impostalo attivo
-        let firstFav = null;
-        outer: for (const cat of state.allData) {
-            for (const sub of (cat.subcategories || [])) {
-                for (const p of (sub.prompts || [])) {
-                    if (p.favorite) { firstFav = { p, sub, cat }; break outer; }
-                }
-            }
-        }
-        if (firstFav) {
-            state.activeCategoryId = firstFav.cat.id;
-            state.activeSubcategoryId = firstFav.sub.id;
-            state.activePromptId = firstFav.p.id;
-        } else {
-            // Se non ci sono preferiti, lascia solo la vista Preferiti senza selezione
-            state.activeCategoryId = null;
-            state.activeSubcategoryId = null;
-            state.activePromptId = null;
-        }
+        const firstFav = state.allData.flatMap(c => c.subcategories.flatMap(s => s.prompts.filter(p => p.favorite).map(p => ({catId: c.id, subId: s.id, promptId: p.id}))))[0];
+        if (firstFav) Object.assign(state, { activeCategoryId: firstFav.catId, activeSubcategoryId: firstFav.subId, activePromptId: firstFav.promptId });
         
         setupEventListeners();
         renderUI();

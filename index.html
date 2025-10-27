@@ -1023,12 +1023,34 @@
             };
         });
         
+        // --- INIZIO BLOCCO CODICE CORRETTO ---
         const colorPicker = col.querySelector("#colorPicker");
-        col.querySelector("#color-btn").onclick = () => colorPicker.click();
-        colorPicker.onchange = () => {
-            document.execCommand('foreColor', false, colorPicker.value);
-            descriptionContainer.focus();
+        col.querySelector("#color-btn").onclick = () => {
+            // Salva la selezione del testo PRIMA di aprire il color picker
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0 && selection.toString().length > 0) {
+                savedRange = selection.getRangeAt(0);
+            } else {
+                savedRange = null; // Assicura che una vecchia selezione non venga usata
+            }
+            colorPicker.click();
         };
+
+        colorPicker.onchange = () => {
+            descriptionContainer.focus(); // È importante riportare il focus all'editor
+            
+            // Ripristina la selezione salvata, se esiste
+            if (savedRange) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedRange);
+            }
+            
+            // Ora esegui il comando sulla selezione ripristinata
+            document.execCommand('foreColor', false, colorPicker.value);
+            savedRange = null; // Pulisci la selezione salvata per usi futuri
+        };
+        // --- FINE BLOCCO CODICE CORRETTO ---
 
         col.querySelector("#copy-prompt-btn").onclick = () => {
             const textToCopy = descriptionContainer.innerText;

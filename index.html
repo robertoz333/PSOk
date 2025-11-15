@@ -519,13 +519,30 @@
     // --- CORE LOGIC ---
     async function updateStateAndSave(newData, { newActiveIds = {}, saveHistory = true } = {}) {
         Loader.show();
-        if (saveHistory) { state.redoStack = []; state.history.push(JSON.parse(JSON.stringify({ ...state }))); if (state.history.length > 30) state.history.shift(); }
-        state.allData = newData;
-        Object.assign(state, newActiveIds);
-        await Database.save(state.allData);
-        localStorage.setItem('promptManagerRecents', JSON.stringify(state.recents));
-        renderUI();
-        Loader.hide();
+        try {
+            if (saveHistory) {
+                state.redoStack = [];
+                state.history.push(JSON.parse(JSON.stringify({ ...state })));
+                if (state.history.length > 30) state.history.shift();
+            }
+            state.allData = newData;
+            Object.assign(state, newActiveIds);
+            
+            // L'operazione che potrebbe fallire è qui
+            await Database.save(state.allData);
+            
+            localStorage.setItem('promptManagerRecents', JSON.stringify(state.recents));
+            renderUI();
+        
+        } catch (error) {
+            // Se si verifica un errore, lo registriamo e avvisiamo l'utente
+            console.error("Errore durante il salvataggio dei dati:", error);
+            Toast.show("Errore critico: impossibile salvare. Riprova.", 'error', 5000);
+        
+        } finally {
+            // Questo blocco viene eseguito SEMPRE, garantendo che la rotellina scompaia
+            Loader.hide();
+        }
     }
     
     // --- RENDER FUNCTIONS ---

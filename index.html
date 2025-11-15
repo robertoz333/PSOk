@@ -49,6 +49,8 @@
         .column-header h3 { margin: 0; font-size: 18px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .column-header-title .rename-icon { color: var(--text-muted); cursor: pointer; font-size: 15px; }
         .column-header-title .rename-icon:hover { color: var(--primary-accent); }
+        .column-header-title .delete-icon { color: var(--text-muted); cursor: pointer; font-size: 15px; margin-left: 8px; }
+        .column-header-title .delete-icon:hover { color: var(--btn-red); }
         .column-content { overflow-y: auto; padding-right: 10px; margin-right: -10px; }
         .column-content::-webkit-scrollbar { width: 8px; }
         .column-content::-webkit-scrollbar-thumb { background-color: var(--element-bg); border-radius: 20px; }
@@ -591,6 +593,7 @@
                 <div class="column-header-title">
                     <h3>${activeCategory.name}</h3>
                     <i class="fa-solid fa-pen-to-square rename-icon" id="rename-cat-btn" title="Rinomina Categoria"></i>
+                    <i class="fa-solid fa-trash-can delete-icon" id="delete-cat-btn" title="Elimina Categoria"></i>
                 </div>
                 <button class="add-button" id="add-subcat-btn" title="Aggiungi Sottocategoria">
                     <i class="fa-solid fa-plus"></i> Sottocategoria
@@ -599,6 +602,7 @@
             <div class="column-content"></div>`;
         document.getElementById('add-subcat-btn').onclick = () => addSubcategory(activeCategory.id);
         document.getElementById('rename-cat-btn').onclick = () => showRenameModal('category', activeCategory.id, activeCategory.name);
+        document.getElementById('delete-cat-btn').onclick = () => deleteCategory(activeCategory.id);
 
         const listContainer = col.querySelector('.column-content');
         if (!activeCategory.subcategories?.length) { listContainer.innerHTML = '<div class="initial-message">Nessuna sottocategoria</div>'; return; }
@@ -626,6 +630,7 @@
                  <div class="column-header-title">
                     <h3>${activeSub.name}</h3>
                     <i class="fa-solid fa-pen-to-square rename-icon" id="rename-subcat-btn" title="Rinomina Sottocategoria"></i>
+                    <i class="fa-solid fa-trash-can delete-icon" id="delete-subcat-btn" title="Elimina Sottocategoria"></i>
                 </div>
                 <button class="add-button" id="add-prompt-btn" title="Aggiungi Prompt">
                     <i class="fa-solid fa-plus"></i> Prompt
@@ -634,6 +639,7 @@
             <div class="column-content"></div>`;
         
         document.getElementById('rename-subcat-btn').onclick = () => showRenameModal('subcategory', activeSub.id, activeSub.name, { categoryId: activeCategory.id });
+        document.getElementById('delete-subcat-btn').onclick = () => deleteSubcategory(activeSub.id, activeCategory.id);
         const addPromptBtn = document.getElementById('add-prompt-btn');
         if (addPromptBtn) {
             addPromptBtn.onclick = (e) => {
@@ -674,8 +680,8 @@
         if (!col) return;
         
         const cat = state.allData.find(c => c.id === state.activeCategoryId);
-        const sub = cat?.subcategories.find(s => s.id === state.activeSubcategoryId);
-        const promptItem = sub?.prompts.find(p => p.id === state.activePromptId);
+        const sub = cat?.subcategories?.find(s => s.id === state.activeSubcategoryId);
+        const promptItem = sub?.prompts?.find(p => p.id === state.activePromptId);
 
         if (!promptItem) { col.innerHTML = '<div class="initial-message">Seleziona un prompt</div>'; return; }
         
@@ -1023,34 +1029,27 @@
             };
         });
         
-        // --- INIZIO BLOCCO CODICE CORRETTO ---
         const colorPicker = col.querySelector("#colorPicker");
         col.querySelector("#color-btn").onclick = () => {
-            // Salva la selezione del testo PRIMA di aprire il color picker
             const selection = window.getSelection();
             if (selection.rangeCount > 0 && selection.toString().length > 0) {
                 savedRange = selection.getRangeAt(0);
             } else {
-                savedRange = null; // Assicura che una vecchia selezione non venga usata
+                savedRange = null;
             }
             colorPicker.click();
         };
 
         colorPicker.onchange = () => {
-            descriptionContainer.focus(); // È importante riportare il focus all'editor
-            
-            // Ripristina la selezione salvata, se esiste
+            descriptionContainer.focus();
             if (savedRange) {
                 const selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(savedRange);
             }
-            
-            // Ora esegui il comando sulla selezione ripristinata
             document.execCommand('foreColor', false, colorPicker.value);
-            savedRange = null; // Pulisci la selezione salvata per usi futuri
+            savedRange = null;
         };
-        // --- FINE BLOCCO CODICE CORRETTO ---
 
         col.querySelector("#copy-prompt-btn").onclick = () => {
             const textToCopy = descriptionContainer.innerText;
@@ -1113,6 +1112,38 @@
         await updateStateAndSave(newData, { newActiveIds: { currentView: 'columns', activeCategoryId: newCategory.id, activeSubcategoryId: null, activePromptId: null } }); 
         Toast.show(`Categoria "${newCategory.name}" aggiunta!`, 'success');
     }
+
+    async function deleteCategory(categoryId) {
+        const categoryToDelete = state.allData.find(c => c.id === categoryId);
+        if (!categoryToDelete) return;
+
+        if (!window.confirm(`Sei sicuro di voler eliminare la categoria "${categoryToDelete.name}"? Tutti i suoi contenuti (sottocategorie e prompt) verranno persi per sempre.`)) return;
+
+        const newData = state.allData.filter(c => c.id !== categoryId);
+
+        let newActiveIds = {};
+        if (state.activeCategoryId === categoryId) {
+            if (newData.length > 0) {
+                const firstCategory = newData.sort((a,b) => a.name.localeCompare(b.name))[0];
+                const firstSubcategory = firstCategory.subcategories?.sort((a,b) => a.name.localeCompare(b.name))[0];
+                newActiveIds = {
+                    currentView: 'columns',
+                    activeCategoryId: firstCategory.id,
+                    activeSubcategoryId: firstSubcategory?.id || null,
+                    activePromptId: firstSubcategory?.prompts?.sort((a,b) => a.title.localeCompare(b.title))[0]?.id || null
+                };
+            } else {
+                 newActiveIds = {
+                    currentView: 'favorites',
+                    activeCategoryId: null,
+                    activeSubcategoryId: null,
+                    activePromptId: null
+                };
+            }
+        }
+        await updateStateAndSave(newData, { newActiveIds });
+        Toast.show(`Categoria "${categoryToDelete.name}" eliminata!`, 'info');
+    }
     
     async function addSubcategory(categoryId) { 
         const name = window.prompt("Nome nuova sottocategoria:"); 
@@ -1121,9 +1152,35 @@
         const cat = newData.find(c => c.id === categoryId); 
         if (!cat) { Toast.show("Errore: categoria non trovata.", 'error'); return; }
         const newSub = { id: `sub_${Date.now()}`, name: name.trim(), prompts: [] }; 
+        if (!Array.isArray(cat.subcategories)) cat.subcategories = [];
         cat.subcategories.push(newSub); 
         await updateStateAndSave(newData, { newActiveIds: { activeSubcategoryId: newSub.id, activePromptId: null } }); 
         Toast.show(`Sottocategoria "${newSub.name}" aggiunta!`, 'success');
+    }
+
+    async function deleteSubcategory(subcategoryId, categoryId) {
+        const newData = JSON.parse(JSON.stringify(state.allData));
+        const cat = newData.find(c => c.id === categoryId);
+        if (!cat || !Array.isArray(cat.subcategories)) return;
+
+        const subToDelete = cat.subcategories.find(s => s.id === subcategoryId);
+        if (!subToDelete) return;
+
+        if (!window.confirm(`Sei sicuro di voler eliminare la sottocategoria "${subToDelete.name}"? Tutti i prompt al suo interno verranno persi.`)) return;
+
+        const subIndex = cat.subcategories.findIndex(s => s.id === subcategoryId);
+        cat.subcategories.splice(subIndex, 1);
+
+        let newActiveIds = {};
+        if (state.activeSubcategoryId === subcategoryId) {
+            const newActiveSub = cat.subcategories[subIndex] || cat.subcategories[subIndex - 1] || cat.subcategories[0] || null;
+            newActiveIds = {
+                activeSubcategoryId: newActiveSub?.id || null,
+                activePromptId: newActiveSub?.prompts?.sort((a,b) => a.title.localeCompare(b.title))[0]?.id || null
+            };
+        }
+        await updateStateAndSave(newData, { newActiveIds });
+        Toast.show(`Sottocategoria "${subToDelete.name}" eliminata!`, 'info');
     }
     
     async function addNewPrompt(subcategoryId, categoryId) { 
@@ -1137,6 +1194,7 @@
         if (!sub) { Toast.show("Errore: sottocategoria non trovata.", 'error'); return; }
         
         const newPrompt = { id: `p_${Date.now()}`, title: title.trim(), description: "", favorite: false, tags: [] }; 
+        if (!Array.isArray(sub.prompts)) sub.prompts = [];
         sub.prompts.push(newPrompt); 
         
         state.startEditingNewPrompt = true; 
@@ -1149,7 +1207,7 @@
         if (!window.confirm("Sei sicuro di voler eliminare questo prompt?")) return; 
         const newData = JSON.parse(JSON.stringify(state.allData)); 
         const sub = newData.find(c=>c.id===catId)?.subcategories.find(s=>s.id===subId); 
-        if (!sub) return;
+        if (!sub || !Array.isArray(sub.prompts)) return;
         const promptIndex = sub.prompts.findIndex(p_item => p_item.id === promptId); 
         if (promptIndex === -1) return;
         sub.prompts.splice(promptIndex, 1); 
@@ -1231,9 +1289,23 @@
                 state.currentView = 'columns';
                 const newCat = state.allData.find(c => c.id === selection);
                 state.activeCategoryId = selection;
-                state.activeSubcategoryId = newCat?.subcategories.sort((a,b)=>a.name.localeCompare(b.name))[0]?.id || null;
-                const firstSub = newCat?.subcategories.sort((a,b)=>a.name.localeCompare(b.name))[0];
-                state.activePromptId = firstSub?.prompts?.sort((a,b)=>a.title.localeCompare(b.title))[0]?.id || null;
+
+                // --- INIZIO BLOCCO CODICE CORRETTO E ROBUSTO ---
+                // Questo codice gestisce in modo sicuro la selezione, anche se la categoria è vuota o malformata.
+                let firstSub = null;
+                if (newCat && Array.isArray(newCat.subcategories) && newCat.subcategories.length > 0) {
+                    firstSub = [...newCat.subcategories].sort((a, b) => a.name.localeCompare(b.name))[0];
+                }
+                
+                state.activeSubcategoryId = firstSub?.id || null;
+
+                let firstPrompt = null;
+                if (firstSub && Array.isArray(firstSub.prompts) && firstSub.prompts.length > 0) {
+                    firstPrompt = [...firstSub.prompts].sort((a, b) => a.title.localeCompare(b.title))[0];
+                }
+
+                state.activePromptId = firstPrompt?.id || null;
+                // --- FINE BLOCCO CODICE CORRETTO E ROBUSTO ---
             }
             renderUI();
         });
